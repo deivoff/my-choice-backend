@@ -1,2 +1,2 @@
-# My-Choice.-Backend
+# My Choice. Backend
 Backend for game "My Choice".
