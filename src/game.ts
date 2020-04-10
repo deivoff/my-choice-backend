@@ -8,8 +8,8 @@ export class Game {
     this.Server = socketIo(port);
 
     this.Server.on('connection', (socket: Socket) => {
-      socket.on('chat:message', ({ name, message}) => {
-        this.Server.emit('chat:message', { name, message })
+      socket.on('chat:message', ({ name, message, color }) => {
+        this.Server.emit('chat:message', { name, message, color })
       });
 
       socket.on('disconnect', () => {
