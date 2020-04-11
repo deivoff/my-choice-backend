@@ -1,51 +1,33 @@
-import socketIo, { Server } from 'socket.io';
+import socketIo, { Server, Socket as SocketIo } from 'socket.io';
 import * as http from 'http';
 import { User } from '$components/user';
-import { Room } from '$components/room';
 
-type Users = {
-  byId: {
-    [key in User['id']]: User;
-  },
-  ids: User['id'][]
-}
 
-type Rooms = {
-  byId: {
-    [key in Room['id']]: Room;
-  },
-  ids: Room['id'][]
+interface Socket extends SocketIo {
+  user: User;
 }
 
 export class Game {
   private Server: Server;
 
-  public users: Users = {
-    byId: {},
-    ids: [],
-  };
-
   constructor(port?: number | http.Server) {
     this.Server = socketIo(port);
 
-    this.Server.on('connection', (socket) => {
-      let user: User;
+    this.Server.on('connection', (socket: Socket) => {
       socket.on('login', ({ username }) => {
-        user = this.addUser(username, socket.id);
+        socket.user = new User(username, socket.id);
 
         socket.emit('rooms', {
           rooms: this.getRooms(),
         });
 
-        socket.on('room:create', ({ roomname }) => {
-          const room = this.addRoom(roomname);
-
-          socket.join(room.id);
+        socket.on('room:create', ({ roomName }) => {
+          socket.join(roomName);
           this.sendRooms();
         });
 
         socket.on('room:choice', room => {
-          socket.join(room.id);
+          socket.join(room.roomName);
           this.sendRooms();
         })
       });
@@ -56,27 +38,8 @@ export class Game {
 
       socket.on('disconnect', () => {
         console.log('User disconnected');
-        this.deleteUser(socket.id);
       })
     });
-  }
-
-  addUser(username: string, id: string) {
-    const user = new User(username, id);
-    this.users = {
-      byId: {
-        ...this.users.byId,
-        [user.id]: user,
-      },
-      ids: [...this.users.ids, user.id],
-    };
-
-    return user;
-  }
-
-  deleteUser(id: string) {
-    delete this.users.byId[id];
-    this.users.ids = this.users.ids.filter(userId => userId !== id);
   }
 
   sendRooms() {
@@ -86,11 +49,11 @@ export class Game {
   }
 
   getRooms() {
-    return Object.keys(this.Server.adapter).map(room => {
-      const userCount = this.Server.in(room).clients.length;
+    return Object.keys(this.Server.sockets.adapter.rooms).map(roomName => {
+      const userCount = this.Server.sockets.adapter.rooms[roomName].length;
 
       return {
-        ...this.rooms.byId[room],
+        roomName,
         userCount
       }
     });
