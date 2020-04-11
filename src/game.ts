@@ -25,11 +25,6 @@ export class Game {
     ids: [],
   };
 
-  public rooms: Rooms = {
-    byId: {},
-    ids: [],
-  };
-
   constructor(port?: number | http.Server) {
     this.Server = socketIo(port);
 
@@ -38,23 +33,20 @@ export class Game {
       socket.on('login', ({ username }) => {
         user = this.addUser(username, socket.id);
 
-        socket.broadcast.emit('rooms', {
-          rooms: this.rooms.byId,
+        socket.emit('rooms', {
+          rooms: this.getRooms(),
         });
 
         socket.on('room:create', ({ roomname }) => {
           const room = this.addRoom(roomname);
 
           socket.join(room.id);
-          socket.emit('rooms', this.rooms.byId)
+          this.sendRooms();
         });
 
         socket.on('room:choice', room => {
-
           socket.join(room.id);
-          socket.emit('rooms', {
-            rooms: this.rooms.byId,
-          })
+          this.sendRooms();
         })
       });
 
@@ -64,6 +56,7 @@ export class Game {
 
       socket.on('disconnect', () => {
         console.log('User disconnected');
+        this.deleteUser(socket.id);
       })
     });
   }
@@ -81,17 +74,25 @@ export class Game {
     return user;
   }
 
-  addRoom(roomname: string) {
-    const room = new Room(roomname);
+  deleteUser(id: string) {
+    delete this.users.byId[id];
+    this.users.ids = this.users.ids.filter(userId => userId !== id);
+  }
 
-    this.rooms = {
-      byId: {
-        ...this.rooms.byId,
-        [room.id]: room,
-      },
-      ids: [...this.rooms.ids, room.id],
-    };
+  sendRooms() {
+    this.Server.emit('rooms', {
+      rooms: this.getRooms(),
+    })
+  }
 
-    return room;
+  getRooms() {
+    return Object.keys(this.Server.adapter).map(room => {
+      const userCount = this.Server.in(room).clients.length;
+
+      return {
+        ...this.rooms.byId[room],
+        userCount
+      }
+    });
   }
 }
