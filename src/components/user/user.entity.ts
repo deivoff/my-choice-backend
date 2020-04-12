@@ -1,4 +1,3 @@
-import { Socket } from 'socket.io';
 
 type Resources = {
   lives: number;
@@ -9,14 +8,30 @@ type Resources = {
 
 export class User {
   public username!: string;
-  public id!: Socket['id'];
-  public room?: string;
+  public roomName?: string;
   public resources?: Resources;
   public circle?: boolean;
   public status?: string;
+  public admin?: boolean;
 
-  constructor(username, id) {
+  constructor(username) {
     this.username = username;
-    this.id = id;
+  }
+
+  createRoom(roomName) {
+    this.roomName = roomName;
+    this.admin = true;
+  }
+
+  choiceRoom(roomName) {
+    this.roomName = roomName;
+  }
+
+  leaveRoom(roomName) {
+    this.roomName = '';
+
+    if (this.admin) {
+      this.admin = false;
+    }
   }
 }
