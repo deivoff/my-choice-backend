@@ -1,27 +1,15 @@
 import SocketIO from 'socket.io';
 import * as http from 'http';
 import { User } from '$components/user';
-
-
-interface Socket extends SocketIO.Socket {
-  user: User;
-}
-
-interface Server extends SocketIO.Server {
-  sockets: SocketIO.Namespace & {
-    adapter: SocketIO.Adapter & {
-      rooms: SocketIO.Rooms &{
-        [key: string]: SocketIO.Room & {
-          status?: RoomStatus;
-        }
-      }
-    }
-  }
-}
+import { Server, Socket } from 'src/utils';
 
 enum RoomStatus {
   prepare,
   inProgress,
+}
+
+type Room = {
+  status?: RoomStatus;
 }
 
 type Message = {
@@ -31,12 +19,14 @@ type Message = {
 }
 
 export class Game {
-  private Server: Server;
+  private Server: Server<Room, User>;
 
   constructor(port?: number | http.Server) {
     this.Server = SocketIO(port);
 
-    this.Server.on('connection', (socket: Socket) => {
+    this.Server.on('connection', (socket: Socket<User>) => {
+      let room: string;
+
       socket.on('login', ({ username }) => {
         socket.user = new User(username);
 
@@ -45,31 +35,37 @@ export class Game {
         });
 
         socket.on('room:create', ({ roomName }) => {
-          socket.user.createRoom(roomName);
-          socket.join(roomName);
+          socket.user!.createRoom(roomName);
+          room = roomName;
 
-          this.Server.sockets.adapter.rooms[roomName].status = RoomStatus.prepare;
+          socket.join(room);
+
+          this.Server.sockets.adapter.rooms[room].status = RoomStatus.prepare;
           this.sendRooms();
         });
 
         socket.on('room:choice', ({ roomName }) => {
-          socket.user.choiceRoom(roomName);
-          socket.join(roomName);
+          socket.user!.choiceRoom(roomName);
+          room = roomName;
 
+          socket.join(room);
+
+          console.log(this.getUsersInRoom(room));
           this.sendRooms();
         });
 
-        socket.on('room:leave', room => {
-          socket.user.leaveRoom(room.roomName);
-          socket.leave(room.roomName);
+        socket.on('room:leave', () => {
+          socket.user!.leaveRoom(room);
+          socket.leave(room);
 
+          room = '';
           this.sendRooms();
         });
       });
 
       socket.on('chat:room-message', (message: Message) => {
-        if (socket.user.roomName) {
-          this.Server.in(socket.user.roomName).emit('chat:room-message', message)
+        if (socket.user!.roomName) {
+          this.Server.in(socket.user!.roomName).emit('chat:room-message', message)
         }
       });
 
@@ -100,5 +96,9 @@ export class Game {
           userCount
         }
     });
+  }
+
+  getUsersInRoom(roomName: string) {
+    return Object.values(this.Server.sockets.adapter.rooms[roomName].sockets).map(value => value);
   }
 }
