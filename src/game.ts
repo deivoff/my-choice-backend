@@ -58,6 +58,21 @@ export class Game {
           socket.user!.leaveRoom();
           this.sendRooms();
         });
+
+        socket.on('game:start', () => {
+          const room = socket.user!.getCurrentRoom();
+          const users = this.getUsersInRoom(room);
+
+          this.Server.in(room).emit('game:players', users.map((user, i) => {
+            user.setPriority(i);
+
+            user.gameStart();
+            return {
+              ...user,
+              currentMove: (i == 0),
+            };
+          }))
+        });
       });
 
       socket.on('chat:room-message', (message: Message) => {

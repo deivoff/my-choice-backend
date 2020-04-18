@@ -12,11 +12,20 @@ export class User {
   public roomName: string = '';
   public resources: Resources = {};
   public status?: UserStatus;
+  public priority?: number;
   public holdCount?: number;
   public admin?: boolean;
 
   constructor(username) {
     this.username = username;
+  }
+
+  setPriority(priority: number) {
+    this.priority = priority;
+  }
+
+  moving() {
+    this.currentMove = true;
   }
 
   gameStart() {
