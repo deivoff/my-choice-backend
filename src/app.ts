@@ -43,9 +43,10 @@ class MockServer {
     app.use(router.routes());
     app.use(router.allowedMethods());
 
+    const PORT = 7000;
     this.server = http.createServer(app.callback());
-    this.server.listen(7000, () => {
-      console.log('Сервер запущен на порту 8080');
+    this.server.listen(PORT, () => {
+      console.log(`Сервер запущен на порту ${PORT}`);
     });
   }
 }
