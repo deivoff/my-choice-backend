@@ -51,7 +51,7 @@ export class Game {
           const userIds = this.getUsersInRoom(room);
 
           socket.leave(room);
-          if (userIds?.length) {
+          if (userIds.length) {
             this.sendPlayers(room);
           }
 
@@ -104,9 +104,17 @@ export class Game {
     const userIds = this.Server.sockets.adapter.rooms[roomName]?.sockets;
 
     if (userIds) {
-      return Object.keys(userIds).map(userId => {
-        return this.Server.sockets.connected[userId].user!
-      })
+      const users = Object.keys(userIds).map(userId => {
+        return this.Server.sockets.connected[userId].user!;
+      });
+
+      if (!users.some(user => user.admin)) {
+        users[0].admin = true;
+      }
+
+      return users;
     }
+
+    return [];
   }
 }
