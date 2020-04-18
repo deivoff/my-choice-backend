@@ -24,10 +24,6 @@ export class User {
     this.priority = priority;
   }
 
-  moving() {
-    this.currentMove = true;
-  }
-
   gameStart() {
     this.resources = {
       white: 0,
