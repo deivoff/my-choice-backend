@@ -47,8 +47,13 @@ export class Game {
         });
 
         socket.on('room:leave', () => {
-          socket.leave(socket.user!.getCurrentRoom());
-          this.sendPlayers(socket.user!.getCurrentRoom());
+          const room = socket.user!.getCurrentRoom();
+          const userIds = this.getUsersInRoom(room);
+
+          socket.leave(room);
+          if (userIds?.length) {
+            this.sendPlayers(room);
+          }
 
           socket.user!.leaveRoom();
           this.sendRooms();
@@ -96,7 +101,7 @@ export class Game {
   }
 
   getUsersInRoom(roomName: string) {
-    const userIds = this.Server.sockets.adapter.rooms[roomName].sockets;
+    const userIds = this.Server.sockets.adapter.rooms[roomName]?.sockets;
 
     if (userIds) {
       return Object.keys(userIds).map(userId => {

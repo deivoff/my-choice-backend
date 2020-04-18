@@ -10,7 +10,7 @@ export enum UserStatus {
 export class User {
   public username!: string;
   public roomName: string = '';
-  public resources?: Resources;
+  public resources: Resources = {};
   public status?: UserStatus;
   public holdCount?: number;
   public admin?: boolean;
