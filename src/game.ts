@@ -61,17 +61,8 @@ export class Game {
 
         socket.on('game:start', () => {
           const room = socket.user!.getCurrentRoom();
-          const users = this.getUsersInRoom(room);
 
-          this.Server.in(room).emit('game:players', users.map((user, i) => {
-            user.setPriority(i);
-
-            user.gameStart();
-            return {
-              ...user,
-              currentMove: (i == 0),
-            };
-          }))
+          this.gameStart(room);
         });
       });
 
@@ -113,6 +104,23 @@ export class Game {
           userCount
         }
     });
+  }
+
+  gameStart(roomName: string) {
+    const users = this.getUsersInRoom(roomName);
+
+    this.Server.sockets.adapter.rooms[roomName].room?.gameStart();
+    this.sendRooms();
+
+    this.Server.in(roomName).emit('game:players', users.map((user, i) => {
+      user.setPriority(i);
+
+      user.gameStart();
+      return {
+        ...user,
+        currentMove: (i == 0),
+      };
+    }))
   }
 
   getUsersInRoom(roomName: string) {
