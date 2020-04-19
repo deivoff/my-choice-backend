@@ -69,7 +69,7 @@ export class Game {
           const room = socket.user!.getCurrentRoom();
           socket.user!.setDream(dreamId);
 
-          this.sendPlayers(room);
+          this.sendPlayersWithDream(room);
         });
 
         socket.on('game:move', (move: number) => {
@@ -107,9 +107,28 @@ export class Game {
     this.Server.in(roomName).emit('game:players', this.getUsersInRoom(roomName))
   }
 
+  sendPlayersWithDream(roomName: string) {
+    const users = this.getUsersInRoom(roomName);
+    const dreamsExist = users.every(user => user.dream !== undefined);
+
+    this.Server.in(roomName).emit('game:players', users.map(user => {
+      if (user.priority === 0 && dreamsExist) {
+        return {
+          ...user,
+          currentMove: true
+        }
+      }
+
+      return user;
+    }))
+  }
+
   getRooms() {
     return Object.keys(this.Server.sockets.adapter.rooms)
-      .filter(roomName => this.Server.sockets.adapter.rooms[roomName].room?.isAwait())
+      .filter(roomName => (
+        this.Server.sockets.adapter.rooms[roomName].room?.isAwait()) &&
+        this.Server.sockets.adapter.rooms[roomName].length <= 8
+      )
       .map(roomName => {
         const userCount = this.Server.sockets.adapter.rooms[roomName].length;
 
