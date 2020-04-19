@@ -1,4 +1,4 @@
-import { Resources } from '$utils/index';
+import { INNER_FIELDS_COUNT, Resources } from '$components/field';
 
 export enum UserStatus {
   inGame,
@@ -56,6 +56,26 @@ export class User {
 
   setDream(id: number) {
     this.dream = id;
+  }
+
+  setPosition(move: number, type?: PositionType) {
+    if (this.position?.type === PositionType.start) {
+      this.position = {
+        type: PositionType.inner,
+        cell: move - 1,
+      };
+
+      return;
+    }
+
+    if (this.position?.type === PositionType.inner) {
+      const cell = (this.position.cell + move) % INNER_FIELDS_COUNT;
+
+      this.position = {
+        type: PositionType.inner,
+        cell,
+      }
+    }
   }
 
   getCurrentRoom() {

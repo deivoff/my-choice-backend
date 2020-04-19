@@ -73,7 +73,10 @@ export class Game {
         });
 
         socket.on('game:move', (move: number) => {
+          const room = socket.user!.getCurrentRoom();
+          socket.user!.setPosition(move);
 
+          this.sendPlayers(room);
         })
       });
 
