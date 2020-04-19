@@ -64,6 +64,17 @@ export class Game {
 
           this.gameStart(room);
         });
+
+        socket.on('game:dream', dreamId => {
+          const room = socket.user!.getCurrentRoom();
+          socket.user!.setDream(dreamId);
+
+          this.sendPlayers(room);
+        });
+
+        socket.on('game:move', (move: number) => {
+
+        })
       });
 
       socket.on('chat:room-message', (message: Message) => {
@@ -112,6 +123,7 @@ export class Game {
     this.Server.sockets.adapter.rooms[roomName].room?.gameStart();
     this.sendRooms();
 
+    this.Server.in(roomName).emit('game:started', true);
     this.Server.in(roomName).emit('game:players', users.map((user, i) => {
       user.setPriority(i);
 

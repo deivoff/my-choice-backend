@@ -11,6 +11,7 @@ export class User {
   public username!: string;
   public roomName: string = '';
   public resources: Resources = {};
+  public dream?: number;
   public status?: UserStatus;
   public priority?: number;
   public holdCount?: number;
@@ -33,6 +34,10 @@ export class User {
     };
 
     this.status = UserStatus.inGame;
+  }
+
+  setDream(id: number) {
+    this.dream = id;
   }
 
   getCurrentRoom() {
