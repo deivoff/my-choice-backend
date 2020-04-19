@@ -123,7 +123,7 @@ export class Game {
     this.Server.sockets.adapter.rooms[roomName].room?.gameStart();
     this.sendRooms();
 
-    this.Server.in(roomName).emit('game:started', true);
+    this.Server.in(roomName).emit('game:started');
     this.Server.in(roomName).emit('game:players', users.map((user, i) => {
       user.setPriority(i);
 
