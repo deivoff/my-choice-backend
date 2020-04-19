@@ -7,12 +7,26 @@ export enum UserStatus {
   winner,
 }
 
+export enum PositionType {
+  start = 'start',
+  inner = 'inner',
+  outer = 'outer',
+}
+
+
+
+type UserPosition = {
+  type: PositionType;
+  cell: number;
+}
+
 export class User {
   public username!: string;
   public roomName: string = '';
   public resources: Resources = {};
   public dream?: number;
   public status?: UserStatus;
+  public position?: UserPosition;
   public priority?: number;
   public holdCount?: number;
   public admin?: boolean;
@@ -34,6 +48,10 @@ export class User {
     };
 
     this.status = UserStatus.inGame;
+    this.position = {
+      type: PositionType.start,
+      cell: 0,
+    }
   }
 
   setDream(id: number) {

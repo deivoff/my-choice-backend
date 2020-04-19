@@ -128,10 +128,6 @@ export class Game {
       user.setPriority(i);
 
       user.gameStart();
-      return {
-        ...user,
-        currentMove: (i == 0),
-      };
     }))
   }
 
