@@ -76,7 +76,7 @@ export class Game {
           const room = socket.user!.getCurrentRoom();
           socket.user!.setPosition(move);
 
-          this.sendPlayers(room);
+          this.sendPlayersWithNext(room, socket.user!.priority!);
         })
       });
 
@@ -113,6 +113,21 @@ export class Game {
 
     this.Server.in(roomName).emit('game:players', users.map(user => {
       if (user.priority === 0 && dreamsExist) {
+        return {
+          ...user,
+          currentMove: true
+        }
+      }
+
+      return user;
+    }))
+  }
+
+  sendPlayersWithNext(roomName: string, currentPlayer: number) {
+    const users = this.getUsersInRoom(roomName);
+
+    this.Server.in(roomName).emit('game:players', users.map(user => {
+      if (user.priority === currentPlayer + 1) {
         return {
           ...user,
           currentMove: true
