@@ -145,9 +145,9 @@ export class Game {
           return user;
         }
 
-        if (user.holdCount) {
+        if (user.hold) {
           nextPlayer = nextPlayer + 1;
-          user.holdCount--;
+          user.hold--;
 
           return user;
         }

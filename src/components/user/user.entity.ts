@@ -33,7 +33,7 @@ export class User {
   public status?: UserStatus;
   public position?: UserPosition;
   public priority?: number;
-  public holdCount?: number;
+  public hold?: number;
   public admin?: boolean;
 
   constructor(username) {
@@ -104,7 +104,7 @@ export class User {
         }
 
         if (action.result.hold) {
-          this.holdCount = this.holdCount ? this.holdCount + action.result.hold : action.result.hold;
+          this.hold = action.result.hold;
         }
 
         if (action.result.gameover) {
