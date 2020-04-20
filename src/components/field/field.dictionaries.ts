@@ -1694,7 +1694,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 2,
     type: FieldType.reaction,
     description: "Отчислили из школы/ВУЗа/уволили с работы.",
@@ -1718,7 +1718,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 3,
     type: FieldType.reaction,
     description: "В гардеробе кому-то отдали Вашу куртку.",
@@ -1742,7 +1742,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 4,
     type: FieldType.reaction,
     description: "Вас обрызгала машина.",
@@ -1766,7 +1766,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 5,
     type: FieldType.reaction,
     description: "Вас нечаянно, но сильно толкнули.",
@@ -1790,7 +1790,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 6,
     type: FieldType.reaction,
     description: "Вы разбили телефон.",
@@ -1814,7 +1814,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 7,
     type: FieldType.reaction,
     description: "Вам недодали сдачу в магазине.",
@@ -1840,7 +1840,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 8,
     type: FieldType.reaction,
     description: "Кот сходил в туалет в Ваши ботинки.",
@@ -1866,7 +1866,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 9,
     type: FieldType.reaction,
     description: "Ваши друзья уехали тусить, а Вас не позвали.",
@@ -1890,7 +1890,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 10,
     type: FieldType.reaction,
     description: "Вы приехали на другой конец города в магазин, а он закрыт.",
@@ -1914,7 +1914,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 11,
     type: FieldType.reaction,
     description: "Кондуктор в автобусе прошел мимо Вас, не взяв деньги за проезд.",
@@ -1938,7 +1938,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 12,
     type: FieldType.reaction,
     description: "Вы поймали «за руку» карманника, который хотел у вас украсть кошелек/телефон.",
@@ -1964,7 +1964,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 13,
     type: FieldType.reaction,
     description: "В магазине вам продали просроченный товар.",
@@ -1988,7 +1988,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 14,
     type: FieldType.reaction,
     description: "Ваш лучший друг не поздравил Вас с Днем рождения.",
@@ -2012,7 +2012,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 15,
     type: FieldType.reaction,
     description: "Вы почти закончили собирать паззл на 3000 деталей и его разобрали у вас на глазах.",
@@ -2031,7 +2031,7 @@ const REACTIONS: Reaction[] = [
       },
     ]
   },
-    {
+  {
     id: 16,
     type: FieldType.reaction,
     description: "Вас бросил(а) парень (девушка).",
