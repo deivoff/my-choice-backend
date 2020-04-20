@@ -1,4 +1,4 @@
-import { FIELDS } from '$components/field/field.dictionaries';
+import { FIELDS } from '$components/field/dictionaries';
 
 export const enum FieldType {
   start,
