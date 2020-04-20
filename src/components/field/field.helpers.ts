@@ -127,7 +127,7 @@ export const InnerFieldDictionary = new Proxy<FieldDictionary>({}, {
     }
 
     if (OPPORTUNITIES_FIELDS.includes(position)) {
-      return {card: FIELDS[FieldType.opportunity]![0]}
+      return { card: FIELDS[FieldType.opportunity]![0] }
     }
 
   }
