@@ -67,7 +67,7 @@ export type Opportunity = Default & {
   type: FieldType.opportunity;
 }
 
-type Dream = Default & {
+export type Dream = Default & Choices & {
   type: FieldType.dream;
 }
 
