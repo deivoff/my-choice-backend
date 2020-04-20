@@ -96,7 +96,7 @@ const OPPORTUNITIES_FIELDS = [3, 11, 16];
 const REACTION_FIELDS = [5, 14];
 
 type FieldDictionary = {
-  [key: number]: ({ card: Field } | { opportunity: true });
+  [key: number]: ({ card: Field } | {});
 }
 
 const arrRand = <T>(array: T[]): T => {
@@ -127,7 +127,7 @@ export const InnerFieldDictionary = new Proxy<FieldDictionary>({}, {
     }
 
     if (OPPORTUNITIES_FIELDS.includes(position)) {
-      return {}
+      return {card: FIELDS[FieldType.opportunity]![0]}
     }
 
   }

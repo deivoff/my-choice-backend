@@ -177,6 +177,14 @@ const INCIDENTS: Field[] = [
   }
 ];
 
+const OPPORTUNITIES: Field[] = [
+  {
+    id: 0,
+    type: FieldType.opportunity,
+    description: "Если количество ресурсов позволяет перейти на «внешний круг» (10Ж и СК 10(Б) или 15Ж и 100$) – то вы переходите."
+  }
+];
+
 const REACTIONS: Field[] = [
   {
     id: 0,
@@ -235,6 +243,7 @@ type Fields = {
 export const FIELDS: Fields = {
   [FieldType.offer]: OFFERS,
   [FieldType.incident]: INCIDENTS,
+  [FieldType.opportunity]: OPPORTUNITIES,
   [FieldType.situation]: SITUATIONS,
   [FieldType.reaction]: REACTIONS,
 };
