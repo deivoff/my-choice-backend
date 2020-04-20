@@ -1,8 +1,9 @@
 import SocketIO from 'socket.io';
 import * as http from 'http';
-import { User } from '$components/user';
+import { PositionType, User } from '$components/user';
 import { RoomInstance } from '$components/room';
-import { Socket, Server } from '$utils/index';
+import { Server, Socket } from '$utils/index';
+import { InnerFieldDictionary } from '$components/field';
 
 
 type Room = {
@@ -76,8 +77,15 @@ export class Game {
           const room = socket.user!.getCurrentRoom();
           socket.user!.setPosition(move);
 
+          this.sendPlayersWithCard(room, socket.user!.priority!);
+        });
+
+        socket.on('game:choice', choice => {
+          console.log(choice);
+          const room = socket.user!.getCurrentRoom();
+
           this.sendPlayersWithNext(room, socket.user!.priority!);
-        })
+        });
       });
 
       socket.on('chat:room-message', (message: Message) => {
@@ -134,6 +142,23 @@ export class Game {
           ...user,
           currentMove: true
         }
+      }
+
+      return user;
+    }))
+  }
+
+  sendPlayersWithCard(roomName: string, currentPlayer: number) {
+    const users = this.getUsersInRoom(roomName);
+
+    this.Server.in(roomName).emit('game:players', users.map(user => {
+      if (user.priority === currentPlayer) {
+        const { type, cell } = user.position!;
+        if (type == PositionType.inner)
+          return {
+            ...user,
+            card: InnerFieldDictionary[cell]
+          }
       }
 
       return user;

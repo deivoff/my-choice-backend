@@ -1,4 +1,6 @@
-enum FieldType {
+import { FIELDS } from '$components/field/field.dictionaries';
+
+export enum FieldType {
   start,
   situation,
   incident,
@@ -17,7 +19,8 @@ enum ResourceType {
   dark = 'dark',
 }
 
-type Field = {
+export type Field = {
+  id: number,
   description: string;
 } & (Start | Situation | Incident | Offer | Reaction | Opportunity | Dream | Activity | Problem)
 
@@ -80,49 +83,56 @@ type Choices = {
 }
 
 type Option = {
+  id: number,
   text: string;
   resources: Resources;
 }
 
 export const INNER_FIELDS_COUNT = 20;
-const OFFERS = [0, 4, 8, 12, 17];
-const SITUATIONS = [1, 7, 9, 13, 18];
-const INCIDENTS = [2, 6, 10, 15, 19];
-const OPPORTUNITIES = [3, 11, 16];
-const REACTION = [5, 14];
+const OFFERS_FIELDS = [0, 4, 8, 12, 17];
+const SITUATIONS_FIELDS = [1, 7, 9, 13, 18];
+const INCIDENTS_FIELDS = [2, 6, 10, 15, 19];
+const OPPORTUNITIES_FIELDS = [3, 11, 16];
+const REACTION_FIELDS = [5, 14];
 
 type FieldDictionary = {
   [key: number]: Field;
 }
+
+const arrRand = <T>(array: T[]): T => {
+  const random = Math.floor(Math.random() * array.length);
+  return array[random];
+};
+
 export const InnerFieldDictionary = new Proxy<FieldDictionary>({}, {
   get: (target, p: number) => {
-    if (OFFERS.includes(p)) {
+    if (OFFERS_FIELDS.includes(p)) {
       return {
-        type: FieldType.offer,
+        ...arrRand(FIELDS[FieldType.offer]!)
       }
     }
 
-    if (SITUATIONS.includes(p)) {
+    if (SITUATIONS_FIELDS.includes(p)) {
       return {
-        type: FieldType.situation,
+        ...arrRand(FIELDS[FieldType.situation]!)
       }
     }
 
-    if (INCIDENTS.includes(p)) {
+    if (INCIDENTS_FIELDS.includes(p)) {
       return {
-        type: FieldType.incident,
+        ...arrRand(FIELDS[FieldType.incident]!)
       }
     }
 
-    if (OPPORTUNITIES.includes(p)) {
+    if (OPPORTUNITIES_FIELDS.includes(p)) {
       return {
-        type: FieldType.opportunity,
+        ...arrRand(FIELDS[FieldType.opportunity]!)
       }
     }
 
-    if (REACTION.includes(p)) {
+    if (REACTION_FIELDS.includes(p)) {
       return {
-        type: FieldType.reaction,
+        ...arrRand(FIELDS[FieldType.reaction]!)
       }
     }
   }
