@@ -154,7 +154,7 @@ export class Game {
     this.Server.in(roomName).emit('game:players', users.map(user => {
       if (user.priority === currentPlayer) {
         const { type, cell } = user.position!;
-        if (type == PositionType.inner)
+        if (type === PositionType.inner)
           return {
             ...user,
             card: InnerFieldDictionary[cell]
