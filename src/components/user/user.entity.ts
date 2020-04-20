@@ -1,7 +1,7 @@
 import {
   Action, Choice, Resources,
   FIELDS, INNER_FIELDS_COUNT,
-  FieldType
+  FieldType, ResourceType,
 } from '$components/field';
 
 export enum UserStatus {
@@ -68,7 +68,11 @@ export class User {
       if (resources[key] === 0) {
         this.resources[key] = 0;
       } else {
-        this.resources[key] = this.resources[key] + resources[key]
+        this.resources[key] = this.resources[key] + resources[key];
+
+        if (key !== ResourceType.money && this.resources[key] < 0) {
+          this.resources[key] = 0;
+        }
       }
     });
 
