@@ -101,36 +101,40 @@ type FieldDictionary = {
 
 const arrRand = <T>(array: T[]): T => {
   const random = Math.floor(Math.random() * array.length);
+
   return array[random];
 };
 
 export const InnerFieldDictionary = new Proxy<FieldDictionary>({}, {
-  get: (target, p: number) => {
-    if (OFFERS_FIELDS.includes(p)) {
+  get: (target, p: number | string) => {
+    const position = Number(`${p}`);
+
+    if (OFFERS_FIELDS.includes(position)) {
       return {
         ...arrRand(FIELDS[FieldType.offer]!)
       }
     }
 
-    if (SITUATIONS_FIELDS.includes(p)) {
+    if (SITUATIONS_FIELDS.includes(position)) {
       return {
         ...arrRand(FIELDS[FieldType.situation]!)
       }
     }
 
-    if (INCIDENTS_FIELDS.includes(p)) {
+    if (INCIDENTS_FIELDS.includes(position)) {
       return {
         ...arrRand(FIELDS[FieldType.incident]!)
       }
     }
 
-    if (OPPORTUNITIES_FIELDS.includes(p)) {
+    if (OPPORTUNITIES_FIELDS.includes(position)) {
       return {
         ...arrRand(FIELDS[FieldType.opportunity]!)
       }
     }
 
-    if (REACTION_FIELDS.includes(p)) {
+    if (REACTION_FIELDS.includes(position)) {
+      console.log({ p }, 'asdads');
       return {
         ...arrRand(FIELDS[FieldType.reaction]!)
       }
