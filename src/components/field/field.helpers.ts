@@ -45,7 +45,7 @@ type Offer = Choices & {
   type: FieldType.offer;
 }
 
-type Opportunity = Choices & {
+type Opportunity = {
   type: FieldType.opportunity;
 }
 
@@ -96,7 +96,7 @@ const OPPORTUNITIES_FIELDS = [3, 11, 16];
 const REACTION_FIELDS = [5, 14];
 
 type FieldDictionary = {
-  [key: number]: Field;
+  [key: number]: ({ card: Field } | { opportunity: true });
 }
 
 const arrRand = <T>(array: T[]): T => {
@@ -110,34 +110,25 @@ export const InnerFieldDictionary = new Proxy<FieldDictionary>({}, {
     const position = Number(`${p}`);
 
     if (OFFERS_FIELDS.includes(position)) {
-      return {
-        ...arrRand(FIELDS[FieldType.offer]!)
-      }
+      return { card: arrRand(FIELDS[FieldType.offer]!) }
     }
 
     if (SITUATIONS_FIELDS.includes(position)) {
-      return {
-        ...arrRand(FIELDS[FieldType.situation]!)
-      }
+      return { card: arrRand(FIELDS[FieldType.situation]!) }
     }
 
     if (INCIDENTS_FIELDS.includes(position)) {
-      return {
-        ...arrRand(FIELDS[FieldType.incident]!)
-      }
+      return { card: arrRand(FIELDS[FieldType.incident]!) }
+    }
+
+
+    if (REACTION_FIELDS.includes(position)) {
+      return { card: arrRand(FIELDS[FieldType.reaction]!) }
     }
 
     if (OPPORTUNITIES_FIELDS.includes(position)) {
-      return {
-        ...arrRand(FIELDS[FieldType.opportunity]!)
-      }
+      return {}
     }
 
-    if (REACTION_FIELDS.includes(position)) {
-      console.log({ p }, 'asdads');
-      return {
-        ...arrRand(FIELDS[FieldType.reaction]!)
-      }
-    }
   }
 });

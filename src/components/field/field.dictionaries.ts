@@ -177,10 +177,6 @@ const INCIDENTS: Field[] = [
   }
 ];
 
-const OPPORTUNITIES: Field[] = [
-
-];
-
 const REACTIONS: Field[] = [
   {
     id: 0,
@@ -239,7 +235,6 @@ type Fields = {
 export const FIELDS: Fields = {
   [FieldType.offer]: OFFERS,
   [FieldType.incident]: INCIDENTS,
-  [FieldType.opportunity]: OPPORTUNITIES,
   [FieldType.situation]: SITUATIONS,
   [FieldType.reaction]: REACTIONS,
 };

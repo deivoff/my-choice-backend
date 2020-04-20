@@ -157,7 +157,7 @@ export class Game {
         if (type === PositionType.inner)
           return {
             ...user,
-            card: InnerFieldDictionary[cell]
+            ...InnerFieldDictionary[cell]
           }
       }
 
