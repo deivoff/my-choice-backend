@@ -1,6 +1,6 @@
 import { FIELDS } from '$components/field/field.dictionaries';
 
-export enum FieldType {
+export const enum FieldType {
   start,
   situation,
   incident,
