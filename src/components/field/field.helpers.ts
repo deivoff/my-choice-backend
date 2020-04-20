@@ -12,44 +12,62 @@ export const enum FieldType {
   problem
 }
 
-enum ResourceType {
+export enum ResourceType {
   lives = 'lives',
   money = 'money',
   white = 'white',
   dark = 'dark',
 }
 
-export type Field = {
+type Fields = Start | Incident | Situation | Reaction | Offer | Opportunity | Dream | Activity | Problem
+export type Default = {
   id: number,
   description: string;
-} & (Start | Situation | Incident | Offer | Reaction | Opportunity | Dream | Activity | Problem)
+}
+export type Choice = (OptionChoice | OpportunityChoice | IncidentChoice)
 
-type Start = {
+type OptionChoice = {
+  id: number;
+  type: FieldType.situation | FieldType.reaction | FieldType.offer,
+  choiceId: number,
+};
+
+type OpportunityChoice = {
+  type: FieldType.opportunity
+  resources?: Resources;
+};
+
+type IncidentChoice = {
+  id: number;
+  type: FieldType.incident
+}
+
+export type Start = {
   type: FieldType.start;
 }
 
-type Incident = {
+export type Incident = Default & {
   type: FieldType.incident;
   action: Action;
 }
 
-type Situation = Choices & {
+export type Situation = Default & Choices & {
   type: FieldType.situation;
 }
 
-type Reaction = Choices & {
+export type Reaction = Default & Choices & {
   type: FieldType.reaction;
 }
 
-type Offer = Choices & {
+export type Offer = Default & Choices & {
   type: FieldType.offer;
 }
 
-type Opportunity = {
+export type Opportunity = Default & {
   type: FieldType.opportunity;
 }
 
-type Dream = {
+type Dream = Default & {
   type: FieldType.dream;
 }
 
@@ -63,14 +81,14 @@ type Problem = {
   white: number;
 }
 
-type Action = {
+export type Action = {
   less?: Resources;
   more?: Resources;
   result: {
     move?: FieldType;
-    resource?: Resources;
+    resources?: Resources;
     hold?: number;
-    gameOver?: true;
+    gameover?: true;
   }
 }
 
@@ -96,7 +114,9 @@ const OPPORTUNITIES_FIELDS = [3, 11, 16];
 const REACTION_FIELDS = [5, 14];
 
 type FieldDictionary = {
-  [key: number]: ({ card: Field } | {});
+  [key: number]: ({
+    card: Fields
+  } | {});
 }
 
 const arrRand = <T>(array: T[]): T => {

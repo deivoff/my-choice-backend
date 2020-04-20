@@ -3,7 +3,7 @@ import * as http from 'http';
 import { PositionType, User } from '$components/user';
 import { RoomInstance } from '$components/room';
 import { Server, Socket } from '$utils/index';
-import { InnerFieldDictionary } from '$components/field';
+import { Choice, InnerFieldDictionary } from '$components/field';
 
 
 type Room = {
@@ -80,9 +80,9 @@ export class Game {
           this.sendPlayersWithCard(room, socket.user!.priority!);
         });
 
-        socket.on('game:choice', choice => {
-          console.log(choice);
+        socket.on('game:choice', (choice: Choice) => {
           const room = socket.user!.getCurrentRoom();
+          socket.user!.updateAfterChoice(choice);
 
           this.sendPlayersWithNext(room, socket.user!.priority!);
         });

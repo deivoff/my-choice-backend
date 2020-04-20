@@ -1,6 +1,6 @@
-import { Field, FieldType } from '$components/field/field.helpers';
+import { FieldType, Incident, Offer, Opportunity, Reaction, Situation } from '$components/field/field.helpers';
 
-const SITUATIONS: Field[] = [
+const SITUATIONS: Situation[] = [
   {
     id: 0,
     type: FieldType.situation,
@@ -77,7 +77,7 @@ const SITUATIONS: Field[] = [
   },
 ];
 
-const OFFERS: Field[] = [
+const OFFERS: Offer[] = [
   {
     id: 0,
     type: FieldType.offer,
@@ -148,7 +148,7 @@ const OFFERS: Field[] = [
   },
 ];
 
-const INCIDENTS: Field[] = [
+const INCIDENTS: Incident[] = [
   {
     id: 0,
     type: FieldType.incident,
@@ -171,13 +171,13 @@ const INCIDENTS: Field[] = [
         dark: 3,
       },
       result: {
-        gameOver: true,
+        gameover: true,
       }
     }
   }
 ];
 
-const OPPORTUNITIES: Field[] = [
+const OPPORTUNITIES: Opportunity[] = [
   {
     id: 0,
     type: FieldType.opportunity,
@@ -185,7 +185,7 @@ const OPPORTUNITIES: Field[] = [
   }
 ];
 
-const REACTIONS: Field[] = [
+const REACTIONS: Reaction[] = [
   {
     id: 0,
     type: FieldType.reaction,
@@ -236,11 +236,7 @@ const REACTIONS: Field[] = [
   },
 ];
 
-
-type Fields = {
-  [key in FieldType]?: Field[]
-}
-export const FIELDS: Fields = {
+export const FIELDS = {
   [FieldType.offer]: OFFERS,
   [FieldType.incident]: INCIDENTS,
   [FieldType.opportunity]: OPPORTUNITIES,

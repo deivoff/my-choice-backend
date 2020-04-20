@@ -1,4 +1,8 @@
-import { INNER_FIELDS_COUNT, Resources } from '$components/field';
+import {
+  Action, Choice, Resources,
+  FIELDS, INNER_FIELDS_COUNT,
+  FieldType
+} from '$components/field';
 
 export enum UserStatus {
   inGame,
@@ -24,6 +28,7 @@ export class User {
   public username!: string;
   public roomName: string = '';
   public resources: Resources = {};
+  public gameover: boolean = false;
   public dream?: number;
   public status?: UserStatus;
   public position?: UserPosition;
@@ -58,6 +63,56 @@ export class User {
     this.dream = id;
   }
 
+  setResources(resources: Resources) {
+    Object.keys(resources).forEach((key) => {
+      if (resources[key] === 0) {
+        this.resources[key] = 0;
+      } else {
+        this.resources[key] = this.resources[key] + resources[key]
+      }
+    });
+
+    if (this.resources.lives! <= 0) {
+      this.gameover = true
+    }
+  }
+
+  setAction(action: Action) {
+    let lessCheck = true;
+    let moreCheck = true;
+
+    if (action.less) {
+      Object.keys(action.less).forEach(key => {
+        lessCheck = this.resources[key] < action.less![key]
+      })
+    }
+
+    if (action.more) {
+      Object.keys(action.more).forEach(key => {
+        moreCheck = this.resources[key] >= action.more![key]
+      })
+    }
+
+    if (lessCheck && moreCheck) {
+        if (action.result.resources) {
+          this.setResources(action.result.resources);
+          return;
+        }
+
+        if (action.result.move) {
+          this.setPosition(action.result.move)
+        }
+
+        if (action.result.hold) {
+          this.holdCount = this.holdCount ? this.holdCount + action.result.hold : action.result.hold;
+        }
+
+        if (action.result.gameover) {
+          this.gameover = true;
+        }
+    }
+  }
+
   setPosition(move: number, type?: PositionType) {
     if (this.position?.type === PositionType.start) {
       this.position = {
@@ -75,6 +130,25 @@ export class User {
         type: PositionType.inner,
         cell,
       }
+    }
+  }
+
+  updateAfterChoice(choice: Choice) {
+    if (choice.type === FieldType.opportunity) {
+      if (choice.resources) {
+        this.setResources(choice.resources);
+      }
+    } else if (choice.type === FieldType.incident) {
+      const { id, type } = choice;
+
+      const { action } = FIELDS[type]![id];
+
+      this.setAction(action)
+    } else {
+        const { id, choiceId, type } = choice;
+
+        const { resources } = FIELDS[type]![id].choices[choiceId];
+        this.setResources(resources);
     }
   }
 
