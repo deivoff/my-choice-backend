@@ -134,10 +134,24 @@ export class Game {
   sendPlayersWithNext(roomName: string, currentPlayer: number) {
     const users = this.getUsersInRoom(roomName);
     const usersCount = users.length;
-    const nextPlayer = (currentPlayer + 1) % usersCount;
+    let nextPlayer = (currentPlayer + 1) % usersCount;
 
     this.Server.in(roomName).emit('game:players', users.map(user => {
+
       if (user.priority === nextPlayer) {
+        if (user.gameover) {
+          nextPlayer = nextPlayer + 1;
+
+          return user;
+        }
+
+        if (user.holdCount) {
+          nextPlayer = nextPlayer +1;
+          user.holdCount--;
+
+          return user;
+        }
+
         return {
           ...user,
           currentMove: true

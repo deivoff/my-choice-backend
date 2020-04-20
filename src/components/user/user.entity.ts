@@ -146,7 +146,6 @@ export class User {
       this.setAction(action)
     } else {
         const { id, choiceId, type } = choice;
-
         const { resources } = FIELDS[type]![id].choices[choiceId];
         this.setResources(resources);
     }
