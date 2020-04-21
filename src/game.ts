@@ -191,7 +191,7 @@ export class Game {
             moveCancel = false;
             return {
               ...user,
-              result,
+              ...result,
             }
           }
 
