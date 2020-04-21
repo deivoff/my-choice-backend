@@ -57,8 +57,8 @@ export class User {
     }
   }
 
-  setDream(id: number) {
-    this.dream = id;
+  setDream(fieldNumber: number | string) {
+    this.dream = Number(`${fieldNumber}`);
   }
 
   setResources(resources: Resources) {
