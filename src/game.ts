@@ -3,7 +3,7 @@ import * as http from 'http';
 import { PositionType, User } from '$components/user';
 import { RoomInstance } from '$components/room';
 import { Server, Socket } from '$utils/index';
-import { Choice, InnerFieldDictionary } from '$components/field';
+import { Choice, InnerFieldDictionary, OuterFieldDictionary } from '$components/field';
 
 
 type Room = {
@@ -164,19 +164,47 @@ export class Game {
 
   sendPlayersWithCard(roomName: string, currentPlayer: number) {
     const users = this.getUsersInRoom(roomName);
+    let moveCancel = false;
 
-    this.Server.in(roomName).emit('game:players', users.map(user => {
+    const newUsers = users.map(user => {
       if (user.priority === currentPlayer) {
         const { type, cell } = user.position!;
-        if (type === PositionType.inner)
+
+        if (type === PositionType.inner) {
           return {
             ...user,
             ...InnerFieldDictionary[cell]
           }
+        }
+
+        if (type === PositionType.outer) {
+          const result = OuterFieldDictionary(user.dream!)[cell];
+          moveCancel = true;
+
+          if (typeof result === 'number') {
+            user.setResources({ white: result });
+
+            return user;
+          }
+
+          if (result) {
+            moveCancel = false;
+            return {
+              ...user,
+              result,
+            }
+          }
+
+          return user;
+        }
       }
 
       return user;
-    }))
+    });
+
+    moveCancel
+      ? this.sendPlayersWithNext(roomName, currentPlayer)
+      : this.Server.in(roomName).emit('game:players', newUsers)
   }
 
   getRooms() {

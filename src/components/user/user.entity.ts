@@ -1,7 +1,7 @@
 import {
   Action, Choice, Resources,
   FIELDS, INNER_FIELDS_COUNT,
-  FieldType, ResourceType,
+  FieldType, ResourceType, FROM_INNER_TO_OUTER, OUTER_FIELDS_COUNT,
 } from '$components/field';
 
 export enum UserStatus {
@@ -16,8 +16,6 @@ export enum PositionType {
   inner = 'inner',
   outer = 'outer',
 }
-
-
 
 type UserPosition = {
   type: PositionType;
@@ -127,11 +125,33 @@ export class User {
       return;
     }
 
-    if (this.position?.type === PositionType.inner) {
+    if (this.position?.type === PositionType.inner && !type) {
       const cell = (this.position.cell + move) % INNER_FIELDS_COUNT;
 
       this.position = {
         type: PositionType.inner,
+        cell,
+      };
+
+      return;
+    }
+
+    if (this.position?.type === PositionType.outer && !type) {
+      const cell = (this.position.cell + move) % OUTER_FIELDS_COUNT;
+
+      this.position = {
+        type: PositionType.outer,
+        cell,
+      };
+
+      return;
+    }
+
+    if (type === PositionType.outer) {
+      const cell = FROM_INNER_TO_OUTER[this.position!.cell!];
+
+      this.position = {
+        type: PositionType.outer,
         cell,
       }
     }
@@ -141,6 +161,10 @@ export class User {
     if (choice.type === FieldType.opportunity) {
       if (choice.resources) {
         this.setResources(choice.resources);
+      }
+
+      if (choice.outer) {
+        this.setPosition(0, PositionType.outer);
       }
     } else if (choice.type === FieldType.incident) {
       const { id, type } = choice;

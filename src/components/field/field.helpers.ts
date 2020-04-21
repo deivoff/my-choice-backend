@@ -114,7 +114,51 @@ const INCIDENTS_FIELDS = [2, 6, 10, 15, 19];
 const OPPORTUNITIES_FIELDS = [3, 11, 16];
 const REACTION_FIELDS = [5, 14];
 
-type FieldDictionary = {
+export const OUTER_FIELDS_COUNT = 30;
+const PROBLEM_FIELDS = {
+  0: 5,
+  6: 10,
+  10: 5,
+  14: 5,
+  18: 10,
+  22: 5,
+  26: 10,
+};
+const ACTIVITY_FIELDS = {
+  1: 20,
+  3: 10,
+  5: 20,
+  7: 10,
+  9: 10,
+  11: 10,
+  13: 10,
+  15: 15,
+  17: 10,
+  19: 10,
+  21: 10,
+  23: 20,
+  25: 10,
+  27: 10,
+  29: 10,
+};
+const DREAM_FIELDS = {
+  2: 100,
+  4: 50,
+  8: 100,
+  12: 50,
+  16: 50,
+  20: 50,
+  24: 100,
+  28: 50,
+};
+
+export const FROM_INNER_TO_OUTER = {
+  3: 0,
+  11: 12,
+  16: 21,
+};
+
+type InnerFieldDictionary = {
   [key: number]: ({
     card: Fields
   } | {});
@@ -126,7 +170,7 @@ const arrRand = <T>(array: T[]): T => {
   return array[random];
 };
 
-export const InnerFieldDictionary = new Proxy<FieldDictionary>({}, {
+export const InnerFieldDictionary = new Proxy<InnerFieldDictionary>({}, {
   get: (target, p: number | string) => {
     const position = Number(`${p}`);
 
@@ -151,5 +195,27 @@ export const InnerFieldDictionary = new Proxy<FieldDictionary>({}, {
       return { card: FIELDS[FieldType.opportunity]![0] }
     }
 
+  }
+});
+type OuterFieldDictionary = (dream: number) => {
+  [key: number]: ({ card: Dream } | null | number)
+}
+export const OuterFieldDictionary: OuterFieldDictionary = (dream: number) => new Proxy({}, {
+  get: (target, p: string | number) => {
+    const position = Number(`${p}`);
+
+    if (Object.keys(DREAM_FIELDS).includes(String(position))) {
+      return position === dream
+        ? { card: arrRand(FIELDS[FieldType.dream]) }
+        : null;
+    }
+
+    if (Object.keys(PROBLEM_FIELDS).includes(String(position))) {
+      return -PROBLEM_FIELDS[position]
+    }
+
+    if (Object.keys(ACTIVITY_FIELDS).includes(String(position))) {
+      return ACTIVITY_FIELDS[position]
+    }
   }
 });
