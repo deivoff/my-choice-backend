@@ -34,6 +34,7 @@ type OptionChoice = {
 
 type OpportunityChoice = {
   type: FieldType.opportunity
+  outer: boolean;
   resources?: Resources;
 };
 
