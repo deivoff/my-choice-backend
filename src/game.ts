@@ -140,13 +140,13 @@ export class Game {
 
       if (user.priority === nextPlayer) {
         if (user.gameover) {
-          nextPlayer = nextPlayer + 1;
+          nextPlayer = (nextPlayer + 1) % usersCount;
 
           return user;
         }
 
         if (user.hold) {
-          nextPlayer = nextPlayer + 1;
+          nextPlayer = (nextPlayer + 1) % usersCount;
           user.hold--;
 
           return user;
