@@ -113,6 +113,13 @@ const SITUATIONS_FIELDS = [1, 7, 9, 13, 18];
 const INCIDENTS_FIELDS = [2, 6, 10, 15, 19];
 const OPPORTUNITIES_FIELDS = [3, 11, 16];
 const REACTION_FIELDS = [5, 14];
+export const INNER_FIELDS = {
+  [FieldType.offer]: OFFERS_FIELDS,
+  [FieldType.situation]: SITUATIONS_FIELDS,
+  [FieldType.incident]: INCIDENTS_FIELDS,
+  [FieldType.opportunity]: OPPORTUNITIES_FIELDS,
+  [FieldType.reaction]: REACTION_FIELDS,
+};
 
 export const OUTER_FIELDS_COUNT = 30;
 const PROBLEM_FIELDS = {

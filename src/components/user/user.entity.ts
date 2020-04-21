@@ -1,12 +1,13 @@
 import {
   Action, Choice, Resources,
   FIELDS, INNER_FIELDS_COUNT,
-  FieldType, ResourceType, FROM_INNER_TO_OUTER, OUTER_FIELDS_COUNT,
+  FieldType, ResourceType,
+  FROM_INNER_TO_OUTER, OUTER_FIELDS_COUNT, INNER_FIELDS,
 } from '$components/field';
 
 export enum UserStatus {
   inGame,
-  gameOver,
+  gameover,
   hold,
   winner,
 }
@@ -102,7 +103,7 @@ export class User {
         }
 
         if (action.result.move) {
-          this.setPosition(action.result.move)
+          this.setInnerFieldPosition(action.result.move)
         }
 
         if (action.result.hold) {
@@ -155,6 +156,18 @@ export class User {
         cell,
       }
     }
+  }
+
+  setInnerFieldPosition(field: FieldType) {
+    const nextField = INNER_FIELDS[field].find(elem => this.position!.cell > elem);
+
+    if (!nextField) {
+      this.position!.cell = INNER_FIELDS[field][0];
+
+      return;
+    }
+
+    this.position!.cell = nextField;
   }
 
   updateAfterChoice(choice: Choice) {
