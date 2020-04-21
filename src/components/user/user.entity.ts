@@ -6,7 +6,7 @@ import {
 } from '$components/field';
 
 export enum UserStatus {
-  inGame,
+  game,
   gameover,
   hold,
   winner,
@@ -18,7 +18,7 @@ export enum PositionType {
   outer = 'outer',
 }
 
-type UserPosition = {
+type UserPosition = null | {
   type: PositionType;
   cell: number;
 }
@@ -28,11 +28,11 @@ export class User {
   public roomName: string = '';
   public resources: Resources = {};
   public gameover: boolean = false;
-  public dream?: number;
+  public dream: null | number = null;
   public status?: UserStatus;
-  public position?: UserPosition;
-  public priority?: number;
-  public hold?: number;
+  public position: UserPosition = null;
+  public priority: null | number = null;
+  public hold: null | number = null;
   public admin?: boolean;
 
   constructor(username) {
@@ -51,7 +51,7 @@ export class User {
       money: 0,
     };
 
-    this.status = UserStatus.inGame;
+    this.status = UserStatus.game;
     this.position = {
       type: PositionType.start,
       cell: 0,
@@ -97,22 +97,22 @@ export class User {
     }
 
     if (lessCheck && moreCheck) {
-        if (action.result.resources) {
-          this.setResources(action.result.resources);
-          return;
-        }
+      if (action.result.resources) {
+        this.setResources(action.result.resources);
+        return;
+      }
 
-        if (action.result.move) {
-          this.setInnerFieldPosition(action.result.move)
-        }
+      if (action.result.move) {
+        this.setInnerFieldPosition(action.result.move)
+      }
 
-        if (action.result.hold) {
-          this.hold = action.result.hold;
-        }
+      if (action.result.hold) {
+        this.hold = action.result.hold;
+      }
 
-        if (action.result.gameover) {
-          this.gameover = true;
-        }
+      if (action.result.gameover) {
+        this.gameover = true;
+      }
     }
   }
 
@@ -186,9 +186,9 @@ export class User {
 
       this.setAction(action)
     } else {
-        const { id, choiceId, type } = choice;
-        const { resources } = FIELDS[type]![id].choices[choiceId];
-        this.setResources(resources);
+      const { id, choiceId, type } = choice;
+      const { resources } = FIELDS[type]![id].choices[choiceId];
+      this.setResources(resources);
     }
   }
 
@@ -207,9 +207,12 @@ export class User {
 
   leaveRoom() {
     this.roomName = '';
-
-    if (this.admin) {
-      this.admin = false;
-    }
+    this.admin = false;
+    this.resources = {};
+    this.position = null;
+    this.gameover = false;
+    this.dream = null;
+    this.priority = null;
+    this.hold = null;
   }
 }
