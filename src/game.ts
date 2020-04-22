@@ -135,9 +135,9 @@ export class Game {
     const users = this.getUsersInRoom(roomName);
     const usersCount = users.length;
     let nextPlayer = (currentPlayer + 1) % usersCount;
+    let isCurrentMoverSet = false;
 
-    this.Server.in(roomName).emit('game:players', users.map(user => {
-
+    let usersWithMover = users.map(user => {
       if (user.priority === nextPlayer) {
         if (user.gameover) {
           nextPlayer = (nextPlayer + 1) % usersCount;
@@ -152,6 +152,7 @@ export class Game {
           return user;
         }
 
+        isCurrentMoverSet = true;
         return {
           ...user,
           currentMove: true
@@ -159,7 +160,9 @@ export class Game {
       }
 
       return user;
-    }))
+    });
+
+    this.Server.in(roomName).emit('game:players', usersWithMover)
   }
 
   sendPlayersWithCard(roomName: string, currentPlayer: number) {

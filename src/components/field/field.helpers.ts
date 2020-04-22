@@ -212,9 +212,7 @@ export const OuterFieldDictionary: OuterFieldDictionary = (dream: number) => new
     const position = Number(`${p}`);
 
     if (Object.keys(DREAM_FIELDS).includes(String(position))) {
-      return position === dream
-        ? { card: arrRand(FIELDS[FieldType.dream]) }
-        : null;
+      return { card: arrRand(FIELDS[FieldType.dream]) };
     }
 
     if (Object.keys(PROBLEM_FIELDS).includes(String(position))) {
