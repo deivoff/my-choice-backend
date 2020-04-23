@@ -237,6 +237,7 @@ export class Game {
 
 function getUserWithMover(users: Partial<User>[], currentPlayer) {
   const usersCount = users.length;
+
   let isCurrentMoverSet = false;
   let isAllGameover = false;
   let nextPlayer = currentPlayer % usersCount;

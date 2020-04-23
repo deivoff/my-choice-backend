@@ -43,6 +43,10 @@ export class User {
     this.priority = priority;
   }
 
+  winner() {
+    this.status = UserStatus.winner;
+  }
+
   gameStart() {
     this.resources = {
       white: 0,
