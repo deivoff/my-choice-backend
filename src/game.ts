@@ -104,6 +104,11 @@ export class Game {
       });
 
       socket.on('disconnect', () => {
+        if (socket.user) {
+          const userRoom = socket.user.getCurrentRoom();
+          this.sendPlayers(userRoom);
+        }
+
         this.sendRooms();
       })
     });
@@ -236,25 +241,25 @@ export class Game {
 }
 
 function getUserWithMover(users: Partial<User>[], currentPlayer) {
-  const usersCount = users.length;
+  const isAllGameover = users.every(user => user.gameover);
 
+  if (isAllGameover) {
+    return users;
+  }
+
+  const usersCount = users.length;
   let isCurrentMoverSet = false;
-  let isAllGameover = false;
   let nextPlayer = currentPlayer % usersCount;
 
   const newUsers = users.map(user => {
     if (user.priority === nextPlayer) {
       if (user.gameover) {
-        nextPlayer = (nextPlayer + 1) % usersCount;
-        isAllGameover = true;
-
+        nextPlayer = nextPlayer + 1;
         return user;
-      } else {
-        isAllGameover = false;
       }
 
       if (user.hold) {
-        nextPlayer = (nextPlayer + 1) % usersCount;
+        nextPlayer = nextPlayer + 1;
         user.hold--;
 
         return user;
@@ -270,7 +275,7 @@ function getUserWithMover(users: Partial<User>[], currentPlayer) {
     return user;
   });
 
-  if (isCurrentMoverSet || isAllGameover) {
+  if (isCurrentMoverSet) {
     return newUsers;
   }
 
