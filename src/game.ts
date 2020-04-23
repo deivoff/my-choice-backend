@@ -239,7 +239,7 @@ function getUserWithMover(users: Partial<User>[], currentPlayer) {
   const usersCount = users.length;
   let isCurrentMoverSet = false;
   let isAllGameover = false;
-  let nextPlayer = currentPlayer;
+  let nextPlayer = currentPlayer % usersCount;
 
   const newUsers = users.map(user => {
     if (user.priority === nextPlayer) {
