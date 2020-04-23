@@ -138,7 +138,7 @@ export class Game {
   sendPlayersWithNext(roomName: string, currentPlayer: number) {
     const users = this.getUsersInRoom(roomName);
 
-    this.Server.in(roomName).emit('game:players', getUserWithMover(users, currentPlayer))
+    this.Server.in(roomName).emit('game:players', getUserWithMover(users, currentPlayer + 1))
   }
 
   sendPlayersWithCard(roomName: string, currentPlayer: number) {
