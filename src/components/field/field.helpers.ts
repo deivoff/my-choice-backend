@@ -28,7 +28,7 @@ export type Choice = (OptionChoice | OpportunityChoice | IncidentChoice)
 
 type OptionChoice = {
   id: number;
-  type: FieldType.situation | FieldType.reaction | FieldType.offer,
+  type: FieldType.situation | FieldType.reaction | FieldType.offer | FieldType.dream,
   choiceId: number,
 };
 

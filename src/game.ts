@@ -84,6 +84,9 @@ export class Game {
           const room = socket.user!.getCurrentRoom();
           socket.user!.updateAfterChoice(choice);
 
+          if (choice['choiceId']) {
+            socket.in(room).emit('game:user-choice', choice['choiceId']);
+          }
           this.sendPlayersWithNext(room, socket.user!.priority!);
         });
       });
