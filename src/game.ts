@@ -82,12 +82,12 @@ export class Game {
 
         socket.on('game:choice', (choice: Choice) => {
           const room = socket.user!.getCurrentRoom();
-          
-          console.log(choice)
+
+          console.log(choice);
           socket.user!.updateAfterChoice(choice);
 
           if (OPTION_CHOICES.includes(choice.type)) {
-            socket.in(room).emit('game:user-choice', choice['choiceId']);
+            socket.in(room).emit('game:user-choice', `${choice['choiceId']}`);
           }
           this.sendPlayersWithNext(room, socket.user!.priority!);
         });

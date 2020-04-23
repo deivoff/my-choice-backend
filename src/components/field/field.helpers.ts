@@ -32,7 +32,7 @@ type OptionChoice = {
   choiceId: number,
 };
 
-export const OPTION_CHOICES = [2, 4, 3, 6];
+export const OPTION_CHOICES = [1, 4, 3, 6];
 
 type OpportunityChoice = {
   type: FieldType.opportunity
