@@ -95,9 +95,7 @@ export type Action = {
   }
 }
 
-export type Resources = {
-  [key in ResourceType]?: number;
-};
+export type Resources = Partial<Record<ResourceType, number>>;
 
 type Choices = {
   choices: Option[];
@@ -167,11 +165,9 @@ export const FROM_INNER_TO_OUTER = {
   16: 25,
 };
 
-type InnerFieldDictionary = {
-  [key: number]: ({
-    card: Fields
-  } | {});
-}
+type InnerFieldDictionary = Record<number, {
+  card: Fields
+} | {}>
 
 const arrRand = <T>(array: T[]): T => {
   const random = Math.floor(Math.random() * array.length);
@@ -206,9 +202,7 @@ export const InnerFieldDictionary = new Proxy<InnerFieldDictionary>({}, {
 
   }
 });
-type OuterFieldDictionary = (dream: number) => {
-  [key: number]: ({ card: Dream } | null | number)
-}
+type OuterFieldDictionary = (dream: number) => Record<number, ({ card: Dream } | null | number)>
 export const OuterFieldDictionary: OuterFieldDictionary = (dream: number) => new Proxy({}, {
   get: (target, p: string | number) => {
     const position = Number(`${p}`);

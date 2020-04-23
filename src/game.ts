@@ -137,36 +137,8 @@ export class Game {
 
   sendPlayersWithNext(roomName: string, currentPlayer: number) {
     const users = this.getUsersInRoom(roomName);
-    const usersCount = users.length;
-    let nextPlayer = (currentPlayer + 1) % usersCount;
-    let isCurrentMoverSet = false;
 
-    let usersWithMover = users.map(user => {
-      if (user.priority === nextPlayer) {
-        if (user.gameover) {
-          nextPlayer = (nextPlayer + 1) % usersCount;
-
-          return user;
-        }
-
-        if (user.hold) {
-          nextPlayer = (nextPlayer + 1) % usersCount;
-          user.hold--;
-
-          return user;
-        }
-
-        isCurrentMoverSet = true;
-        return {
-          ...user,
-          currentMove: true
-        }
-      }
-
-      return user;
-    });
-
-    this.Server.in(roomName).emit('game:players', usersWithMover)
+    this.Server.in(roomName).emit('game:players', getUserWithMover(users, currentPlayer))
   }
 
   sendPlayersWithCard(roomName: string, currentPlayer: number) {
@@ -261,4 +233,46 @@ export class Game {
 
     return [];
   }
+}
+
+function getUserWithMover(users: Partial<User>[], currentPlayer) {
+  const usersCount = users.length;
+  let isCurrentMoverSet = false;
+  let isAllGameover = false;
+  let nextPlayer = currentPlayer;
+
+  const newUsers = users.map(user => {
+    if (user.priority === nextPlayer) {
+      if (user.gameover) {
+        nextPlayer = (nextPlayer + 1) % usersCount;
+        isAllGameover = true;
+
+        return { ...user };
+      } else {
+        isAllGameover = false;
+      }
+
+      if (user.hold) {
+        nextPlayer = (nextPlayer + 1) % usersCount;
+        const newUser = { ...user };
+        user.hold--;
+
+        return newUser;
+      }
+
+      isCurrentMoverSet = true;
+      return {
+        ...user,
+        currentMove: true
+      }
+    }
+
+    return { ...user };
+  });
+
+  if (isCurrentMoverSet || isAllGameover) {
+    return newUsers;
+  }
+
+  return getUserWithMover(newUsers, nextPlayer)
 }
