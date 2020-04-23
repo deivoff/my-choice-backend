@@ -247,17 +247,16 @@ function getUserWithMover(users: Partial<User>[], currentPlayer) {
         nextPlayer = (nextPlayer + 1) % usersCount;
         isAllGameover = true;
 
-        return { ...user };
+        return user;
       } else {
         isAllGameover = false;
       }
 
       if (user.hold) {
         nextPlayer = (nextPlayer + 1) % usersCount;
-        const newUser = { ...user };
         user.hold--;
 
-        return newUser;
+        return user;
       }
 
       isCurrentMoverSet = true;
@@ -267,7 +266,7 @@ function getUserWithMover(users: Partial<User>[], currentPlayer) {
       }
     }
 
-    return { ...user };
+    return user;
   });
 
   if (isCurrentMoverSet || isAllGameover) {
