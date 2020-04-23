@@ -83,7 +83,6 @@ export class Game {
         socket.on('game:choice', (choice: Choice) => {
           const room = socket.user!.getCurrentRoom();
 
-          console.log(choice);
           socket.user!.updateAfterChoice(choice);
 
           if (OPTION_CHOICES.includes(choice.type)) {
