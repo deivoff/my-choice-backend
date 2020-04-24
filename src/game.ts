@@ -216,8 +216,9 @@ export class Game {
     this.Server.in(roomName).emit('game:started');
     this.Server.in(roomName).emit('game:players', users.map((user, i) => {
       user.setPriority(i);
-
       user.gameStart();
+
+      return user;
     }))
   }
 
