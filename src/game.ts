@@ -126,7 +126,7 @@ export class Game {
 
   sendPlayersWithDream(roomName: string) {
     const users = this.getUsersInRoom(roomName);
-    const dreamsExist = users.every(user => user.dream !== undefined);
+    const dreamsExist = users.every(user => user.dream);
 
     this.Server.in(roomName).emit('game:players', users.map(user => {
       if (user.priority === 0 && dreamsExist) {
