@@ -187,8 +187,6 @@ export class Game {
             user.win();
             return user;
           }
-
-          return user;
         }
       }
 
@@ -251,9 +249,17 @@ export class Game {
 }
 
 function getUserWithMover(users: Partial<User>[], currentPlayer) {
-  const isAllGameover = users.every(user => user.gameover);
+  const activeUsers = users.filter(user => !user.gameover);
 
-  if (isAllGameover) {
+  if (activeUsers.length === 0) {
+    return users;
+  }
+
+  if (activeUsers.length === 1) {
+    if (activeUsers[0].win) {
+      activeUsers[0].win();
+    }
+
     return users;
   }
 
