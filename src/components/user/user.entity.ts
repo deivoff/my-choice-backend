@@ -1,8 +1,15 @@
 import {
-  Action, Choice, Resources,
-  FIELDS, INNER_FIELDS_COUNT,
-  FieldType, ResourceType,
-  FROM_INNER_TO_OUTER, OUTER_FIELDS_COUNT, INNER_FIELDS,
+  Action,
+  Choice,
+  FIELDS,
+  FieldType,
+  FROM_INNER_TO_OUTER,
+  INNER_FIELDS,
+  INNER_FIELDS_COUNT,
+  OUTER_FIELDS_COUNT,
+  Resources,
+  ResourceType,
+  DREAM_FIELDS,
 } from '$components/field';
 
 export enum UserStatus {
@@ -30,6 +37,7 @@ export class User {
   public gameover: boolean = false;
   public dream: null | number = null;
   public status?: UserStatus;
+  public winner: boolean = false;
   public position: UserPosition = null;
   public priority: null | number = null;
   public hold: null | number = null;
@@ -43,8 +51,8 @@ export class User {
     this.priority = priority;
   }
 
-  winner() {
-    this.status = UserStatus.winner;
+  win() {
+    this.winner = true;
   }
 
   gameStart() {
@@ -192,7 +200,16 @@ export class User {
     } else {
       const { id, choiceId, type } = choice;
       const { resources } = FIELDS[type]![id].choices[choiceId];
+
       this.setResources(resources);
+
+      if (
+        type === FieldType.dream
+        && this.position!.cell === this.dream
+        && this.resources!.white! >= DREAM_FIELDS[this.position!.cell]
+      ) {
+        this.win();
+      }
     }
   }
 

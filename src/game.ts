@@ -88,7 +88,13 @@ export class Game {
           if (OPTION_CHOICES.includes(choice.type)) {
             socket.in(room).emit('game:user-choice', `${choice['choiceId']}`);
           }
-          this.sendPlayersWithNext(room, socket.user!.priority!);
+          if (socket.user!.winner) {
+            setTimeout(() => {
+              this.Server.in(room).emit('game:players', this.getUsersInRoom(room))
+            }, 1000);
+          } else {
+            this.sendPlayersWithNext(room, socket.user!.priority!);
+          }
         });
       });
 
@@ -162,7 +168,7 @@ export class Game {
         }
 
         if (type === PositionType.outer) {
-          const result = OuterFieldDictionary(user.dream!)[cell];
+          const result = OuterFieldDictionary(user.dream!, user.resources!.white!)[cell];
           moveCancel = true;
 
           if (typeof result === 'number') {
@@ -177,6 +183,9 @@ export class Game {
               ...user,
               ...result,
             }
+          } else {
+            user.win();
+            return user;
           }
 
           return user;

@@ -148,7 +148,7 @@ const ACTIVITY_FIELDS = {
   27: 20,
   29: 10,
 };
-const DREAM_FIELDS = {
+export const DREAM_FIELDS = {
   2: 50,
   6: 100,
   8: 50,
@@ -202,12 +202,13 @@ export const InnerFieldDictionary = new Proxy<InnerFieldDictionary>({}, {
 
   }
 });
-type OuterFieldDictionary = (dream: number) => Record<number, ({ card: Dream } | null | number)>
-export const OuterFieldDictionary: OuterFieldDictionary = (dream: number) => new Proxy({}, {
+type OuterFieldDictionary = (dream: number, white: number) => Record<number, ({ card: Dream } | null | number)>
+export const OuterFieldDictionary: OuterFieldDictionary = (dream, white) => new Proxy({}, {
   get: (target, p: string | number) => {
     const position = Number(`${p}`);
 
     if (Object.keys(DREAM_FIELDS).includes(String(position))) {
+      if (DREAM_FIELDS[position] === dream && white >= DREAM_FIELDS[position]) return null;
       return { card: arrRand(FIELDS[FieldType.dream]) };
     }
 
