@@ -111,7 +111,6 @@ export class User {
     if (lessCheck && moreCheck) {
       if (action.result.resources) {
         this.setResources(action.result.resources);
-        return;
       }
 
       if (action.result.move) {
