@@ -232,6 +232,7 @@ export class User {
     this.position = null;
     this.gameover = false;
     this.dream = null;
+    this.winner = false;
     this.priority = null;
     this.hold = null;
   }
