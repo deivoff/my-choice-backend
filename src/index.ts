@@ -1,4 +1,4 @@
 import App from './app';
 
-new App();
+App.start();
 

@@ -290,7 +290,7 @@ export class User {
         user: this.username,
         room: this.roomName,
         choice,
-        message: `${this.username} в карточке ${FIELD_DICTIONARY[type]} №${id} "${description}" выбрал ${text}.`
+        message: `${this.username} в карточке ${FIELD_DICTIONARY[type]} №${id} "${description}" выбрал "${text}".`
       }).save();
 
       if (

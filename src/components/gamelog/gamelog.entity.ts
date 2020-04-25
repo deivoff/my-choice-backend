@@ -1,7 +1,8 @@
 import { FieldType } from '$components/field';
-import { getModelForClass, prop, ReturnModelType } from '@typegoose/typegoose';
+import { ObjectId } from 'mongodb';
+import { getModelForClass, modelOptions, prop, ReturnModelType } from '@typegoose/typegoose';
 
-class ChoiceSchema {
+class Choice {
   @prop({ required: true })
   type!: FieldType;
 
@@ -12,7 +13,12 @@ class ChoiceSchema {
   id!: number;
 }
 
-class GamelogSchema {
+@modelOptions({ schemaOptions: { timestamps: true} })
+class Gamelog {
+  readonly _id!: ObjectId;
+  readonly createdAt!: Date;
+  readonly updatedAt!: Date;
+
   @prop({ required: true })
   message!: string;
 
@@ -23,7 +29,7 @@ class GamelogSchema {
   room?: string;
 
   @prop({ _id: false })
-  choice?: ChoiceSchema;
+  choice?: Choice;
 
   @prop()
   win?: boolean;
@@ -35,5 +41,5 @@ class GamelogSchema {
   hold?: boolean;
 }
 
-export type GamelogModel = ReturnModelType<typeof GamelogSchema>;
-export const GamelogModel: GamelogModel = getModelForClass(GamelogSchema);
+export type GamelogModel = ReturnModelType<typeof Gamelog>;
+export const GamelogModel: GamelogModel = getModelForClass(Gamelog);

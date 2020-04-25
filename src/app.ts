@@ -10,22 +10,20 @@ import path from "path";
 process.env.NODE_ENV === 'development' && require('dotenv').config({ path: path.join(`${__dirname}./../.env`) });
 
 class App {
-  constructor() {
-    new Game(new MockServer().server);
+  static async start() {
+    const server = await MockServer.start();
+    new Game(server);
   }
 }
 
 export default App;
 
 class MockServer {
-  public server: Server;
-  constructor() {
+  static async start() {
     const {
       'NODE_ENV': env,
       'DB_NAME': dbName,
       'DB_URL': dbUrl,
-      'DB_PASS': pass,
-      'DB_USER': user,
     } = process.env;
     const app = new Koa();
     const router = new KoaRouter();
@@ -57,21 +55,22 @@ class MockServer {
     const PORT = 7000;
 
     try {
-      mongoose.connect(`${dbUrl}`, {
+      await mongoose.connect(`${dbUrl}`, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         dbName,
-        user,
-        pass,
       });
       env === ('development' || 'test') && mongoose.set('debug', true);
       console.log('MongoDB Connected');
     } catch (error) {
       console.error(error);
     }
-    this.server = http.createServer(app.callback());
-    this.server.listen(PORT, () => {
+
+    const server = http.createServer(app.callback());
+    server.listen(PORT, () => {
       console.log(`Сервер запущен на порту ${PORT}`);
     });
+
+    return server;
   }
 }
