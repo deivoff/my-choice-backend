@@ -3,7 +3,7 @@ import * as http from 'http';
 import { PositionType, User } from '$components/user';
 import { RoomInstance } from '$components/room';
 import { Server, Socket } from '$utils/index';
-import { Choice, InnerFieldDictionary, OuterFieldDictionary, OPTION_CHOICES } from '$components/field';
+import { Choice, InnerFieldDictionary, OuterFieldDictionary, OPTION_CHOICES, ResourceType } from '$components/field';
 
 
 type Room = {
@@ -96,6 +96,13 @@ export class Game {
             this.sendPlayersWithNext(room, socket.user!.priority!);
           }
         });
+
+        socket.on('game:remove-dark', (key: ResourceType) => {
+          const room = socket.user!.getCurrentRoom();
+          socket.user!.removeDark(key);
+
+          this.sendPlayers(room);
+        })
       });
 
       socket.on('chat:room-message', (message: Message) => {

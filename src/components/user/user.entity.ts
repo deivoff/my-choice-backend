@@ -1,6 +1,7 @@
 import {
   Action,
   Choice,
+  DREAM_FIELDS,
   FIELDS,
   FieldType,
   FROM_INNER_TO_OUTER,
@@ -9,7 +10,6 @@ import {
   OUTER_FIELDS_COUNT,
   Resources,
   ResourceType,
-  DREAM_FIELDS,
 } from '$components/field';
 
 export enum UserStatus {
@@ -49,6 +49,22 @@ export class User {
 
   setPriority(priority: number) {
     this.priority = priority;
+  }
+
+  removeDark(changeResource: ResourceType) {
+    this.resources.dark = this.resources!.dark! - 1;
+
+    if (changeResource === ResourceType.money) {
+      this.resources.money = this.resources!.money! - 50;
+    }
+
+    if (changeResource === ResourceType.white) {
+      this.resources.white = this.resources!.white! - 5;
+    }
+
+    if (changeResource === ResourceType.lives) {
+      this.resources.lives = this.resources!.lives! - 5;
+    }
   }
 
   win() {
