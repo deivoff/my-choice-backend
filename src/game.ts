@@ -119,7 +119,10 @@ export class Game {
       socket.on('disconnect', () => {
         if (socket.user) {
           const userRoom = socket.user.getCurrentRoom();
-          this.sendPlayers(userRoom);
+          socket.user.disconnect();
+          if (userRoom) {
+            this.sendPlayers(userRoom);
+          }
         }
 
         this.sendRooms();
@@ -283,7 +286,7 @@ function getUserWithMover(users: Partial<User>[], currentPlayer) {
 
       if (user.hold) {
         nextPlayer = nextPlayer + 1;
-        user.hold--;
+        user.await && user.await();
 
         return user;
       }

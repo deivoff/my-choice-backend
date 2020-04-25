@@ -1,7 +1,7 @@
 import {
   Action,
   Choice,
-  DREAM_FIELDS,
+  DREAM_FIELDS, FIELD_DICTIONARY,
   FIELDS,
   FieldType,
   FROM_INNER_TO_OUTER,
@@ -11,6 +11,7 @@ import {
   Resources,
   ResourceType,
 } from '$components/field';
+import { GamelogModel } from '$components/gamelog';
 
 export enum UserStatus {
   game,
@@ -65,10 +66,34 @@ export class User {
     if (changeResource === ResourceType.lives) {
       this.resources.lives = this.resources!.lives! - 5;
     }
+
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      message: `${this.username} удалил одну СК(Ч) в обмен на ${changeResource}.`
+    }).save();
   }
 
   win() {
     this.winner = true;
+
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      win: true,
+      message: `${this.username} выиграл.`
+    }).save();
+  }
+
+  await() {
+    this.hold && this.hold--;
+
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      hold: true,
+      message: `${this.username} пропускает 1 из ${this.hold} ходов.`
+    }).save();
   }
 
   gameStart() {
@@ -83,11 +108,23 @@ export class User {
     this.position = {
       type: PositionType.start,
       cell: 0,
-    }
+    };
+
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      message: `${this.username} начал игру.`
+    }).save();
   }
 
   setDream(fieldNumber: number | string) {
     this.dream = Number(`${fieldNumber}`);
+
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      message: `${this.username} выбрал ${this.dream} как мечту.`
+    }).save();
   }
 
   setResources(resources: Resources) {
@@ -150,6 +187,12 @@ export class User {
         cell: move - 1,
       };
 
+      new GamelogModel({
+        user: this.username,
+        room: this.roomName,
+        message: `${this.username} перешел на поле №${this.position.cell} внутреннего круга.`
+      }).save();
+
       return;
     }
 
@@ -160,6 +203,12 @@ export class User {
         type: PositionType.inner,
         cell,
       };
+
+      new GamelogModel({
+        user: this.username,
+        room: this.roomName,
+        message: `${this.username} перешел на поле №${this.position.cell} внутреннего круга.`
+      }).save();
 
       return;
     }
@@ -172,11 +221,23 @@ export class User {
         cell,
       };
 
+      new GamelogModel({
+        user: this.username,
+        room: this.roomName,
+        message: `${this.username} перешел на поле №${this.position.cell} внешнего круга.`
+      }).save();
+
       return;
     }
 
     if (type === PositionType.outer) {
       const cell = FROM_INNER_TO_OUTER[this.position!.cell!];
+
+      new GamelogModel({
+        user: this.username,
+        room: this.roomName,
+        message: `${this.username} перешел с внутреннего круга на внешний.`
+      }).save();
 
       this.position = {
         type: PositionType.outer,
@@ -209,14 +270,28 @@ export class User {
     } else if (choice.type === FieldType.incident) {
       const { id, type } = choice;
 
-      const { action } = FIELDS[type]![id];
+      const { action, description } = FIELDS[type]![id];
 
-      this.setAction(action)
+      this.setAction(action);
+
+      new GamelogModel({
+        user: this.username,
+        room: this.roomName,
+        message: `${this.username} произошел случай №${id} "${description}".`
+      }).save();
+
     } else {
       const { id, choiceId, type } = choice;
-      const { resources } = FIELDS[type]![id].choices[choiceId];
+      const { description, choices: { [choiceId]: { resources, text }} } = FIELDS[type]![id];
 
       this.setResources(resources);
+
+      new GamelogModel({
+        user: this.username,
+        room: this.roomName,
+        choice,
+        message: `${this.username} в карточке ${FIELD_DICTIONARY[type]} №${id} "${description}" выбрал ${text}.`
+      }).save();
 
       if (
         type === FieldType.dream
@@ -232,16 +307,40 @@ export class User {
     return this.roomName;
   }
 
+  disconnect() {
+    new GamelogModel({
+      user: this.username,
+      message: `Игрок ${this.username} отключился.`
+    }).save();
+  }
+
   createRoom(roomName) {
     this.roomName = roomName;
     this.admin = true;
+
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      message: `${this.username} создал комнату "${this.roomName}".`
+    }).save();
   }
 
   choiceRoom(roomName) {
     this.roomName = roomName;
+
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      message: `${this.username} вошел в комнату "${this.roomName}".`
+    }).save();
   }
 
   leaveRoom() {
+    new GamelogModel({
+      user: this.username,
+      room: this.roomName,
+      message: `${this.username} покинул комнату "${this.roomName}".`
+    }).save();
     this.roomName = '';
     this.admin = false;
     this.resources = {};

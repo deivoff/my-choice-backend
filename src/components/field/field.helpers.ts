@@ -12,6 +12,17 @@ export const enum FieldType {
   problem
 }
 
+export const FIELD_DICTIONARY = {
+  [FieldType.situation]: 'Ситуация',
+  [FieldType.incident]: 'Случай',
+  [FieldType.offer]: 'Предложение',
+  [FieldType.reaction]: 'Реакция',
+  [FieldType.opportunity]: 'Возможность',
+  [FieldType.dream]: 'Мечта-тест',
+  [FieldType.activity]: 'Активность',
+  [FieldType.problem]: 'Проблема',
+};
+
 export enum ResourceType {
   lives = 'lives',
   money = 'money',
