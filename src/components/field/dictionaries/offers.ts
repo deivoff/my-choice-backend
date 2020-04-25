@@ -571,6 +571,7 @@ export default [
         resources: {
           lives:-1,
           dark: 1,
+          money: 10,
         }
       },
       {
@@ -936,9 +937,9 @@ export default [
         id: 1,
         text: "Согласитесь только за деньги",
         resources: {
-          lives:-1,
+          lives: -1,
           dark: 1,
-          money: -10,
+          money: 10,
         }
       },
       {
