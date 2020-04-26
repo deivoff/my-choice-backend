@@ -218,7 +218,7 @@ export const OuterFieldDictionary: OuterFieldDictionary = (dream, white) => new 
     const position = Number(`${p}`);
 
     if (Object.keys(DREAM_FIELDS).includes(String(position))) {
-      if (DREAM_FIELDS[position] === dream && white >= DREAM_FIELDS[position]) return null;
+      if (position === dream && white >= DREAM_FIELDS[position]) return null;
       return { card: arrRand(FIELDS[FieldType.dream]) };
     }
 
