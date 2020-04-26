@@ -187,12 +187,6 @@ export class User {
         cell: move - 1,
       };
 
-      new GamelogModel({
-        user: this.username,
-        room: this.roomName,
-        message: `${this.username} перешел на поле №${this.position.cell} внутреннего круга.`
-      }).save();
-
       return;
     }
 
@@ -203,12 +197,6 @@ export class User {
         type: PositionType.inner,
         cell,
       };
-
-      new GamelogModel({
-        user: this.username,
-        room: this.roomName,
-        message: `${this.username} перешел на поле №${this.position.cell} внутреннего круга.`
-      }).save();
 
       return;
     }
@@ -221,23 +209,11 @@ export class User {
         cell,
       };
 
-      new GamelogModel({
-        user: this.username,
-        room: this.roomName,
-        message: `${this.username} перешел на поле №${this.position.cell} внешнего круга.`
-      }).save();
-
       return;
     }
 
     if (type === PositionType.outer) {
       const cell = FROM_INNER_TO_OUTER[this.position!.cell!];
-
-      new GamelogModel({
-        user: this.username,
-        room: this.roomName,
-        message: `${this.username} перешел с внутреннего круга на внешний.`
-      }).save();
 
       this.position = {
         type: PositionType.outer,
@@ -260,13 +236,26 @@ export class User {
 
   updateAfterChoice(choice: Choice) {
     if (choice.type === FieldType.opportunity) {
+      let message = `Игрок ${this.username} встал на возможность`;
       if (choice.resources) {
         this.setResources(choice.resources);
+        Object.keys(choice.resources).forEach(key => {
+          message += `, увеличил ресурс ${key} на ${choice.resources![key]}`
+        });
+
       }
 
       if (choice.outer) {
         this.setPosition(0, PositionType.outer);
+
+        message += `, и перешел на внешний круг`
       }
+
+      new GamelogModel({
+        user: this.username,
+        room: this.roomName,
+        message
+      }).save();
     } else if (choice.type === FieldType.incident) {
       const { id, type } = choice;
 
@@ -277,7 +266,7 @@ export class User {
       new GamelogModel({
         user: this.username,
         room: this.roomName,
-        message: `${this.username} произошел случай №${id} "${description}".`
+        message: `${this.username} встал на поле №${this.position!.cell}, произошел случай №${id} "${description}".`
       }).save();
 
     } else {
@@ -290,7 +279,7 @@ export class User {
         user: this.username,
         room: this.roomName,
         choice,
-        message: `${this.username} в карточке ${FIELD_DICTIONARY[type]} №${id} "${description}" выбрал "${text}".`
+        message: `${this.username} встал на поле №${this.position!.cell} в карточке ${FIELD_DICTIONARY[type]} №${id} "${description}" выбрал "${text}".`
       }).save();
 
       if (
