@@ -172,7 +172,7 @@ export class User {
 
       if (action.result.move) {
         this.setInnerFieldPosition(action.result.move)
-        
+
         return true
       }
 
@@ -251,7 +251,8 @@ export class User {
       if (choice.outer) {
         this.setPosition(0, PositionType.outer);
 
-        message += `, и перешел на внешний круг`
+        message += `, и перешел на внешний круг`;
+        return true;
       }
 
       new GamelogModel({
