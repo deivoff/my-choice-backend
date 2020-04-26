@@ -199,7 +199,7 @@ export const InnerFieldDictionary = new Proxy<InnerFieldDictionary>({}, {
     }
 
     if (INCIDENTS_FIELDS.includes(position)) {
-      return { card: FIELDS[FieldType.incident]![3] }
+      return { card: arrRand(FIELDS[FieldType.incident]!) }
     }
 
 

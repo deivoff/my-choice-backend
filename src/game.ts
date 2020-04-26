@@ -91,7 +91,7 @@ export class Game {
         socket.on('game:choice', (choice: Choice) => {
           const room = socket.user!.getCurrentRoom();
 
-          socket.user!.updateAfterChoice(choice);
+          const isFieldChanged = socket.user!.updateAfterChoice(choice);
 
           if (OPTION_CHOICES.includes(choice.type)) {
             socket.in(room).emit('game:user-choice', `${choice['choiceId']}`);
@@ -100,8 +100,8 @@ export class Game {
             setTimeout(() => {
               this.Server.in(room).emit('game:players', this.getUsersInRoom(room))
             }, 1000);
-          } else if (INNER_FIELDS[FieldType.opportunity].includes(socket.user!.position!.cell)) {
-            this.sendPlayersWithNext(room, socket.user!.priority!);
+          } else if (isFieldChanged) {
+            this.sendPlayersWithCard(room, socket.user!.priority!);
           } else {
             this.sendPlayersWithNext(room, socket.user!.priority! + 1);
           }

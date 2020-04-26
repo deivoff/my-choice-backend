@@ -166,18 +166,22 @@ export class User {
         this.setResources(action.result.resources);
       }
 
-      if (action.result.move) {
-        this.setInnerFieldPosition(action.result.move)
-      }
-
       if (action.result.hold) {
         this.hold = action.result.hold;
+      }
+
+      if (action.result.move) {
+        this.setInnerFieldPosition(action.result.move)
+        
+        return true
       }
 
       if (action.result.gameover) {
         this.gameover = true;
       }
     }
+
+    return false;
   }
 
   setPosition(move: number, type?: PositionType) {
@@ -223,8 +227,7 @@ export class User {
   }
 
   setInnerFieldPosition(field: FieldType) {
-    const nextField = INNER_FIELDS[field].find(elem => this.position!.cell > elem);
-
+    const nextField = INNER_FIELDS[field].find(elem => this.position!.cell < elem);
     if (!nextField) {
       this.position!.cell = INNER_FIELDS[field][0];
 
@@ -256,12 +259,14 @@ export class User {
         room: this.roomName,
         message
       }).save();
+
+      return false;
     } else if (choice.type === FieldType.incident) {
       const { id, type } = choice;
 
       const { action, description } = FIELDS[type]![id];
 
-      this.setAction(action);
+      const changeMove = this.setAction(action);
 
       new GamelogModel({
         user: this.username,
@@ -269,6 +274,7 @@ export class User {
         message: `${this.username} встал на поле №${this.position!.cell}, произошел случай №${id} "${description}".`
       }).save();
 
+      return changeMove;
     } else {
       const { id, choiceId, type } = choice;
       const { description, choices: { [choiceId]: { resources, text }} } = FIELDS[type]![id];
@@ -289,6 +295,8 @@ export class User {
       ) {
         this.win();
       }
+
+      return;
     }
   }
 
