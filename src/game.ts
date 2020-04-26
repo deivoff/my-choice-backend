@@ -82,6 +82,7 @@ export class Game {
 
         socket.on('game:move', (move: number) => {
           const room = socket.user!.getCurrentRoom();
+          socket.user!.removeCurrentMove();
           socket.user!.setPosition(move);
 
           this.sendPlayersWithCard(room, socket.user!.priority!);
@@ -131,6 +132,12 @@ export class Game {
           socket.user.disconnect();
           if (userRoom) {
             this.sendPlayers(userRoom);
+
+            if (socket.user.currentMove) {
+              socket.user.removeCurrentMove();
+
+              this.sendPlayersWithNext(userRoom, socket.user!.priority! + 1);
+            }
           }
         }
 
@@ -155,10 +162,9 @@ export class Game {
 
     this.Server.in(roomName).emit('game:players', users.map(user => {
       if (user.priority === 0 && dreamsExist) {
-        return {
-          ...user,
-          currentMove: true
-        }
+
+        user.setCurrentMove();
+        return user;
       }
 
       return user;
@@ -310,10 +316,8 @@ function getUserWithMover(users: Partial<User>[], currentPlayer, deep: number = 
       }
 
       isCurrentMoverSet = true;
-      return {
-        ...user,
-        currentMove: true
-      }
+      user.setCurrentMove && user.setCurrentMove!();
+      return user
     }
 
     return user;

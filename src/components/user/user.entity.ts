@@ -38,6 +38,7 @@ export class User {
   public gameover: boolean = false;
   public dream: null | number = null;
   public status?: UserStatus;
+  public currentMove: boolean = false;
   public winner: boolean = false;
   public position: UserPosition = null;
   public priority: null | number = null;
@@ -50,6 +51,14 @@ export class User {
 
   setPriority(priority: number) {
     this.priority = priority;
+  }
+
+  setCurrentMove() {
+    this.currentMove = true;
+  }
+
+  removeCurrentMove() {
+    this.currentMove = false;
   }
 
   removeDark(changeResource: ResourceType) {
