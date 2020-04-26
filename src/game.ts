@@ -21,6 +21,7 @@ export class Game {
 
   constructor(port?: number | http.Server) {
     this.Server = SocketIO(port);
+    this.Server.emit('connect:error');
 
     this.Server.on('connection', (socket: Socket<User>) => {
       socket.on('login', ({ username }) => {
