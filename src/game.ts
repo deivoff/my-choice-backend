@@ -3,7 +3,14 @@ import * as http from 'http';
 import { PositionType, User } from '$components/user';
 import { RoomInstance } from '$components/room';
 import { Server, Socket } from '$utils/index';
-import { Choice, InnerFieldDictionary, OuterFieldDictionary, OPTION_CHOICES, ResourceType } from '$components/field';
+import {
+  Choice,
+  InnerFieldDictionary,
+  OuterFieldDictionary,
+  OPTION_CHOICES,
+  ResourceType,
+  INNER_FIELDS, FieldType,
+} from '$components/field';
 
 
 type Room = {
@@ -93,8 +100,10 @@ export class Game {
             setTimeout(() => {
               this.Server.in(room).emit('game:players', this.getUsersInRoom(room))
             }, 1000);
-          } else {
+          } else if (INNER_FIELDS[FieldType.opportunity].includes(socket.user!.position!.cell)) {
             this.sendPlayersWithNext(room, socket.user!.priority!);
+          } else {
+            this.sendPlayersWithNext(room, socket.user!.priority! + 1);
           }
         });
 
@@ -157,10 +166,10 @@ export class Game {
     }))
   }
 
-  sendPlayersWithNext(roomName: string, currentPlayer: number) {
+  sendPlayersWithNext(roomName: string, nextPlayer: number) {
     const users = this.getUsersInRoom(roomName);
 
-    this.Server.in(roomName).emit('game:players', getUserWithMover(users, currentPlayer + 1))
+    this.Server.in(roomName).emit('game:players', getUserWithMover(users, nextPlayer))
   }
 
   sendPlayersWithCard(roomName: string, currentPlayer: number) {
@@ -205,7 +214,7 @@ export class Game {
     });
 
     moveCancel
-      ? this.sendPlayersWithNext(roomName, currentPlayer)
+      ? this.sendPlayersWithNext(roomName, currentPlayer + 1)
       : this.Server.in(roomName).emit('game:players', newUsers)
   }
 
