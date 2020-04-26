@@ -148,6 +148,7 @@ export class User {
   setAction(action: Action) {
     let lessCheck = true;
     let moreCheck = true;
+    let isFieldChange = false;
 
     if (action.less) {
       Object.keys(action.less).forEach(key => {
@@ -171,9 +172,9 @@ export class User {
       }
 
       if (action.result.move) {
-        this.setInnerFieldPosition(action.result.move)
+        this.setInnerFieldPosition(action.result.move);
 
-        return true
+        isFieldChange = true
       }
 
       if (action.result.gameover) {
@@ -181,7 +182,7 @@ export class User {
       }
     }
 
-    return false;
+    return isFieldChange;
   }
 
   setPosition(move: number, type?: PositionType) {
@@ -239,6 +240,7 @@ export class User {
 
   updateAfterChoice(choice: Choice) {
     if (choice.type === FieldType.opportunity) {
+      let isFieldChanged = false;
       let message = `Игрок ${this.username} встал на возможность`;
       if (choice.resources) {
         this.setResources(choice.resources);
@@ -252,7 +254,7 @@ export class User {
         this.setPosition(0, PositionType.outer);
 
         message += `, и перешел на внешний круг`;
-        return true;
+        isFieldChanged = true;
       }
 
       new GamelogModel({
@@ -261,7 +263,7 @@ export class User {
         message
       }).save();
 
-      return false;
+      return isFieldChanged;
     } else if (choice.type === FieldType.incident) {
       const { id, type } = choice;
 

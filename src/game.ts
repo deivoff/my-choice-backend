@@ -9,7 +9,6 @@ import {
   OuterFieldDictionary,
   OPTION_CHOICES,
   ResourceType,
-  INNER_FIELDS, FieldType,
 } from '$components/field';
 
 
@@ -168,15 +167,18 @@ export class Game {
 
   sendPlayersWithNext(roomName: string, nextPlayer: number) {
     const users = this.getUsersInRoom(roomName);
+    const usersWithMover = getUserWithMover(users, nextPlayer);
 
-    this.Server.in(roomName).emit('game:players', getUserWithMover(users, nextPlayer))
+    usersWithMover
+      ? this.Server.in(roomName).emit('game:players')
+      : this.Server.in(roomName).emit('game:error')
   }
 
   sendPlayersWithCard(roomName: string, currentPlayer: number) {
     const users = this.getUsersInRoom(roomName);
     let moveCancel = false;
 
-    const newUsers = users.map(user => {
+    const newUsers = users.map(user=> {
       if (user.priority === currentPlayer) {
         const { type, cell } = user.position!;
 
@@ -268,8 +270,11 @@ export class Game {
   }
 }
 
-function getUserWithMover(users: Partial<User>[], currentPlayer) {
+function getUserWithMover(users: Partial<User>[], currentPlayer, deep: number = 3) {
   const activeUsers = users.filter(user => !user.gameover);
+  if (!deep) {
+    return null;
+  }
 
   if (activeUsers.length === 0) {
     return users;
@@ -287,7 +292,10 @@ function getUserWithMover(users: Partial<User>[], currentPlayer) {
   let isCurrentMoverSet = false;
   let nextPlayer = currentPlayer % usersCount;
 
-  const newUsers = users.map(user => {
+  const newUsers = users.map((user, i) => {
+    if (user.priority !== i && user.setPriority) {
+      user.setPriority(i);
+    }
     if (user.priority === nextPlayer) {
       if (user.gameover) {
         nextPlayer = nextPlayer + 1;
@@ -315,5 +323,5 @@ function getUserWithMover(users: Partial<User>[], currentPlayer) {
     return newUsers;
   }
 
-  return getUserWithMover(newUsers, nextPlayer)
+  return getUserWithMover(newUsers, nextPlayer, deep - 1)
 }
