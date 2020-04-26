@@ -170,7 +170,7 @@ export class Game {
     const usersWithMover = getUserWithMover(users, nextPlayer);
 
     usersWithMover
-      ? this.Server.in(roomName).emit('game:players')
+      ? this.Server.in(roomName).emit('game:players', usersWithMover)
       : this.Server.in(roomName).emit('game:error')
   }
 
