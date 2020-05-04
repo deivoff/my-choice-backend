@@ -1,6 +1,6 @@
 import SocketIO from 'socket.io';
 import * as http from 'http';
-import { PositionType, User } from '$components/user';
+import { PositionType, Player, createUser, Moderator } from '$components/user';
 import { RoomInstance } from '$components/room';
 import { Server, Socket } from '$utils/index';
 import {
@@ -23,15 +23,15 @@ type Message = {
 }
 
 export class Game {
-  private Server: Server<Room, User>;
+  private Server: Server<Room, Player | Moderator>;
 
   constructor(port?: number | http.Server) {
     this.Server = SocketIO(port);
     this.Server.emit('connect:error');
 
-    this.Server.on('connection', (socket: Socket<User>) => {
+    this.Server.on('connection', (socket: Socket<Player | Moderator>) => {
       socket.on('login', ({ username }) => {
-        socket.user = new User(username);
+        socket.user = createUser(username);
 
         socket.emit('rooms', {
           rooms: this.getRooms(),
@@ -56,7 +56,7 @@ export class Game {
 
         socket.on('room:leave', () => {
           const room = socket.user!.getCurrentRoom();
-          const userIds = this.getUsersInRoom(room);
+          const userIds = this.getPlayersInRoom(room);
 
           socket.leave(room);
           if (userIds.length) {
@@ -67,52 +67,9 @@ export class Game {
           this.sendRooms();
         });
 
-        socket.on('game:start', () => {
-          const room = socket.user!.getCurrentRoom();
-
-          this.gameStart(room);
-        });
-
-        socket.on('game:dream', dreamId => {
-          const room = socket.user!.getCurrentRoom();
-          socket.user!.setDream(dreamId);
-
-          this.sendPlayersWithDream(room);
-        });
-
-        socket.on('game:move', (move: number) => {
-          const room = socket.user!.getCurrentRoom();
-          socket.user!.removeCurrentMove();
-          socket.user!.setPosition(move);
-
-          this.sendPlayersWithCard(room, socket.user!.priority!);
-        });
-
-        socket.on('game:choice', (choice: Choice) => {
-          const room = socket.user!.getCurrentRoom();
-
-          const isFieldChanged = socket.user!.updateAfterChoice(choice);
-
-          if (OPTION_CHOICES.includes(choice.type)) {
-            socket.in(room).emit('game:user-choice', `${choice['choiceId']}`);
-          }
-          if (socket.user!.winner) {
-            setTimeout(() => {
-              this.Server.in(room).emit('game:players', this.getUsersInRoom(room))
-            }, 1000);
-          } else if (isFieldChanged) {
-            this.sendPlayersWithCard(room, socket.user!.priority!);
-          } else {
-            this.sendPlayersWithNext(room, socket.user!.priority! + 1);
-          }
-        });
-
-        socket.on('game:remove-dark', (key: ResourceType) => {
-          const room = socket.user!.getCurrentRoom();
-          socket.user!.removeDark(key);
-
-          this.sendPlayers(room);
-        })
+        if (socket.user instanceof Player) {
+          this.subscribeSocketAsPlayer(socket as Socket<Player>);
+        }
       });
 
       socket.on('chat:room-message', (message: Message) => {
@@ -130,7 +87,7 @@ export class Game {
         if (socket.user) {
           const userRoom = socket.user.getCurrentRoom();
           socket.user.disconnect();
-          if (userRoom) {
+          if (userRoom && socket.user instanceof Player) {
             this.sendPlayers(userRoom);
 
             if (socket.user.currentMove) {
@@ -146,6 +103,55 @@ export class Game {
     });
   }
 
+  subscribeSocketAsPlayer(socket: Socket<Player>) {
+    socket.on('game:start', () => {
+      const room = socket.user!.getCurrentRoom();
+
+      this.gameStart(room);
+    });
+
+    socket.on('game:dream', dreamId => {
+      const room = socket.user!.getCurrentRoom();
+      socket.user!.setDream(dreamId);
+
+      this.sendPlayersWithDream(room);
+    });
+
+    socket.on('game:move', (move: number) => {
+      const room = socket.user!.getCurrentRoom();
+      socket.user!.removeCurrentMove();
+      socket.user!.setPosition(move);
+
+      this.sendPlayersWithCard(room, socket.user!.priority!);
+    });
+
+    socket.on('game:choice', (choice: Choice) => {
+      const room = socket.user!.getCurrentRoom();
+
+      const isFieldChanged = socket.user!.updateAfterChoice(choice);
+
+      if (OPTION_CHOICES.includes(choice.type)) {
+        socket.in(room).emit('game:user-choice', `${choice['choiceId']}`);
+      }
+      if (socket.user!.winner) {
+        setTimeout(() => {
+          this.Server.in(room).emit('game:players', this.getPlayersInRoom(room))
+        }, 1000);
+      } else if (isFieldChanged) {
+        this.sendPlayersWithCard(room, socket.user!.priority!);
+      } else {
+        this.sendPlayersWithNext(room, socket.user!.priority! + 1);
+      }
+    });
+
+    socket.on('game:remove-dark', (key: ResourceType) => {
+      const room = socket.user!.getCurrentRoom();
+      socket.user!.removeDark(key);
+
+      this.sendPlayers(room);
+    })
+  }
+
   sendRooms() {
     this.Server.emit('rooms', {
       rooms: this.getRooms(),
@@ -153,11 +159,11 @@ export class Game {
   }
 
   sendPlayers(roomName: string) {
-    this.Server.in(roomName).emit('game:players', this.getUsersInRoom(roomName))
+    this.Server.in(roomName).emit('game:players', this.getPlayersInRoom(roomName))
   }
 
   sendPlayersWithDream(roomName: string) {
-    const users = this.getUsersInRoom(roomName);
+    const users = this.getPlayersInRoom(roomName);
     const dreamsExist = users.every(user => user.dream);
 
     this.Server.in(roomName).emit('game:players', users.map(user => {
@@ -172,7 +178,7 @@ export class Game {
   }
 
   sendPlayersWithNext(roomName: string, nextPlayer: number) {
-    const users = this.getUsersInRoom(roomName);
+    const users = this.getPlayersInRoom(roomName);
     const usersWithMover = getUserWithMover(users, nextPlayer);
 
     usersWithMover
@@ -181,7 +187,7 @@ export class Game {
   }
 
   sendPlayersWithCard(roomName: string, currentPlayer: number) {
-    const users = this.getUsersInRoom(roomName);
+    const users = this.getPlayersInRoom(roomName);
     let moveCancel = false;
 
     const newUsers = users.map(user=> {
@@ -243,7 +249,7 @@ export class Game {
   }
 
   gameStart(roomName: string) {
-    const users = this.getUsersInRoom(roomName);
+    const users = this.getPlayersInRoom(roomName);
 
     this.Server.sockets.adapter.rooms[roomName].room?.gameStart();
     this.sendRooms();
@@ -257,26 +263,27 @@ export class Game {
     }))
   }
 
-  getUsersInRoom(roomName: string) {
+  getPlayersInRoom(roomName: string) {
     const userIds = this.Server.sockets.adapter.rooms[roomName]?.sockets;
 
     if (userIds) {
-      const users = Object.keys(userIds).map(userId => {
-        return this.Server.sockets.connected[userId].user!;
-      });
+      const players: Player[] = Object
+        .keys(userIds)
+        .map(userId => this.Server.sockets.connected[userId].user!)
+        .filter(user => user instanceof Player) as Player[];
 
-      if (!users.some(user => user.admin)) {
-        users[0].admin = true;
+      if (!players.some(user => user.admin)) {
+        players[0].admin = true;
       }
 
-      return users;
+      return players;
     }
 
     return [];
   }
 }
 
-function getUserWithMover(users: Partial<User>[], currentPlayer, deep: number = 3) {
+function getUserWithMover(users: Partial<Player>[], currentPlayer, deep: number = 3) {
   const activeUsers = users.filter(user => !user.gameover);
   if (!deep) {
     return null;
