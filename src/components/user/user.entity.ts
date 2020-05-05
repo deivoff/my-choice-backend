@@ -1,6 +1,5 @@
 export class User {
   public username!: string;
-  public canCreate: boolean = false;
   public roomName: string = '';
 
   constructor(username) {
