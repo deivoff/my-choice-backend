@@ -271,7 +271,7 @@ export class Game {
         .map(userId => this.Server.sockets.connected[userId].user!)
         .filter(user => user instanceof Player) as Player[];
 
-      if (!players.some(user => user.admin)) {
+      if (players.length && !players.some(user => user.admin)) {
         players[0].admin = true;
       }
 
