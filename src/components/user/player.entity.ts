@@ -1,7 +1,8 @@
 import {
   Action,
   Choice,
-  DREAM_FIELDS, FIELD_DICTIONARY,
+  DREAM_FIELDS,
+  FIELD_DICTIONARY,
   FIELDS,
   FieldType,
   FROM_INNER_TO_OUTER,
@@ -19,6 +20,11 @@ export enum PlayerStatus {
   gameover,
   hold,
   winner,
+}
+
+export type Share = {
+  exchange: ResourceType,
+  for: ResourceType,
 }
 
 export enum PositionType {
@@ -56,26 +62,40 @@ export class Player extends User {
     this.currentMove = false;
   }
 
-  removeDark(changeResource: ResourceType) {
-    this.resources.dark = this.resources!.dark! - 1;
+  share(share: Share) {
+    if (share.exchange === ResourceType.dark) {
+      this.resources.dark = this.resources!.dark! - 1;
 
-    if (changeResource === ResourceType.money) {
-      this.resources.money = this.resources!.money! - 50;
+      if (share.for === ResourceType.money) {
+        this.resources.money = this.resources!.money! - 50;
+      }
+
+      if (share.for === ResourceType.white) {
+        this.resources.white = this.resources!.white! - 5;
+      }
+
+      if (share.for === ResourceType.lives) {
+        this.resources.lives = this.resources!.lives! - 5;
+      }
+
+      gamelog({
+        user: this.username,
+        room: this.roomName,
+        message: `${this.username} удалил одну СК(Ч) в обмен на ${share.for}.`
+      });
     }
 
-    if (changeResource === ResourceType.white) {
-      this.resources.white = this.resources!.white! - 5;
+    if (share.exchange === ResourceType.lives) {
+      this.resources.lives = this.resources!.lives! + 1;
+      this.resources.money = this.resources!.money! - 10;
+
+      gamelog({
+        user: this.username,
+        room: this.roomName,
+        message: `${this.username} обменял 10 монет в обмен на 1 жизнь.`
+      });
     }
 
-    if (changeResource === ResourceType.lives) {
-      this.resources.lives = this.resources!.lives! - 5;
-    }
-
-    gamelog({
-      user: this.username,
-      room: this.roomName,
-      message: `${this.username} удалил одну СК(Ч) в обмен на ${changeResource}.`
-    });
   }
 
   win() {

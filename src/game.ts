@@ -1,6 +1,6 @@
 import SocketIO from 'socket.io';
 import * as http from 'http';
-import { PositionType, Player, createUser, Moderator } from '$components/user';
+import { PositionType, Player, createUser, Moderator, Share } from '$components/user';
 import { RoomInstance } from '$components/room';
 import { Server, Socket } from '$utils/index';
 import {
@@ -144,9 +144,9 @@ export class Game {
       }
     });
 
-    socket.on('game:remove-dark', (key: ResourceType) => {
+    socket.on('game:share', (share: Share) => {
       const room = socket.user!.getCurrentRoom();
-      socket.user!.removeDark(key);
+      socket.user!.share(share);
 
       this.sendPlayers(room);
     })
