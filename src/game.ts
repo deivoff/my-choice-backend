@@ -8,7 +8,6 @@ import {
   InnerFieldDictionary,
   OuterFieldDictionary,
   OPTION_CHOICES,
-  ResourceType,
 } from '$components/field';
 
 
@@ -32,7 +31,7 @@ export class Game {
     this.Server.on('connection', (socket: Socket<Player | Moderator>) => {
       socket.on('login', ({ username }) => {
         socket.user = createUser(username);
-
+        socket.emit('login', socket.user);
         socket.emit('rooms', {
           rooms: this.getRooms(),
         });
