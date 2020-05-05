@@ -1,8 +1,8 @@
 import { Moderator } from './moderator.entity';
-import { Player } from 'src/components/user/player.entity';
+import { Player } from './player.entity';
 
 export * from './moderator.entity';
-export * from 'src/components/user/player.entity';
+export * from './player.entity';
 
 const moderators = {
   'a?hQa&uu29PCO#pE': 'Модератор#1',
