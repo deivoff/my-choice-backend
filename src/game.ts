@@ -101,7 +101,7 @@ export class Game {
         })
       });
     } catch (e) {
-      this.Server.emit('connection:error');
+      this.Server.emit('game:error');
     }
   }
 
