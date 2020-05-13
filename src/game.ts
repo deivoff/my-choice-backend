@@ -26,80 +26,83 @@ export class Game {
 
   constructor(port?: number | http.Server) {
     this.Server = SocketIO(port);
-    this.Server.emit('connect:error');
 
-    this.Server.on('connection', (socket: Socket<Player | Moderator>) => {
-      socket.on('login', ({ username }) => {
-        socket.user = createUser(username);
-        socket.emit('login', socket.user);
-        socket.emit('rooms', {
-          rooms: this.getRooms(),
-        });
+    try {
+      this.Server.on('connection', (socket: Socket<Player | Moderator>) => {
+        socket.on('login', ({ username }) => {
+          socket.user = createUser(username);
+          socket.emit('login', socket.user);
+          socket.emit('rooms', {
+            rooms: this.getRooms(),
+          });
 
-        socket.on('room:create', ({ roomName }) => {
-          socket.user!.createRoom(roomName);
-          socket.join(roomName);
+          socket.on('room:create', ({ roomName }) => {
+            socket.user!.createRoom(roomName);
+            socket.join(roomName);
 
-          this.Server.sockets.adapter.rooms[roomName].room = new RoomInstance(roomName);
-          this.sendRooms();
-        });
+            this.Server.sockets.adapter.rooms[roomName].room = new RoomInstance(roomName);
+            this.sendRooms();
+          });
 
-        socket.on('room:choice', ({ roomName }) => {
-          socket.user!.choiceRoom(roomName);
+          socket.on('room:choice', ({ roomName }) => {
+            socket.user!.choiceRoom(roomName);
 
-          socket.join(roomName);
+            socket.join(roomName);
 
-          this.sendPlayers(roomName);
-          this.sendRooms();
-        });
+            this.sendPlayers(roomName);
+            this.sendRooms();
+          });
 
-        socket.on('room:leave', () => {
-          const room = socket.user!.getCurrentRoom();
-          const userIds = this.getPlayersInRoom(room);
+          socket.on('room:leave', () => {
+            const room = socket.user!.getCurrentRoom();
+            const userIds = this.getPlayersInRoom(room);
 
-          socket.leave(room);
-          if (userIds.length) {
-            this.sendPlayers(room);
+            socket.leave(room);
+            if (userIds.length) {
+              this.sendPlayers(room);
+            }
+
+            socket.user!.leaveRoom();
+            this.sendRooms();
+          });
+
+          if (socket.user instanceof Player) {
+            this.subscribeSocketAsPlayer(socket as Socket<Player>);
           }
-
-          socket.user!.leaveRoom();
-          this.sendRooms();
         });
 
-        if (socket.user instanceof Player) {
-          this.subscribeSocketAsPlayer(socket as Socket<Player>);
-        }
-      });
+        socket.on('chat:room-message', (message: Message) => {
+          const userRoom = socket.user!.getCurrentRoom();
+          if (userRoom) {
+            this.Server.in(userRoom).emit('chat:room-message', message)
+          }
+        });
 
-      socket.on('chat:room-message', (message: Message) => {
-        const userRoom = socket.user!.getCurrentRoom();
-        if (userRoom) {
-          this.Server.in(userRoom).emit('chat:room-message', message)
-        }
-      });
+        socket.on('chat:message', (message: Message) => {
+          this.Server.emit('chat:message', message)
+        });
 
-      socket.on('chat:message', (message: Message) => {
-        this.Server.emit('chat:message', message)
-      });
+        socket.on('disconnect', () => {
+          if (socket.user) {
+            const userRoom = socket.user.getCurrentRoom();
+            socket.user.disconnect();
+            if (userRoom && socket.user instanceof Player) {
+              this.sendPlayers(userRoom);
 
-      socket.on('disconnect', () => {
-        if (socket.user) {
-          const userRoom = socket.user.getCurrentRoom();
-          socket.user.disconnect();
-          if (userRoom && socket.user instanceof Player) {
-            this.sendPlayers(userRoom);
+              if (socket.user.currentMove) {
+                socket.user.removeCurrentMove();
 
-            if (socket.user.currentMove) {
-              socket.user.removeCurrentMove();
-
-              this.sendPlayersWithNext(userRoom, socket.user!.priority! + 1);
+                this.sendPlayersWithNext(userRoom, socket.user!.priority! + 1);
+              }
             }
           }
-        }
 
-        this.sendRooms();
-      })
-    });
+          this.sendRooms();
+        })
+      });
+    } catch (e) {
+      this.Server.emit('connection:error');
+    }
   }
 
   subscribeSocketAsPlayer(socket: Socket<Player>) {
