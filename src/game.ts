@@ -102,6 +102,7 @@ export class Game {
       });
     } catch (e) {
       this.Server.emit('game:error');
+      throw e;
     }
   }
 
