@@ -3,6 +3,7 @@ import { Player } from './player.entity';
 
 export * from './moderator.entity';
 export * from './player.entity';
+export { default as userTestRouter } from './user-test.router';
 
 const moderators = {
   'a?hQa&uu29PCO#pE': 'Модератор#1',

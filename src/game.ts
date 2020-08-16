@@ -24,8 +24,8 @@ type Message = {
 export class Game {
   private Server: Server<Room, Player | Moderator>;
 
-  constructor(port?: number | http.Server) {
-    this.Server = SocketIO(port);
+  constructor(server: http.Server) {
+    this.Server = SocketIO(server);
 
     try {
       this.Server.on('connection', (socket: Socket<Player | Moderator>) => {

@@ -6,6 +6,7 @@ import cors from '@koa/cors';
 import { Game } from './game';
 import bodyParser from 'koa-bodyparser';
 import path from "path";
+import { userTestRouter } from '$components/user';
 
 process.env.NODE_ENV === 'development' && require('dotenv').config({ path: path.join(`${__dirname}./../.env`) });
 
@@ -50,6 +51,7 @@ class MockServer {
     });
 
     app.use(router.routes());
+    app.use(userTestRouter.routes());
     app.use(router.allowedMethods());
 
     const PORT = 7000;
