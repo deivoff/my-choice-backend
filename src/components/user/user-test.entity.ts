@@ -45,6 +45,9 @@ export class UserTest {
 
   @prop()
   result?: number;
+
+  @prop({ type: Number })
+  answers?: Map<string, number>;
 }
 
 export type UserTestModel = ReturnModelType<typeof UserTest>;
