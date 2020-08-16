@@ -1,0 +1,1086 @@
+[
+  {
+    "id": "1",
+    "video": "https://www.youtube.com/watch?v=OJHEVMMLQtw&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Согласно Конституции, Совет Федерации состоит из:",
+    "values": [
+      {
+        "value": 1,
+        "label": "сенаторов Российской Федерации"
+      },
+      {
+        "value": 2,
+        "label": "членов Совета Федерации"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "2",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Согласно Конституции, исполнительную власть Российской Федерации осуществляет:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Президент Российской Федерации"
+      },
+      {
+        "value": 2,
+        "label": "Правительство Российской Федерации"
+      },
+      {
+        "value": 3,
+        "label": "Правительство Российской Федерации под общим руководством Президента Российской Федерации"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "3",
+    "video": "https://www.youtube.com/watch?v=Y7PXDZ2B0II&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Согласно Конституции, Председатель Правительства Российской Федерации несет персональную ответственность за осуществление возложенных на Правительство Российской Федерации полномочий перед:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Государственной Думой"
+      },
+      {
+        "value": 2,
+        "label": "Президентом Российской Федерации"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "4",
+    "video": "https://www.youtube.com/watch?v=tDvyRyR_QM0&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Какому компоненту политической системы свойственно вести борьбу за политическую власть:",
+    "values": [
+      {
+        "value": 1,
+        "label": "государству"
+      },
+      {
+        "value": 2,
+        "label": "политическим партиям"
+      },
+      {
+        "value": 3,
+        "label": "общественным организациям"
+      },
+      {
+        "value": 4,
+        "label": "средствам массовой информации"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "5",
+    "video": "https://www.youtube.com/watch?v=0G2RvbNr9dg&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Назовите основные функции Федерального Собрания Российской Федерации:",
+    "values": [
+      {
+        "value": 1,
+        "label": "исполнительная, представительная, контрольная"
+      },
+      {
+        "value": 2,
+        "label": "законодательная, распорядительная, надзорная"
+      },
+      {
+        "value": 3,
+        "label": "представительная, законодательная"
+      },
+      {
+        "value": 4,
+        "label": "судебная"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "6",
+    "video": "https://www.youtube.com/watch?v=xo_OX19Yx-w&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Государственная Дума Российской Федерации состоит из:",
+    "values": [
+      {
+        "value": 1,
+        "label": "350 депутатов"
+      },
+      {
+        "value": 2,
+        "label": "200 депутатов"
+      },
+      {
+        "value": 3,
+        "label": "450 депутатов"
+      },
+      {
+        "value": 4,
+        "label": "500 депутатов"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "7",
+    "video": "https://www.youtube.com/watch?v=uRVudZEUoDE&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Что согласно Конституции является высшей ценностью в РФ?",
+    "values": [
+      {
+        "value": 1,
+        "label": "Конституционные нормы"
+      },
+      {
+        "value": 2,
+        "label": "Человек, его права и свобод"
+      },
+      {
+        "value": 3,
+        "label": "Исполнительная власть"
+      },
+      {
+        "value": 4,
+        "label": "Семья"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "8",
+    "video": "https://www.youtube.com/watch?v=8_Q2D7eQpzU&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Общенациональный орган государственной власти, осуществляющий законодательные функции - это:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Федеральное собрание"
+      },
+      {
+        "value": 2,
+        "label": "Совет Федерации"
+      },
+      {
+        "value": 3,
+        "label": "Государственная Дума"
+      },
+      {
+        "value": 4,
+        "label": "Конституционный Суд"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "9",
+    "video": "https://www.youtube.com/watch?v=YuWLo23P-T4&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Когда была принята Конституция РФ?",
+    "values": [
+      {
+        "value": 1,
+        "label": "11 июля 1992 года"
+      },
+      {
+        "value": 2,
+        "label": "7 ноября 1993 года"
+      },
+      {
+        "value": 3,
+        "label": "12 декабря 1993 года"
+      },
+      {
+        "value": 4,
+        "label": "1 января 1994 года"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "10",
+    "video": "https://www.youtube.com/watch?v=jC9VvvjuoHM&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&",
+    "question": "Российская Федерация существует в форме:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Парламентарной республики"
+      },
+      {
+        "value": 2,
+        "label": "Полупарламентарной республики"
+      },
+      {
+        "value": 3,
+        "label": "Президентской республики"
+      },
+      {
+        "value": 4,
+        "label": "Парламентарной монархии"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "11",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Правительство возглавляет:",
+    "values": [
+      {
+        "value": 1,
+        "label": "ППрезидент РФ"
+      },
+      {
+        "value": 2,
+        "label": "Совет Федерации"
+      },
+      {
+        "value": 3,
+        "label": "Председатель Правительства"
+      },
+      {
+        "value": 4,
+        "label": "Президент РФ и Председатель Правительства"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "12",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Судебная власть в РФ осуществляется посредством судопроизводства:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Конституционного"
+      },
+      {
+        "value": 2,
+        "label": "Административного"
+      },
+      {
+        "value": 3,
+        "label": "Гражданского"
+      },
+      {
+        "value": 4,
+        "label": "Всех вышеперечисленных"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "13",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "К числу приоритетных функций государства относится:",
+    "values": [
+      {
+        "value": 1,
+        "label": "экономическая"
+      },
+      {
+        "value": 2,
+        "label": "охрана прав и свобод граждан"
+      },
+      {
+        "value": 3,
+        "label": "экологическая"
+      },
+      {
+        "value": 4,
+        "label": "международная"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "14",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Основные права и свободы человека:",
+    "values": [
+      {
+        "value": 1,
+        "label": "неотчуждаемы и принадлежат каждому от рождени"
+      },
+      {
+        "value": 2,
+        "label": "предоставляются государством"
+      },
+      {
+        "value": 3,
+        "label": "связаны с обладанием гражданства"
+      },
+      {
+        "value": 4,
+        "label": "все перечисленное"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "15",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Права и свободы человека — это:",
+    "values": [
+      {
+        "value": 1,
+        "label": "мера его возможного поведения"
+      },
+      {
+        "value": 2,
+        "label": "мера должного поведения"
+      },
+      {
+        "value": 3,
+        "label": "те его социальные возможности, которые гарантируются государством"
+      },
+      {
+        "value": 4,
+        "label": "все перечисленное"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "16",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Верны ли следующие суждения о гражданстве РФ? \n А. Приобретение гражданином РФ другого гражданства влечёт за собой прекращение гражданства РФ \n Б. Заключение брака между гражданином РФ и лицом, не имеющим гражданства, влечёт за собой изменение гражданства указанных лиц",
+    "values": [
+      {
+        "value": 1,
+        "label": "верно только А"
+      },
+      {
+        "value": 2,
+        "label": "верно только Б"
+      },
+      {
+        "value": 3,
+        "label": "оба верны"
+      },
+      {
+        "value": 4,
+        "label": "оба неверны"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "17",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Добровольцы – это… (продолжите определение) граждане с доброй волей",
+    "values": [
+      {
+        "value": 1,
+        "label": "граждане, осуществляющие благотворительную деятельность в форме безвозмездного труда"
+      },
+      {
+        "value": 2,
+        "label": "городские сумасшедшие"
+      },
+      {
+        "value": 3,
+        "label": "граждане, добровольно идущие на косметические опыты"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "18",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Можно ли поставить знак равенства между словами волонтер и доброволец?",
+    "values": [
+      {
+        "value": 1,
+        "label": "да"
+      },
+      {
+        "value": 2,
+        "label": "нет"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "19",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Какие организации относятся к некоммерческим?",
+    "values": [
+      {
+        "value": 1,
+        "label": "муниципальное лечебное учреждение"
+      },
+      {
+        "value": 2,
+        "label": "муниципальное унитарное предприятие"
+      },
+      {
+        "value": 3,
+        "label": "Пенсионный фонд РФ"
+      },
+      {
+        "value": 4,
+        "label": "благотворительный фонд"
+      },
+      {
+        "value": 5,
+        "label": "малое предприятие"
+      },
+      {
+        "value": 6,
+        "label": "адвокатская контора"
+      },
+      {
+        "value": 7,
+        "label": "производственный кооператив"
+      },
+      {
+        "value": 8,
+        "label": "областной драматический театр"
+      },
+      {
+        "value": 9,
+        "label": "учреждение исполнения наказаний"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "20",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Все НКО должны иметь Устав",
+    "values": [
+      {
+        "value": 1,
+        "label": "да"
+      },
+      {
+        "value": 2,
+        "label": "нет"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "21",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Благотворительная организация не вправе расходовать свои средства и использовать свое имущество для поддержки политических партий, движений, групп и компаний",
+    "values": [
+      {
+        "value": 1,
+        "label": "да"
+      },
+      {
+        "value": 2,
+        "label": "нет"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "22",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, в Российской Федерации гарантируются защита достоинства граждан и уважение человека труда, обеспечиваются сбалансированность прав и обязанностей гражданина, социальное партнерство, экономическая, политическая и социальная:",
+    "values": [
+      {
+        "value": 1,
+        "label": "солидарность"
+      },
+      {
+        "value": 2,
+        "label": "справедливость"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "23",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, в Совет Федерации, помимо двух представителей от каждого субъекта Российской Федерации (по одному от законодательного (представительного) и исполнительного органов государственной власти) входят:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Президент Российской Федерации, прекративший исполнение своих полномочий в связи с истечением срока его пребывания в должности или досрочно в случае его отставки, — пожизненно"
+      },
+      {
+        "value": 2,
+        "label": "не более 30 представителей Российской Федерации, назначаемых Президентом Российской Федерации, из которых не более семи могут быть назначены пожизненно"
+      },
+      {
+        "value": 3,
+        "label": "все ответы верные"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "24",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Социальный проект – это…",
+    "values": [
+      {
+        "value": 1,
+        "label": "план мероприятий"
+      },
+      {
+        "value": 2,
+        "label": "программа действий, направленная на решение социальных проблем"
+      },
+      {
+        "value": 3,
+        "label": "выборы в муниципальные органы власти"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "25",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Может ли некоммерческая организация заниматься предпринимательской деятельностью вместо основной деятельности?",
+    "values": [
+      {
+        "value": 1,
+        "label": "да"
+      },
+      {
+        "value": 2,
+        "label": "нет"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "26",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Для создания общественного объединения число физических лиц должно быть",
+    "values": [
+      {
+        "value": 1,
+        "label": "один человек"
+      },
+      {
+        "value": 2,
+        "label": "три человека"
+      },
+      {
+        "value": 3,
+        "label": "пятнадцать человек"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "27",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Что является особенностью формирования и использования финансов некоммерческой организации?",
+    "values": [
+      {
+        "value": 1,
+        "label": "использование добровольных взносов и пожертвований как основного источника доходов"
+      },
+      {
+        "value": 2,
+        "label": "осуществление предпринимательской деятельности для цели, ради которой она была создана"
+      },
+      {
+        "value": 3,
+        "label": "достижение максимальной прибыли за счет производственно-финансовой деятельности"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "28",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, \"Российская Федерация, объединенная тысячелетней историей, сохраняя память предков, передавших нам идеалы и веру в Бога, а также преемственность в развитии Российского государства, признает исторически сложившееся государственное единство\". Означает ли внесение в Конституцию выражения \"веру в Бога\" отказ от светского характера государства?",
+    "values": [
+      {
+        "value": 1,
+        "label": "да"
+      },
+      {
+        "value": 2,
+        "label": "нет"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "29",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, государственным языком Российской Федерации на всей ее территории является русский язык как язык:",
+    "values": [
+      {
+        "value": 1,
+        "label": "многонационального российского народа"
+      },
+      {
+        "value": 2,
+        "label": "государствообразующего народа, входящего в многонациональный союз равноправных народов Российской Федерации"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "30",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, культура в Российской Федерации:",
+    "values": [
+      {
+        "value": 1,
+        "label": "является уникальным наследием ее многонационального народа"
+      },
+      {
+        "value": 2,
+        "label": "поддерживается и охраняется государством"
+      },
+      {
+        "value": 3,
+        "label": "все ответы верные"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "31",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции Российской Федерации, местом постоянного пребывания отдельных федеральных органов государственной власти может быть:",
+    "values": [
+      {
+        "value": 1,
+        "label": "только город Москва"
+      },
+      {
+        "value": 2,
+        "label": "города Москва и Санкт-Петербург"
+      },
+      {
+        "value": 3,
+        "label": "центры федеральных округов"
+      },
+      {
+        "value": 4,
+        "label": "другой город, определенный федеральным конституционным законом"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "32",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции Российской Федерации, индексация пенсий осуществляется:",
+    "values": [
+      {
+        "value": 1,
+        "label": "не реже одного раза в год"
+      },
+      {
+        "value": 2,
+        "label": "не реже одного раза в три года"
+      },
+      {
+        "value": 3,
+        "label": "не реже одного раза в пять лет"
+      },
+      {
+        "value": 4,
+        "label": "ежеквартально"
+      },
+      {
+        "value": 5,
+        "label": "ежемесячно"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "33",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, Российская Федерация принимает меры по:",
+    "values": [
+      {
+        "value": 1,
+        "label": "поддержанию и укреплению международного мира и безопасности"
+      },
+      {
+        "value": 2,
+        "label": "обеспечению мирного сосуществования государств и народов"
+      },
+      {
+        "value": 3,
+        "label": "недопущению вмешательства во внутренние дела государства"
+      },
+      {
+        "value": 4,
+        "label": "все ответы верные"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "34",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, Президент Российской Федерации обеспечивает согласованное взаимодействие и функционирование:",
+    "values": [
+      {
+        "value": 1,
+        "label": "органов государственной власти"
+      },
+      {
+        "value": 2,
+        "label": "органов, входящих в единую систему публичной власти"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "35",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, Президент Российской Федерации",
+    "values": [
+      {
+        "value": 1,
+        "label": "поддерживает гражданский мир и согласие в стране"
+      },
+      {
+        "value": 2,
+        "label": "обеспечивает приоритет традиционных ценностей"
+      },
+      {
+        "value": 3,
+        "label": "обеспечивает приоритет общечеловеческих ценностей"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "36",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, в целях согласованного функционирования и взаимодействия органов публичной власти Президент Российской Федерации формирует:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Совет Безопасности Российской Федерации"
+      },
+      {
+        "value": 2,
+        "label": "Государственный Совет Российской Федерации"
+      },
+      {
+        "value": 3,
+        "label": "Администрацию Президента Российской Федерации"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "37",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции Российской Федерации, в целях содействия главе государства в реализации его полномочий по вопросам обеспечения национальных интересов и безопасности личности, общества и государства, а также поддержания гражданского мира и согласия в стране, охраны суверенитета Российской Федерации, ее независимости и государственной целостности, предотвращения внутренних и внешних угроз, Президент Российской Федерации формирует:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Совет Безопасности Российской Федерации"
+      },
+      {
+        "value": 2,
+        "label": "Государственный Совет Российской Федерации"
+      },
+      {
+        "value": 3,
+        "label": "Администрацию Президента Российской Федерации"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "38",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Согласно Конституции, Президент Российской Федерации, прекративший исполнение полномочий в связи с истечением срока его пребывания в должности либо досрочно в случае его отставки или стойкой неспособности по состоянию здоровья осуществлять принадлежащие ему полномочия, обладает:",
+    "values": [
+      {
+        "value": 1,
+        "label": "неприкосновенностью"
+      },
+      {
+        "value": 2,
+        "label": "правом вето"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "39",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Федеральные законы в Государственной Думе РФ принимаются путем голосования:",
+    "values": [
+      {
+        "value": 1,
+        "label": "простым большинством от числа депутатов"
+      },
+      {
+        "value": 2,
+        "label": "квалифицированным большинством от числа присутствующих на заседании"
+      },
+      {
+        "value": 3,
+        "label": "тремя четвертями голосов присутствующих на заседании депутатов"
+      },
+      {
+        "value": 4,
+        "label": "двумя третями голосов присутствующих на заседании депутатов"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "40",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "В состав Совета Федерации Федерального Собрания Российской Федерации входят:",
+    "values": [
+      {
+        "value": 1,
+        "label": "главы исполнительной и законодательной власти субъектов федерации"
+      },
+      {
+        "value": 2,
+        "label": "руководители региональных политических партий и общественно-политических организаций"
+      },
+      {
+        "value": 3,
+        "label": "представители от законодательной и исполнительной власти субъектов федерации"
+      },
+      {
+        "value": 4,
+        "label": "руководители центральных исполнительных органов"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "41",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Какие органы осуществляют государственную власть в РФ",
+    "values": [
+      {
+        "value": 1,
+        "label": "Федеральное Собрание"
+      },
+      {
+        "value": 2,
+        "label": "Президент РФ"
+      },
+      {
+        "value": 3,
+        "label": "Оба верно"
+      },
+      {
+        "value": 4,
+        "label": "Оба неверно"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "42",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Уполномоченный по правам человека в РФ назначается на должность и освобождается от неё:",
+    "values": [
+      {
+        "value": 1,
+        "label": "Государственной Думой"
+      },
+      {
+        "value": 2,
+        "label": "Председателем правительства"
+      },
+      {
+        "value": 3,
+        "label": "Советом Федерации"
+      },
+      {
+        "value": 4,
+        "label": "Конституционным судом"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "43",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "В какую из нижеперечисленных организаций Россия не входит",
+    "values": [
+      {
+        "value": 1,
+        "label": "БРИКС"
+      },
+      {
+        "value": 2,
+        "label": "НАТО"
+      },
+      {
+        "value": 3,
+        "label": "ООН"
+      },
+      {
+        "value": 4,
+        "label": "ОБСЕ"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "44",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Могут ли проходить военную службу иностранные граждане в Российской Федерации:",
+    "values": [
+      {
+        "value": 1,
+        "label": "могут"
+      },
+      {
+        "value": 2,
+        "label": "не могут"
+      },
+      {
+        "value": 3,
+        "label": "могут только альтернативную службу"
+      },
+      {
+        "value": 4,
+        "label": "могут только при поступлении в Высшее военное учебное заведение"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "45",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Что включает в себя территория Российской Федерации?",
+    "values": [
+      {
+        "value": 1,
+        "label": "территории субъектов Российской Федерации"
+      },
+      {
+        "value": 2,
+        "label": "внутренние воды и территориальное море"
+      },
+      {
+        "value": 3,
+        "label": "воздушное пространство над территорией субъектов Российской Федерации, внутренними водами и территориальным морем"
+      },
+      {
+        "value": 4,
+        "label": "всё вышеперечисленное"
+      }
+    ],
+    "correct": 4
+  },
+  {
+    "id": "46",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "В соответствии с законодательством РФ за осуществление террористической деятельности следует:",
+    "values": [
+      {
+        "value": 1,
+        "label": "неотвратимость наказания"
+      },
+      {
+        "value": 2,
+        "label": "освободить от наказания"
+      },
+      {
+        "value": 3,
+        "label": "ограничения по военной службе"
+      },
+      {
+        "value": 4,
+        "label": "смертная казнь"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "47",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Когда в Россию пришло понятие «волонтер»?",
+    "values": [
+      {
+        "value": 1,
+        "label": "1990-е годы"
+      },
+      {
+        "value": 2,
+        "label": "2000-е годы"
+      },
+      {
+        "value": 3,
+        "label": "XIX век"
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "id": "48",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "В каком году в России благотворительность законодательно\n\nпризнана правовым видом деятельности?",
+    "values": [
+      {
+        "value": 1,
+        "label": "1997"
+      },
+      {
+        "value": 2,
+        "label": "2001"
+      },
+      {
+        "value": 3,
+        "label": "1995"
+      }
+    ],
+    "correct": 3
+  },
+  {
+    "id": "49",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Когда празднуют Международный День Добровольцев?",
+    "values": [
+      {
+        "value": 1,
+        "label": "последнее воскресенье ноября"
+      },
+      {
+        "value": 2,
+        "label": "5 декабря"
+      },
+      {
+        "value": 3,
+        "label": "29 февраля"
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "id": "50",
+    "video": "https://www.youtube.com/watch?v=CQ5gq5qO2Ls&list=PLghMPlCNpaoFcKowXO3zwlBmMeyoGyyBA&index=3",
+    "question": "Третий сектор экономики формируют организации …",
+    "values": [
+      {
+        "value": 1,
+        "label": "частные коммерческие"
+      },
+      {
+        "value": 2,
+        "label": "частные некоммерческие"
+      },
+      {
+        "value": 3,
+        "label": "муниципальные"
+      },
+      {
+        "value": 4,
+        "label": "государственные"
+      }
+    ],
+    "correct": 2
+  }
+]

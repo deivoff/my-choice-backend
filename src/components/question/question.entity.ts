@@ -22,7 +22,7 @@ class Question {
   @prop({ required: true })
   question!: string;
 
-  @prop({ required: true, _id: false })
+  @prop({ required: true, _id: false, type: Answer })
   values!: Answer[];
 
   @prop({ required: true })
