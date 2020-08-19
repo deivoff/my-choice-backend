@@ -1,5 +1,6 @@
 import Router from 'koa-router';
 import { UserTestModel } from '$components/user/user-test.entity';
+import sendMail from '$components/nodemailer';
 
 const userTestRouter = new Router();
 
@@ -33,5 +34,12 @@ userTestRouter.get('/user', async (ctx, next) => {
     ctx.app.emit('error', err, ctx);
   }
 });
+
+// userTestRouter.get('/sendmail', () => sendMail(
+//   'politreyd@bk.ru',
+//   'Второй региональный общественно-политический диктант "Я гражданин"',
+//   'Вас приветствует команда общественно-политического диктанта "Я гражданин"! Ваш уникальный код для входа в тестирование: y4n19msqp. ' +
+//   '\n Для участия в тесте перейдите по ссылке: мойвыбор72.рф'
+// ));
 
 export default userTestRouter;
