@@ -18,6 +18,7 @@
     "@typegoose/typegoose": "^7.3.2",
     "@types/uuid": "^8.3.0",
     "body-parser": "^1.19.0",
+    "canvas": "^2.6.1",
     "dotenv": "^8.2.0",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.2.1",
@@ -35,6 +36,8 @@
   },
   "devDependencies": {
     "@neutrinojs/airbnb": "9.3.0",
+    "@neutrinojs/font-loader": "^9.3.0",
+    "@neutrinojs/image-loader": "^9.3.0",
     "@neutrinojs/node": "9.3.0",
     "@types/koa-bodyparser": "^4.3.0",
     "@types/koa-logger": "^3.1.1",

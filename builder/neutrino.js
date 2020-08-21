@@ -1,6 +1,8 @@
 const path = require('path');
 const node = require('@neutrinojs/node');
 const airbnb = require('@neutrinojs/airbnb');
+const images = require('@neutrinojs/image-loader');
+const fonts = require('@neutrinojs/font-loader');
 
 const nodeExternals = require('webpack-node-externals');
 const terserPlugin = require('terser-webpack-plugin');
@@ -92,6 +94,8 @@ const nodeTypescript = neutrino => {
 
 module.exports = {
   use: [
+    images(),
+    fonts(),
     eslintTypescript,
     node({
       clean: true

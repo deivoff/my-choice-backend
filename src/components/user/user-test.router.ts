@@ -9,7 +9,8 @@ userTestRouter.get('/user', async (ctx, next) => {
 
   if (!id) {
     ctx.status = 400;
-    ctx.body = 'Bad request'
+    ctx.body = 'Bad request';
+    return next();
   }
 
   try {

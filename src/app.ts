@@ -8,6 +8,7 @@ import bodyParser from 'koa-bodyparser';
 import path from "path";
 import { userTestRouter } from '$components/user';
 import { questionRouter } from '$components/question';
+import certificateRouter from '$components/certificate/certificate.router';
 
 process.env.NODE_ENV === 'development' && require('dotenv').config({ path: path.join(`${__dirname}./../.env`) });
 
@@ -54,6 +55,7 @@ class MockServer {
     app.use(router.routes());
     app.use(userTestRouter.routes());
     app.use(questionRouter.routes());
+    app.use(certificateRouter.routes());
     app.use(router.allowedMethods());
 
     const PORT = 7000;
