@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { createImage } from './certificate.utils';
+import { createCertificate } from './certificate.utils';
 import { UserTestModel } from '$components/user/user-test.entity';
 
 const certificateRouter = new Router();
@@ -31,13 +31,13 @@ certificateRouter.get('/certificate', async (ctx, next) => {
 
     if (!user.result) {
       ctx.status = 404;
-      ctx.body = '<h1>Вы еще либо не прошли тест или подождите немного и перезагрузите</h1> ' +
+      ctx.body = '<h1>Вы еще либо не прошли тест или подождите немного и перезагрузите эту страницу</h1> ' +
         '<h2>Возможно ошибка у нас, обратитесь в техподдержку: allianssonko@gmail.com</h2>';
       return next();
     }
 
     ctx.response.set("content-type", "application/pdf");
-    ctx.body = await createImage(user.firstName, user.lastName, user.result);;
+    ctx.body = await createCertificate(user.firstName, user.lastName, user.result);
     return next();
   } catch (err) {
     err.status = err.statusCode || err.status || 500;

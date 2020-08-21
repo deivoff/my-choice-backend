@@ -14,7 +14,7 @@ const height = 2339;
 const canvas = createCanvas(width, height, 'pdf');
 const context = canvas.getContext('2d');
 
-export async function createImage(firstName, lastName, score) {
+export async function createCertificate(firstName, lastName, score) {
   const image = await loadImage(__dirname + '/' + template);
   context.drawImage(image, 0, 0, width, height);
 

@@ -5,7 +5,15 @@ import { Sex, UserTest } from '$components/user/user-test.entity';
 const parseUser = (jsonUser: typeof data[0]): Omit<UserTest, '_id'> => {
   const [lastName, firstName = '-', middleName] = jsonUser['Ф.И.О.']
     .toString()
-    .split(/\s+/).map(word => word[0].toUpperCase() + word.substring(1)).join(' ')
+    .trim()
+    .split(/\s+/).map(word => {
+      try {
+        return word[0].toUpperCase() + word.substring(1);
+      } catch (e) {
+        console.error(e, word, jsonUser['Ф.И.О.']);
+        throw e;
+      }
+    }).join(' ')
     .split(' ', 3);
 
   const phone = normalizePhone(jsonUser['КОНТАКТНЫЙ ТЕЛЕФОН']) || undefined;
@@ -14,7 +22,7 @@ const parseUser = (jsonUser: typeof data[0]): Omit<UserTest, '_id'> => {
     firstName,
     middleName,
     lastName,
-    age: jsonUser['ВОЗРАСТ'],
+    age: Number(jsonUser['ВОЗРАСТ']),
     email: jsonUser['АДРЕС ЭЛЕКТРОННОЙ ПОЧТЫ'].replace(/\s+/g, '').toLowerCase(),
     sex: jsonUser['ПОЛ'] === "Мужской" ? Sex.male : Sex.female,
     createdAt: jsonUser['Отметка времени'],

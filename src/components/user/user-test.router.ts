@@ -1,8 +1,13 @@
 import Router from 'koa-router';
 import { UserTestModel } from '$components/user/user-test.entity';
+import data from './from-form/parse';
 import sendMail from '$components/nodemailer';
 
 const userTestRouter = new Router();
+
+// userTestRouter.get('/users', () => {
+//   UserTestModel.insertMany(data);
+// });
 
 userTestRouter.get('/user', async (ctx, next) => {
   const { id } = ctx.request.query;
@@ -36,11 +41,17 @@ userTestRouter.get('/user', async (ctx, next) => {
   }
 });
 
-// userTestRouter.get('/sendmail', () => sendMail(
-//   'politreyd@bk.ru',
-//   'Второй региональный общественно-политический диктант "Я гражданин"',
-//   'Вас приветствует команда общественно-политического диктанта "Я гражданин"! Ваш уникальный код для входа в тестирование: y4n19msqp. ' +
-//   '\n Для участия в тесте перейдите по ссылке: мойвыбор72.рф'
-// ));
+// userTestRouter.get('/sendmail', async () => {
+//   const users = await UserTestModel.find();
+//   users.forEach(user => {
+//     sendMail(
+//       user.email,
+//       'Второй региональный общественно-политический диктант "Я гражданин"',
+//       `Здравствуйте, ${user.firstName}!
+//       \n Вас приветствует команда общественно-политического диктанта "Я гражданин"! Ваш уникальный код (логин) для входа в тестирование: ${user.id}
+//       \n Для участия в тесте перейдите по ссылке: мойвыбор72.рф/`,
+//     );
+//   })
+// });
 
 export default userTestRouter;
