@@ -8,13 +8,13 @@ import * as fs from 'fs';
 registerFont(__dirname + '/' + fontArial, {
   family: 'Arial',
 });
-const width = 1653;
-const height = 2339;
-
-const canvas = createCanvas(width, height, 'pdf');
-const context = canvas.getContext('2d');
 
 export async function createCertificate(firstName, lastName, score) {
+  const width = 1653;
+  const height = 2339;
+
+  const canvas = createCanvas(width, height, 'pdf');
+  const context = canvas.getContext('2d');
   const image = await loadImage(__dirname + '/' + template);
   context.drawImage(image, 0, 0, width, height);
 

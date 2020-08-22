@@ -1,7 +1,7 @@
 import * as nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport(
-  'smtps://my.choice7272%40gmail.com:sosiska11@smtp.gmail.com'
+  'smtps://my.choice7272%40gmail.com:Sosiska12@smtp.gmail.com'
 );
 
 const sendMail = (to, subject, text) => transporter.sendMail({
@@ -11,9 +11,9 @@ const sendMail = (to, subject, text) => transporter.sendMail({
   text
 }, (error, info) => {
   if (error) {
-    return console.log(`error: ${error}`);
+    return console.log(`error: ${error}, to: ${to}`);
   }
-  console.log(`Message Sent ${info.response}`);
+  console.log(`Message Sent ${info.response} to ${to}`);
 });
 
 export default sendMail;
