@@ -1,13 +1,21 @@
 import Router from 'koa-router';
 import { UserTestModel } from '$components/user/user-test.entity';
-import data from './from-form/parse';
+import data from './from-file/parse';
 import sendMail from '$components/nodemailer';
+import { UserFalseModel } from '$components/user/user-false.entity';
 
 const userTestRouter = new Router();
 
-// userTestRouter.get('/users', () => {
-//   UserTestModel.insertMany(data);
-// });
+userTestRouter.get('/users', async (ctx, next) => {
+  // UserFalseModel.insertMany(data);
+  ctx.body = data
+  ctx.body = await UserFalseModel.find({
+    result: {
+      $exists: true
+    }
+  });
+  return next()
+});
 
 userTestRouter.get('/user', async (ctx, next) => {
   const { id } = ctx.request.query;

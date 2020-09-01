@@ -1,8 +1,32 @@
 import Router from 'koa-router';
 import { createCertificate } from './certificate.utils';
 import { UserTestModel } from '$components/user/user-test.entity';
+// import { UserFalseModel } from '$components/user/user-false.entity';
+// import * as fs from 'fs';
+// import path from 'path';
 
 const certificateRouter = new Router();
+
+// console.log(path.join(__dirname, '..', 'certs'));
+// certificateRouter.get('/certs', async () => {
+//   const users = await UserTestModel.find({
+//     result: {
+//       $exists: true
+//     }
+//   });
+//
+//   users.forEach((user, i) => {
+//     setTimeout(async () => {
+//       console.log('start');
+//       const cert = await createCertificate(user.firstName, user.lastName, user.result);
+//       const name = `${path.join(__dirname, '..', 'certs_norm')}/${user.firstName}_${user.lastName}_${i}.pdf`;
+//       console.log('crated');
+//       fs.writeFileSync(name, cert, 'binary');
+//       console.log(name);
+//       return;
+//     }, 10 * i)
+//   });
+// });
 
 certificateRouter.get('/certificate', async (ctx, next) => {
   const { id } = ctx.request.query;
