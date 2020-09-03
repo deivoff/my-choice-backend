@@ -6,16 +6,16 @@ import { UserFalseModel } from '$components/user/user-false.entity';
 
 const userTestRouter = new Router();
 
-userTestRouter.get('/users', async (ctx, next) => {
-  // UserFalseModel.insertMany(data);
-  ctx.body = data
-  ctx.body = await UserFalseModel.find({
-    result: {
-      $exists: true
-    }
-  });
-  return next()
-});
+// userTestRouter.get('/users', async (ctx, next) => {
+// //   // UserFalseModel.insertMany(data);
+// //   ctx.body = data
+// //   ctx.body = await UserFalseModel.find({
+// //     result: {
+// //       $exists: true
+// //     }
+// //   });
+// //   return next()
+// // });
 
 userTestRouter.get('/user', async (ctx, next) => {
   const { id } = ctx.request.query;
