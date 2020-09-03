@@ -1,7 +1,6 @@
 import Router from 'koa-router';
 import data from './data/data.json';
 import { QuestionModel } from '$components/question';
-import { UserTestModel } from '$components/user/user-test.entity';
 
 const questionRouter = new Router();
 
@@ -16,22 +15,7 @@ questionRouter.get('/questions', async (ctx, next) => {
 });
 
 questionRouter.post('/answers', async (ctx, next) => {
-  const { answers, id: userId } = ctx.request.body;
-
-  let user;
-  try {
-    user = await UserTestModel.findOne({ id: userId });
-    if (!user || !userId) {
-      ctx.body = 'User not found!';
-      ctx.status = 404;
-      return next();
-    }
-  } catch (err) {
-      err.status = err.statusCode || err.status || 500;
-      ctx.body = err.message;
-      ctx.app.emit('error', err, ctx);
-      return next()
-  }
+  const { answers } = ctx.request.body;
 
   let questions;
   try {
@@ -56,10 +40,6 @@ questionRouter.post('/answers', async (ctx, next) => {
 
     return acc;
   }, 0);
-
-  user.result = result;
-  user.answers = answers;
-  await user.save();
 
   ctx.body = {
     result
