@@ -1,0 +1,37 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserPhoto {
+  url: String!
+}
+
+type VKProvider {
+  id: String!
+  link: String!
+  token: String!
+}
+
+type UserSocial {
+  vkProvider: VKProvider!
+}
+
+type UserName {
+  familyName: String!
+  givenName: String!
+}
+
+type UserModel {
+  _id: ObjectId!
+  email: String
+  name: UserName!
+  photos: [UserPhoto!]!
+  social: UserSocial!
+}
+
+"""Mongo objectId scalar type"""
+scalar ObjectId
+
+type Query {
+  user: UserModel
+}
