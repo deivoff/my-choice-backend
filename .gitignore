@@ -36,3 +36,7 @@ lerna-debug.log*
 # env
 /.env
 .env
+
+# schema
+/schema.gql
+schema.gql
