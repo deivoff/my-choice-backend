@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { GameModule } from './game/game.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { GameModule } from './game/game.module';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
+      installSubscriptionHandlers: true,
     }),
     TypegooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -32,6 +34,7 @@ import { GameModule } from './game/game.module';
     AuthModule,
     UserModule,
     GameModule,
+    MessageModule,
   ],
 })
 export class AppModule {}
