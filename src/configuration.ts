@@ -14,6 +14,7 @@ export default () => {
   } = process.env;
   return ({
     port: parseInt(PORT, 10) || 3000,
+    secretKey: SECRET_KEY,
     database: {
       uri: DB_URI,
       dbName: DB_NAME,

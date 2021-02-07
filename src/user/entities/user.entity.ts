@@ -1,13 +1,16 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { sign } from 'jsonwebtoken';
+import { Types } from 'mongoose';
+import { prop } from '@typegoose/typegoose';
+import { ConfigService } from '@nestjs/config';
 
-import { Document, Types } from 'mongoose';
+
 
 @ObjectType()
 export class UserPhoto {
 
   @Field(() => String)
-  @Prop({ required: true })
+  @prop({ required: true })
   url!: string;
 
 }
@@ -16,7 +19,7 @@ export class UserPhoto {
 class VKProvider {
 
   @Field()
-  @Prop({ required: true })
+  @prop({ required: true })
   id!: string;
 
   @Field()
@@ -25,7 +28,7 @@ class VKProvider {
   }
 
   @Field()
-  @Prop({ required: true })
+  @prop({ required: true })
   token!: string;
 
 }
@@ -34,7 +37,7 @@ class VKProvider {
 class UserSocial {
 
   @Field(() => VKProvider)
-  @Prop({ _id: false })
+  @prop({ _id: false })
   vkProvider!: VKProvider;
 
 }
@@ -43,39 +46,48 @@ class UserSocial {
 export class UserName {
 
   @Field(() => String)
-  @Prop({ required: true })
+  @prop({ required: true })
   familyName!: string;
 
   @Field(() => String)
-  @Prop({ required: true })
+  @prop({ required: true })
   givenName!: string;
 
 }
 
 @ObjectType()
-@Schema()
 export class User {
 
   @Field()
   readonly _id!: Types.ObjectId;
 
   @Field({ nullable: true })
-  @Prop()
+  @prop()
   email?: string;
 
   @Field(() => UserName)
-  @Prop({ _id: false })
+  @prop({ _id: false })
   name!: UserName;
 
   @Field(() => [UserPhoto])
-  @Prop({ type: UserPhoto, _id: false })
+  @prop({ type: UserPhoto, _id: false })
   photos?: UserPhoto[];
 
   @Field(() => UserSocial)
-  @Prop({ _id: false })
+  @prop({ _id: false })
   social!: UserSocial;
 
-}
+  generateJWT(secret: string) {
+    return sign(
+      {
+        email: this.email,
+        name: this.name,
+        photos: this.photos ? this.photos : [],
+        id: this._id,
+      },
+      secret,
+      { expiresIn: '50d' },
+    );
+  }
 
-export type UserDocument = User & Document;
-export const UserSchema = SchemaFactory.createForClass(User);
+}
