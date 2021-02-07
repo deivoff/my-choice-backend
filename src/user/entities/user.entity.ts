@@ -2,7 +2,6 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Document, Types } from 'mongoose';
-import { ObjectIdScalar } from '$common/scalars/objectId.scalar';
 
 @ObjectType()
 export class UserPhoto {
@@ -55,7 +54,7 @@ export class UserName {
 
 @ObjectType()
 @Schema()
-export class UserModel {
+export class User {
 
   @Field()
   readonly _id!: Types.ObjectId;
@@ -78,5 +77,5 @@ export class UserModel {
 
 }
 
-export type UserDocument = UserModel & Document;
-export const UserSchema = SchemaFactory.createForClass(UserModel);
+export type UserDocument = User & Document;
+export const UserSchema = SchemaFactory.createForClass(User);
