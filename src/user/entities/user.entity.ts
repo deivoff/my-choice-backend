@@ -1,8 +1,9 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { sign } from 'jsonwebtoken';
+import { Field, GqlExecutionContext, ObjectType } from '@nestjs/graphql';
+import { decode, sign } from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { prop } from '@typegoose/typegoose';
-import { ConfigService } from '@nestjs/config';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { IncomingMessage } from "http";
 
 
 
@@ -83,7 +84,7 @@ export class User {
         email: this.email,
         name: this.name,
         photos: this.photos ? this.photos : [],
-        id: this._id,
+        _id: this._id,
       },
       secret,
       { expiresIn: '50d' },
@@ -91,3 +92,17 @@ export class User {
   }
 
 }
+
+export type DecodedUser = Pick<User, 'email' | 'name' | '_id'> & {
+  photos: UserPhoto[]
+  iat: number;
+  exp: number;
+}
+
+export const DecodedUser = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const { req } = ctx.getArgByIndex<{ req: IncomingMessage }>(2) || {};
+
+    return decode(req.headers.authorization);
+  }
+);

@@ -15,6 +15,10 @@ export default () => {
   return ({
     port: parseInt(PORT, 10) || 3000,
     secretKey: SECRET_KEY,
+    origin: {
+      ws: WS_ORIGIN_URL,
+      http: ORIGIN_URL,
+    },
     database: {
       uri: DB_URI,
       dbName: DB_NAME,

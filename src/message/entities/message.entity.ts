@@ -1,7 +1,7 @@
 import { User, UserName, UserPhoto } from 'src/user/entities/user.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
-import { prop } from '@typegoose/typegoose';
+import { prop, Ref } from '@typegoose/typegoose';
 
 @ObjectType()
 export class Message {
@@ -16,8 +16,8 @@ export class Message {
   authorName!: UserName;
 
   @Field(() => User)
-  @prop()
-  author: User;
+  @prop({ ref: User })
+  author: Ref<User>;
 
   @prop({ required: true })
   topic!: string;

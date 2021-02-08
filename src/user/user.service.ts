@@ -4,12 +4,18 @@ import { ReturnModelType } from '@typegoose/typegoose';
 
 import { User } from 'src/user/entities/user.entity';
 import { AuthData } from 'src/auth/types/auth.types';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User) private readonly userModel: ReturnModelType<typeof User>
   ) {}
+
+  findOne(_id: Types.ObjectId) {
+    return this.userModel.findById(_id);
+  }
+
   async upsertVKUser({ accessToken, profile: {
     name, id, photos
   } }: AuthData, onNewUser?: () => void) {
