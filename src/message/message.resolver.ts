@@ -19,7 +19,7 @@ export class MessageResolver {
   findMessages(
     @Args('topic') topic: string
   ) {
-    return this.messageService.getMessagesByTopic(topic)
+    return this.messageService.findByTopic(topic)
   }
 
   @UseGuards(AuthGuard)
@@ -29,7 +29,7 @@ export class MessageResolver {
     @Args('message') message: string,
     @DecodedUser() decodedUser: DecodedUser,
   ) {
-    const newMessage = await this.messageService.addMessage(
+    const newMessage = await this.messageService.create(
       topic,
       message,
       {
@@ -58,7 +58,7 @@ export class MessageResolver {
   }
 
   @ResolveField(() => User)
-  async author(
+  author(
     @Parent() message: Message,
   ) {
     const { author } = message;

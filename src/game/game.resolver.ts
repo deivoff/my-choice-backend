@@ -33,7 +33,7 @@ export class GameResolver {
     @Parent() game: Game,
   ) {
     const { creator } = game;
-    return await this.userService.findOne(creator);
+    return this.userService.findOne(creator);
   }
 
   @Query(() => [Game], { name: 'games' })

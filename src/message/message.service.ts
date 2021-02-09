@@ -11,7 +11,7 @@ export class MessageService {
     @InjectModel(Message) private readonly messageModel: ReturnModelType<typeof Message>
   ) {}
 
-  addMessage(
+  create(
     topic: string,
     message: string,
     user: {
@@ -29,7 +29,7 @@ export class MessageService {
     })
   }
 
-  getMessagesByTopic(topic: string) {
+  findByTopic(topic: string) {
     return this.messageModel.find({
       topic,
     }, null, {

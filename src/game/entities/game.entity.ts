@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 import { User } from 'src/user/entities/user.entity';
-import { prop, Ref } from '@typegoose/typegoose';
+import { prop } from '@typegoose/typegoose';
 
 @ObjectType()
 export class Game {
