@@ -2,7 +2,6 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { verify } from 'jsonwebtoken';
 import { IncomingMessage } from 'http';
 import { ConfigService } from '@nestjs/config';
-import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

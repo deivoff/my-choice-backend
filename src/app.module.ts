@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypegooseModule } from 'nestjs-typegoose';
+import { PubSub } from 'graphql-subscriptions';
 
 import configuration from './configuration';
 import { AuthModule } from './auth/auth.module';

@@ -12,18 +12,17 @@ export class Message {
   readonly createdAt!: Date;
 
   @Field(() => UserName)
-  @prop({ required: true })
+  @prop({ required: true, _id: false })
   authorName!: UserName;
 
-  @Field(() => User)
   @prop({ ref: User })
-  author: Ref<User>;
+  author: Types.ObjectId;
 
   @prop({ required: true })
   topic!: string;
 
   @Field(() => UserPhoto,{ nullable: true })
-  @prop({ required: false })
+  @prop({ required: false, _id: false })
   avatar?: UserPhoto;
 
   @Field()

@@ -1,16 +1,19 @@
-import { Args, Mutation, Query, Resolver, Root, Subscription } from '@nestjs/graphql';
+import { Args, Mutation, Parent, Query, ResolveField, Resolver, Root, Subscription } from '@nestjs/graphql';
 import { MessageService } from './message.service';
 import { Message } from 'src/message/entities/message.entity';
-import { PubSub } from 'graphql-subscriptions';
-import { UseGuards } from '@nestjs/common';
+import { PubSubEngine } from 'graphql-subscriptions';
+import { Inject, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { DecodedUser } from 'src/user/entities/user.entity';
+import { DecodedUser, User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
-const pubSub = new PubSub();
-
-@Resolver()
+@Resolver(() => Message)
 export class MessageResolver {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    @Inject('PUB_SUB') private readonly pubSub: PubSubEngine,
+    private readonly messageService: MessageService,
+    private readonly userService: UserService,
+  ) {}
 
   @Query(() => [Message], { name: 'messages'})
   findMessages(
@@ -36,7 +39,7 @@ export class MessageResolver {
       }
     );
 
-    await pubSub.publish('onMessage', {
+    await this.pubSub.publish('onMessage', {
       onMessage: newMessage,
     });
 
@@ -51,6 +54,14 @@ export class MessageResolver {
     @Args('topic') topic: string,
     @Root() message: Message,
   ) {
-    return pubSub.asyncIterator('onMessage');
+    return this.pubSub.asyncIterator('onMessage');
+  }
+
+  @ResolveField(() => User)
+  async author(
+    @Parent() message: Message,
+  ) {
+    const { author } = message;
+    return this.userService.findOne(author);
   }
 }

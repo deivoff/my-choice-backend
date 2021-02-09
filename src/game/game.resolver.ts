@@ -1,17 +1,39 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
 import { GameService } from './game.service';
 import { Game } from './entities/game.entity';
 import { CreateGameInput } from './dto/create-game.input';
 import { UpdateGameInput } from './dto/update-game.input';
 import { Types } from 'mongoose';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { DecodedUser, User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Resolver(() => Game)
 export class GameResolver {
-  constructor(private readonly gameService: GameService) {}
+  constructor(
+    private readonly gameService: GameService,
+    private readonly userService: UserService
+  ) {}
 
+  @UseGuards(AuthGuard)
   @Mutation(() => Game)
-  createGame(@Args('createGameInput') createGameInput: CreateGameInput) {
-    return this.gameService.create(createGameInput);
+  createGame(
+    @Args('createGameInput') createGameInput: CreateGameInput,
+    @DecodedUser() decodedUser: DecodedUser
+  ) {
+    return this.gameService.create({
+      name: createGameInput.name,
+      creator: decodedUser._id
+    });
+  }
+
+  @ResolveField(() => User)
+  async creator(
+    @Parent() game: Game,
+  ) {
+    const { creator } = game;
+    return await this.userService.findOne(creator);
   }
 
   @Query(() => [Game], { name: 'games' })
