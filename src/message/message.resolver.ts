@@ -29,7 +29,7 @@ export class MessageResolver {
     @Args('message') message: string,
     @DecodedUser() decodedUser: DecodedUser,
   ) {
-    await this.messageService.createAndPublish(
+    const newMessage = await this.messageService.create(
       topic,
       message,
       {
@@ -38,6 +38,10 @@ export class MessageResolver {
         avatar: decodedUser.photos[0],
       }
     );
+
+    await this.pubSub.publish('onMessage', {
+      onMessage: newMessage,
+    });
 
     return true;
   }
