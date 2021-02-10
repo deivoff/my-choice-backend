@@ -40,3 +40,6 @@ lerna-debug.log*
 # schema
 /schema.gql
 schema.gql
+
+# redis dump
+dump.rdb
