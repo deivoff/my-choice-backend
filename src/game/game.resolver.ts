@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { GameService } from './game.service';
 import { Game } from './entities/game.entity';
 import { CreateGameInput } from './dto/create-game.input';

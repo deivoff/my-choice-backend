@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGameInput } from './dto/create-game.input';
 import { UpdateGameInput } from './dto/update-game.input';
 import { Types } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';

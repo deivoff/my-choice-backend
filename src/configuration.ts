@@ -11,6 +11,7 @@ export default () => {
     SECRET_KEY,
     VK_CLIENT_ID,
     VK_CLIENT_SECRET,
+    REDIS_URL,
   } = process.env;
   return ({
     port: parseInt(PORT, 10) || 3000,
@@ -18,6 +19,9 @@ export default () => {
     origin: {
       ws: WS_ORIGIN_URL,
       http: ORIGIN_URL,
+    },
+    redis: {
+      url: REDIS_URL
     },
     database: {
       uri: DB_URI,
