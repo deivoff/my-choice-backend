@@ -1,11 +1,19 @@
-import { Field, GqlExecutionContext, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { decode, sign } from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { prop } from '@typegoose/typegoose';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { IncomingMessage } from "http";
 
+export enum UserRole {
+  User = 'User',
+  Moderator = 'Moderator',
+  Admin = 'Admin',
+}
 
+registerEnumType(UserRole, {
+  name: 'UserRole',
+});
 
 @ObjectType()
 export class UserPhoto {
@@ -70,6 +78,10 @@ export class User {
   @prop({ _id: false })
   name!: UserName;
 
+  @Field(() => UserRole)
+  @prop({ default: UserRole.User })
+  role: UserRole;
+
   @Field(() => [UserPhoto])
   @prop({ type: UserPhoto, _id: false })
   photos?: UserPhoto[];
@@ -83,6 +95,7 @@ export class User {
       {
         email: this.email,
         name: this.name,
+        role: this.role,
         photos: this.photos ? this.photos : [],
         _id: this._id,
       },
@@ -93,7 +106,7 @@ export class User {
 
 }
 
-export type DecodedUser = Pick<User, 'email' | 'name' | '_id'> & {
+export type DecodedUser = Pick<User, 'email' | 'name' | '_id' | 'role' > & {
   photos: UserPhoto[]
   iat: number;
   exp: number;
