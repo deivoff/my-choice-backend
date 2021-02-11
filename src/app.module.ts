@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { GameModule } from './game/game.module';
 import { MessageModule } from './message/message.module';
+import { GameFieldModule } from './game-field/game-field.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { MessageModule } from './message/message.module';
     UserModule,
     GameModule,
     MessageModule,
+    GameFieldModule,
   ],
 })
 export class AppModule {}

@@ -6,7 +6,10 @@ import { Game } from 'src/game/entities/game.entity';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [TypegooseModule.forFeature([Game]), UserModule],
+  imports: [
+    TypegooseModule.forFeature([Game]),
+    UserModule,
+  ],
   providers: [GameResolver, GameService],
 })
 export class GameModule {}
