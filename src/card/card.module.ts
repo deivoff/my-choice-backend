@@ -1,32 +1,31 @@
 import { Module } from '@nestjs/common';
-import { GameFieldService } from './game-field.service';
-import { GameFieldResolver } from './game-field.resolver';
 import { TypegooseModule } from 'nestjs-typegoose';
+
+import { CardService } from './card.service';
+import { CardResolver } from './card.resolver';
 import {
   DreamTest,
-  Field,
+  Card,
   FieldType, Incident,
   Offer,
-  Opportunity,
   Reaction,
   Situation,
-} from 'src/game-field/entities/game-field.entity';
+} from 'src/card/entities/card.entity';
 
 @Module({
   imports: [TypegooseModule.forFeature([
     {
-      schemaOptions: { discriminatorKey: 'type', collection: 'game-fields' },
-      typegooseClass: Field,
+      schemaOptions: { discriminatorKey: 'type', collection: 'cards' },
+      typegooseClass: Card,
       discriminators: [
         { typegooseClass: DreamTest, discriminatorId: FieldType.DreamTest },
         { typegooseClass: Situation, discriminatorId: FieldType.Situation },
         { typegooseClass: Reaction, discriminatorId: FieldType.Reaction },
         { typegooseClass: Offer, discriminatorId: FieldType.Offer },
-        { typegooseClass: Opportunity, discriminatorId: FieldType.Opportunity },
         { typegooseClass: Incident, discriminatorId: FieldType.Incident },
       ],
     },
   ])],
-  providers: [GameFieldResolver, GameFieldService]
+  providers: [CardResolver, CardService]
 })
-export class GameFieldModule {}
+export class CardModule {}

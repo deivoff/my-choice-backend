@@ -1,5 +1,5 @@
 import { prop } from '@typegoose/typegoose';
-import { Field as GQLField, Int, InterfaceType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Int, InterfaceType, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 
 export enum FieldType {
@@ -29,22 +29,24 @@ export const FIELD_DICTIONARY = {
   [FieldType.Problem]: 'Проблема',
 };
 
+const CHOICES_CARD = [FieldType.DreamTest, FieldType.Situation, FieldType.Reaction, FieldType.Offer];
+
 @ObjectType()
 export class Resources {
 
-  @GQLField(() => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @prop()
   lives?: number;
 
-  @GQLField(() => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @prop()
   money?: number;
 
-  @GQLField(() => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @prop()
   white?: number;
 
-  @GQLField(() => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @prop()
   dark?: number;
 
@@ -53,14 +55,13 @@ export class Resources {
 @ObjectType()
 export class Option {
 
-  @GQLField()
+  @Field()
   readonly _id: Types.ObjectId;
 
-  @GQLField()
+  @Field()
   @prop()
   description: string;
 
-  @GQLField()
   @prop({ _id: false })
   resources: Resources
 
@@ -69,88 +70,86 @@ export class Option {
 @ObjectType()
 export class Result {
 
-  @GQLField(() => FieldType, { nullable: true })
+  @Field(() => FieldType, { nullable: true })
   @prop()
   move?: FieldType;
 
-  @GQLField({ nullable: true })
+  @Field(() => Resources, { nullable: true })
   @prop()
   resources?: Resources;
 
-  @GQLField(() => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @prop()
   hold?: number;
 
-  @GQLField({ nullable: true })
-  @prop({ default: true })
-  gameover?: true;
+  @Field(() => Boolean, { nullable: true })
+  @prop()
+  gameover?: boolean;
 }
 
 @ObjectType()
 export class Action {
 
-  @GQLField({ nullable: true })
+  @Field(() => Resources, { nullable: true})
   @prop({ _id: false })
   less?: Resources;
 
-  @GQLField({ nullable: true })
+  @Field(() => Resources, { nullable: true})
   @prop({ _id: false })
   more?: Resources;
 
-  @GQLField()
+  @Field(() => Result, { nullable: true})
   @prop({ _id: false })
   result: Result
 
 }
 
-@InterfaceType()
-export class Field {
+@InterfaceType({
+  resolveType: args => {
+    return CHOICES_CARD.includes(args.type) ? ChoiceCard.name : args.type;
+  }
+})
+export class Card {
 
-  @GQLField()
+  @Field()
   readonly _id: Types.ObjectId;
 
   readonly type: FieldType;
 
-  @GQLField()
+  @Field()
   get typeName(): string {
     return FIELD_DICTIONARY[this.type]
   }
 
-  @GQLField()
+  @Field()
   @prop()
   description: string;
 
 }
 
 @ObjectType({
-  implements: [Field],
+  implements: [Card],
 })
-export class ChoiceField extends Field {
+export class ChoiceCard extends Card {
 
-  @GQLField(() => [Option])
+  @Field(() => [Option])
   @prop({ type: [Option] })
   choices: Option[]
 
 }
 
 @ObjectType({
-  implements: [Field]
+  implements: [Card]
 })
-export class Incident extends Field {
+export class Incident extends Card {
 
-  @GQLField()
-  @prop()
+  @prop({ _id: false })
   action: Action;
 
 }
 
-export class DreamTest extends ChoiceField {}
-export class Situation extends ChoiceField {}
-export class Reaction extends ChoiceField {}
-export class Offer extends ChoiceField {}
-
-@ObjectType({
-  implements: [Field],
-})
-export class Opportunity extends Field {}
+export class DreamTest extends ChoiceCard {}
+export class Situation extends ChoiceCard {}
+export class Reaction extends ChoiceCard {}
+export class Offer extends ChoiceCard {}
 
