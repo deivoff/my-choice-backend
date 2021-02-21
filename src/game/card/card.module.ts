@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 
-import { CardService } from './card.service';
-import { CardResolver } from './card.resolver';
+import { CardService } from 'src/game/card/card.service';
+import { CardResolver } from 'src/game/card/card.resolver';
 import {
   DreamTest,
   Card,
-  FieldType, Incident,
+  Incident,
   Offer,
   Reaction,
   Situation,
-} from 'src/card/entities/card.entity';
+} from 'src/game/card/entities/card.entity';
+import { FieldType } from 'src/game/field/field.dictionaries';
 
 @Module({
   imports: [TypegooseModule.forFeature([

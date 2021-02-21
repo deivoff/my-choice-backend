@@ -16,4 +16,10 @@ export class Game {
   @prop({ ref: User })
   creator: Types.ObjectId;
 
+  @prop({ type: [Types.ObjectId], required: false })
+  players?: Types.ObjectId[];
+
+  @prop({ type: [Types.ObjectId], required: false })
+  observers?: Types.ObjectId[];
+
 }

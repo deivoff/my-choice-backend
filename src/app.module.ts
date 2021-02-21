@@ -10,7 +10,6 @@ import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { GameModule } from './game/game.module';
 import { MessageModule } from './message/message.module';
-import { CardModule } from './card/card.module';
 
 @Module({
   imports: [
@@ -38,6 +37,9 @@ import { CardModule } from './card/card.module';
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       installSubscriptionHandlers: true,
+      subscriptions: {
+        onDisconnect: (socket, ctx) => console.log(ctx.request.headers)
+      }
     }),
     TypegooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -53,7 +55,6 @@ import { CardModule } from './card/card.module';
     UserModule,
     GameModule,
     MessageModule,
-    CardModule,
   ],
 })
 export class AppModule {}

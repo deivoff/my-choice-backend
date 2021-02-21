@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCardInput } from './dto/create-card.input';
+import { CreateCardInput } from 'src/game/card/dto/create-card.input';
 import { InjectModel } from 'nestjs-typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
-import { Card } from 'src/card/entities/card.entity';
+import { Card } from 'src/game/card/entities/card.entity';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class CardService {
@@ -17,8 +18,8 @@ export class CardService {
     return this.cardModel.find();
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} gameField`;
+  findOne(_id: Types.ObjectId) {
+    return this.cardModel.findById(_id);
   }
 
 }

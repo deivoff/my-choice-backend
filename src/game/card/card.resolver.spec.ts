@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CardResolver } from './card.resolver';
+import { CardResolver } from 'src/game/card/card.resolver';
 import { CardService } from './game-field.service';
 
 describe('GameFieldResolver', () => {

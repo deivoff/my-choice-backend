@@ -32,11 +32,7 @@ export class MessageResolver {
     const newMessage = await this.messageService.create(
       topic,
       message,
-      {
-        _id: decodedUser._id,
-        name: decodedUser.name,
-        avatar: decodedUser.photos[0],
-      }
+      decodedUser._id
     );
 
     await this.pubSub.publish('onMessage', {
@@ -59,9 +55,8 @@ export class MessageResolver {
 
   @ResolveField(() => User)
   author(
-    @Parent() message: Message,
+    @Parent() { author }: Message,
   ) {
-    const { author } = message;
     return this.userService.findOne(author);
   }
 }

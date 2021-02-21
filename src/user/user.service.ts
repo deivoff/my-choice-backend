@@ -40,4 +40,14 @@ export class UserService {
       throw error;
     }
   }
+
+  updateNickname(userId: Types.ObjectId, newNickname: string) {
+    return this.userModel.findByIdAndUpdate(userId, {
+      nickname: newNickname,
+    });
+  }
+
+  findMany(_ids: Types.ObjectId[]) {
+    return this.userModel.find({'_id': { $in: _ids } });
+  }
 }

@@ -1,56 +1,10 @@
 import { prop } from '@typegoose/typegoose';
-import { Field, Int, InterfaceType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Int, InterfaceType, ObjectType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
-
-export enum FieldType {
-  Start = 'Start',
-  Situation = 'Situation',
-  Incident = 'Incident',
-  Offer = 'Offer',
-  Reaction = 'Reaction',
-  Opportunity = 'Opportunity',
-  DreamTest = 'Dream',
-  Activity = 'Activity',
-  Problem = 'Problem'
-}
-
-registerEnumType(FieldType, {
-  name: 'FieldType',
-});
-
-export const FIELD_DICTIONARY = {
-  [FieldType.Situation]: 'Ситуация',
-  [FieldType.Incident]: 'Случай',
-  [FieldType.Offer]: 'Предложение',
-  [FieldType.Reaction]: 'Реакция',
-  [FieldType.Opportunity]: 'Возможность',
-  [FieldType.DreamTest]: 'Мечта-тест',
-  [FieldType.Activity]: 'Активность',
-  [FieldType.Problem]: 'Проблема',
-};
+import { FIELD_DICTIONARY, FieldType } from 'src/game/field/field.dictionaries';
+import { Resources } from 'src/game/resources/resources.entity';
 
 const CHOICES_CARD = [FieldType.DreamTest, FieldType.Situation, FieldType.Reaction, FieldType.Offer];
-
-@ObjectType()
-export class Resources {
-
-  @Field(() => Int, { nullable: true })
-  @prop()
-  lives?: number;
-
-  @Field(() => Int, { nullable: true })
-  @prop()
-  money?: number;
-
-  @Field(() => Int, { nullable: true })
-  @prop()
-  white?: number;
-
-  @Field(() => Int, { nullable: true })
-  @prop()
-  dark?: number;
-
-}
 
 @ObjectType()
 export class Option {

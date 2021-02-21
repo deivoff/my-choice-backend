@@ -11,8 +11,8 @@ export class ObjectIdScalar implements CustomScalar<string, Types.ObjectId> {
     return new Types.ObjectId(value);
   }
 
-  serialize(value: Types.ObjectId) {
-    return value.toHexString(); // value sent to the client
+  serialize(value: Types.ObjectId | string) {
+    return typeof value === 'string' ? value : value.toHexString(); // value sent to the client
   }
 
   parseLiteral(ast: ValueNode) {

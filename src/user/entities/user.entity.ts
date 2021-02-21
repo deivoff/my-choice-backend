@@ -78,6 +78,9 @@ export class User {
   @prop({ _id: false })
   name!: UserName;
 
+  @prop({ required: false })
+  nickname: string;
+
   @Field(() => UserRole)
   @prop({ default: UserRole.User })
   role: UserRole;
@@ -86,7 +89,6 @@ export class User {
   @prop({ type: UserPhoto, _id: false })
   photos?: UserPhoto[];
 
-  @Field(() => UserSocial)
   @prop({ _id: false })
   social!: UserSocial;
 

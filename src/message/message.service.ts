@@ -14,17 +14,11 @@ export class MessageService {
   async create(
     topic: string,
     message: string,
-    user: {
-      _id: Types.ObjectId,
-      avatar?: UserPhoto,
-      name: UserName,
-    }
+    authorId: Types.ObjectId
   ) {
     return this.messageModel.create({
       message,
-      author: user._id,
-      authorName: user.name,
-      avatar: user.avatar,
+      author: authorId,
       topic,
     });
   }
