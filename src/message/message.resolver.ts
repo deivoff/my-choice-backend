@@ -6,6 +6,7 @@ import { Inject, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DecodedUser, User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { Types } from 'mongoose';
 
 @Resolver(() => Message)
 export class MessageResolver {
@@ -34,7 +35,6 @@ export class MessageResolver {
       message,
       decodedUser._id
     );
-
     await this.pubSub.publish('onMessage', {
       onMessage: newMessage,
     });
@@ -48,7 +48,6 @@ export class MessageResolver {
   })
   onMessage(
     @Args('topic') topic: string,
-    @Root() message: Message,
   ) {
     return this.pubSub.asyncIterator('onMessage');
   }
@@ -59,4 +58,12 @@ export class MessageResolver {
   ) {
     return this.userService.findOne(author);
   }
+
+  @ResolveField(() => Date)
+  createdAt(
+    @Parent() { _id }: Message
+  ) {
+    return typeof _id === 'string' ? Types.ObjectId(_id).getTimestamp() : _id.getTimestamp()
+  }
+
 }
