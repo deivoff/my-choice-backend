@@ -3,7 +3,6 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { RedisModule } from 'nestjs-redis';
-
 import configuration from './configuration';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -38,7 +37,7 @@ import { MessageModule } from './message/message.module';
       autoSchemaFile: 'schema.gql',
       installSubscriptionHandlers: true,
       subscriptions: {
-        onDisconnect: (socket, ctx) => console.log(ctx.request.headers)
+        onConnect: (connectionParams) => ({ authToken: connectionParams['authToken'] }),
       }
     }),
     TypegooseModule.forRootAsync({

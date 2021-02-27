@@ -4,15 +4,19 @@ import { GameSessionService } from 'src/game/game-session/game-session.service';
 import { PlayerModule } from 'src/game/player/player.module';
 import { PlayerService } from 'src/game/player/player.service';
 import { GameSessionResolver } from 'src/game/game-session/game-session.resolver';
+import { UserModule } from 'src/user/user.module';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
-    PlayerModule
+    PlayerModule,
+    UserModule,
   ],
   providers: [
+    PlayerService,
+    UserService,
     GameSessionService,
     GameSessionResolver,
-    PlayerService,
     {
       provide: 'PUBLISHER',
       useFactory: (redisService: RedisService) => {
@@ -23,6 +27,7 @@ import { GameSessionResolver } from 'src/game/game-session/game-session.resolver
   ],
   exports: [
     GameSessionService,
+    PlayerModule,
   ]
 })
 export class GameSessionModule {}

@@ -10,11 +10,11 @@ export enum PlayerPosition {
 }
 
 export enum PlayerStatus {
-  Awaiting,
-  InGame,
-  Gameover,
-  Hold,
-  Winner,
+  Awaiting = 'Awaiting',
+  InGame = 'InGame',
+  Gameover = 'Gameover',
+  Hold = 'Hold',
+  Winner = 'Winner',
 }
 
 registerEnumType(PlayerPosition, {
@@ -28,17 +28,17 @@ registerEnumType(PlayerStatus, {
 @ObjectType()
 export class Player extends PickType(User, ['_id']){
 
-  @Field(() => Resources)
-  resources?: Resources;
-
   @Field({ nullable: true })
   avatar: string;
 
-  @Field(() => PlayerPosition)
-  position: PlayerPosition;
-
   @Field()
   nickname: string;
+
+  @Field(() => Resources, { nullable: true })
+  resources?: Resources;
+
+  @Field(() => PlayerPosition, { nullable: true })
+  position?: PlayerPosition;
 
   @Field(() => PlayerStatus)
   status: PlayerStatus;

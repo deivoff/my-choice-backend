@@ -10,14 +10,12 @@ export class GameSessionResolver {
   ) {}
 
   @ResolveField(() => [Player])
-  async players(
+  players(
     @Parent() {
       players
     }: GameSession,
   ) {
-    const pl = await this.gameSessionService.getPlayers(players);
-    console.log(pl);
-    return pl;
+    return this.gameSessionService.getPlayers(players);
   }
 
   @ResolveField(() => Int)

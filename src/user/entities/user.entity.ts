@@ -79,7 +79,16 @@ export class User {
   name!: UserName;
 
   @prop({ required: false })
-  nickname: string;
+  _nickname: string;
+
+  get nickname() {
+    if (!this._nickname) return `${this.name.givenName} ${this.name.familyName}`;
+    return this._nickname;
+  }
+
+  set nickname(val) {
+    this._nickname = val
+  }
 
   @Field(() => UserRole)
   @prop({ default: UserRole.User })
@@ -108,7 +117,8 @@ export class User {
 
 }
 
-export type DecodedUser = Pick<User, 'email' | 'name' | '_id' | 'role' > & {
+export type DecodedUser = Pick<User, 'email' | 'name' | 'role' > & {
+  _id: string;
   photos: UserPhoto[]
   iat: number;
   exp: number;

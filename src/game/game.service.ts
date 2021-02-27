@@ -12,13 +12,13 @@ import { GameSessionService } from 'src/game/game-session/game-session.service';
 export class GameService {
   constructor(
     @InjectModel(Game) private readonly gameModel: ReturnModelType<typeof Game>,
+    @Inject('PUB_SUB') private readonly  pubSub: PubSubEngine,
     private readonly gameSessionService: GameSessionService,
-    @Inject('PUB_SUB') private readonly  pubSub: PubSubEngine
 ) {}
 
-  async create(createGameInput: { name: string; creator: Types.ObjectId, observerMode?: boolean }) {
+  async create(createGameInput: { name: string; creator: string, observerMode?: boolean }) {
     const gameId = Types.ObjectId();
-    const creatorId = createGameInput.creator.toHexString();
+    const creatorId = createGameInput.creator;
     const playersOrObservers = createGameInput.observerMode ? {
         observers: [creatorId],
         players: []
@@ -34,22 +34,40 @@ export class GameService {
       ...playersOrObservers
     });
 
-    const activeGames = await this.gameSessionService.getAllAwaiting();
+    await this.publishActiveGames();
 
-    await this.pubSub.publish('lobby', {
-      lobby: activeGames
-    });
-
-    return this.gameModel.create({
+    await this.gameModel.create({
       _id: gameId,
       name: createGameInput.name,
       creator: createGameInput.creator,
     });
+
+    return game;
   }
 
-  join(gameId: Types.ObjectId, userId: Types.ObjectId) {
-    console.log('joined', gameId, userId);
-    return 'joined'
+  getActiveGames() {
+    return this.gameSessionService.getAllAwaiting();
+  }
+
+  private async publishActiveGames() {
+    const activeGames = await this.getActiveGames();
+    await this.pubSub.publish('updateActiveGames', {
+      updateActiveGames: activeGames
+    });
+  }
+
+  async join(gameId: Types.ObjectId, userId: Types.ObjectId) {
+    const game = await this.gameSessionService.join(gameId.toHexString(), userId.toHexString());
+
+    this.publishActiveGames();
+    return game
+  }
+
+  async leave(gameId: Types.ObjectId, userId: Types.ObjectId) {
+    const game = await this.gameSessionService.leave(gameId.toHexString(), userId.toHexString());
+
+    this.publishActiveGames();
+    return game;
   }
 
   findAll() {
@@ -60,11 +78,4 @@ export class GameService {
     return `This action returns a #${id} game`;
   }
 
-  update(id: Types.ObjectId, updateGameInput: UpdateGameInput) {
-    return `This action updates a #${id} game`;
-  }
-
-  remove(id: Types.ObjectId) {
-    return `This action removes a #${id} game`;
-  }
 }

@@ -21,7 +21,7 @@ export class UserResolver {
   nickname(
     @Parent() user: User
   ) {
-    return user.nickname || `${user.name.givenName} ${user.name.familyName}`
+    return user.nickname;
   }
 
   @UseGuards(AuthGuard)
@@ -30,7 +30,7 @@ export class UserResolver {
     @Args('nickname') newNickname: string,
     @DecodedUser() { _id }: DecodedUser
   ) {
-    return this.userService.updateNickname(_id, newNickname)
+    return this.userService.updateNickname(Types.ObjectId(_id), newNickname)
   }
 
 }

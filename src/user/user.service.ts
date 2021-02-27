@@ -12,7 +12,7 @@ export class UserService {
     @InjectModel(User) private readonly userModel: ReturnModelType<typeof User>
   ) {}
 
-  findOne(_id: Types.ObjectId) {
+  findOne(_id: Types.ObjectId | string) {
     return this.userModel.findById(_id);
   }
 

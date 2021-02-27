@@ -21,7 +21,7 @@ export class GameResolver {
   ) {}
 
   @UseGuards(AuthGuard)
-  @Mutation(() => Game)
+  @Mutation(() => GameSession)
   createGame(
     @Args('createGameInput') { name, observerMode}: CreateGameInput,
     @DecodedUser() { _id }: DecodedUser
@@ -39,7 +39,17 @@ export class GameResolver {
     @Args('gameId') gameId: Types.ObjectId,
     @DecodedUser() decodedUser: DecodedUser
   ) {
-    await this.gameService.join(gameId, decodedUser._id);
+    await this.gameService.join(gameId, Types.ObjectId(decodedUser._id));
+    return true
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async leaveGame(
+    @Args('gameId') gameId: Types.ObjectId,
+    @DecodedUser() decodedUser: DecodedUser
+  ) {
+    await this.gameService.leave(gameId, Types.ObjectId(decodedUser._id));
     return true
   }
 
@@ -49,11 +59,14 @@ export class GameResolver {
     return [];
   }
 
-  @Subscription(() => [GameSession], {
-    name: 'lobby'
-  })
-  activeGames() {
-    return this.pubSub.asyncIterator('lobby');
+  @Query(() => [GameSession])
+  getActiveGames() {
+    return this.gameService.getActiveGames()
+  }
+
+  @Subscription(() => [GameSession])
+  updateActiveGames() {
+    return this.pubSub.asyncIterator('updateActiveGames');
   }
 
   @ResolveField(() => User)

@@ -1,14 +1,29 @@
 import { User } from 'src/user/entities/user.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
-import { prop, Ref } from '@typegoose/typegoose';
+import { prop } from '@typegoose/typegoose';
 
 @ObjectType()
-export class Message {
+export class Author {
+
   @Field(() => Types.ObjectId)
   readonly _id!: Types.ObjectId |  string;
 
-  @prop({ ref: User })
+  @Field()
+  nickname: string;
+
+  @Field({ nullable: true })
+  avatar?: string;
+
+}
+
+@ObjectType()
+export class Message {
+
+  @Field(() => Types.ObjectId)
+  readonly _id!: Types.ObjectId |  string;
+
+  @prop({ ref: User, required: true })
   author: Types.ObjectId;
 
   @prop({ required: true })

@@ -1,6 +1,6 @@
 import { Args, Mutation, Parent, Query, ResolveField, Resolver, Root, Subscription } from '@nestjs/graphql';
 import { MessageService } from './message.service';
-import { Message } from 'src/message/entities/message.entity';
+import { Author, Message } from 'src/message/entities/message.entity';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { Inject, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -33,7 +33,7 @@ export class MessageResolver {
     const newMessage = await this.messageService.create(
       topic,
       message,
-      decodedUser._id
+      Types.ObjectId(decodedUser._id)
     );
     await this.pubSub.publish('onMessage', {
       onMessage: newMessage,
@@ -52,11 +52,17 @@ export class MessageResolver {
     return this.pubSub.asyncIterator('onMessage');
   }
 
-  @ResolveField(() => User)
-  author(
+  @ResolveField(() => Author)
+  async author(
     @Parent() { author }: Message,
-  ) {
-    return this.userService.findOne(author);
+  ): Promise<Author> {
+    const user = await this.userService.findOne(author);
+    const avatar = user.photos?.length ? user.photos[0].url : null;
+    return {
+      _id: user._id,
+      nickname: user.nickname,
+      avatar
+    };
   }
 
   @ResolveField(() => Date)
