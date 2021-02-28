@@ -43,7 +43,7 @@ export class UserService {
 
   updateNickname(userId: Types.ObjectId, newNickname: string) {
     return this.userModel.findByIdAndUpdate(userId, {
-      nickname: newNickname,
+      _nickname: newNickname,
     });
   }
 
