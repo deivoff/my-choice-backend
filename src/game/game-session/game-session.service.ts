@@ -3,6 +3,7 @@ import { Redis } from 'ioredis';
 import { union, isEmpty } from 'lodash';
 import { GameStatus } from 'src/game/game-session/game-session.entity';
 import { PlayerService } from 'src/game/player/player.service';
+import { GAME_NOT_FOUND } from 'src/game/game.errors';
 
 interface CreateGameSession {
   name: string;
@@ -24,13 +25,13 @@ export class GameSessionService {
     return `game:${_id}`
   };
 
-  async create({
+  create = async ({
     _id,
     name,
     creator,
     players,
     observers,
-         }: CreateGameSession) {
+         }: CreateGameSession) => {
     await this.redisClient.hset(this.key(_id), {
       _id,
       name,
@@ -45,46 +46,55 @@ export class GameSessionService {
     }
 
     return await this.redisClient.hgetall(this.key(_id));
-  }
+  };
 
-  async getAll() {
+  getGame = (gameKey: string) => {
+    return this.redisClient.hgetall(gameKey)
+  };
+
+  getAll = async () => {
     const [,keys] = await this.redisClient.scan(0, 'match', this.key('*'));
-    return Promise.all(keys.map((key => this.redisClient.hgetall(key))));
-  }
+    return await Promise.all(keys.sort().reverse().map(this.getGame));
+  };
 
-  async getAllAwaiting() {
+  getAllAwaiting = async () => {
     const games = await this.getAll();
     return games.filter(({ status }) => status === GameStatus.Awaiting)
-  }
+  };
 
-  async join(gameId: string, userId: string) {
+  join = async (gameId: string, userId: string) => {
     const gameKey = this.key(gameId);
-    const game = await this.redisClient.hgetall(gameKey);
+    const game = await this.getGame(gameKey);
 
     if (!game || isEmpty(game)) {
-      throw new Error('Game not found!')
+      throw new Error(GAME_NOT_FOUND)
+    }
+
+    const players = game.players.split(',');
+    if (players.includes(userId)) {
+
     }
 
     if (game.status === GameStatus.Awaiting) {
       await this.playerService.initPlayer(userId);
       await this.redisClient.hset(gameKey, {
-        players: union(game.players.split(','), userId).join(',')
+        players: union(players, [userId]).join()
       })
     } else {
       await this.redisClient.hset(gameKey, {
-        observers: union(game.observers.split(','), userId).join(',')
+        observers: union(game.observers.split(','), [userId]).join()
       })
     }
 
     return this.redisClient.hgetall(gameKey);
-  }
+  };
 
-  async leave(gameId: string, userId: string) {
+  leave = async (gameId: string, userId: string) => {
     const gameKey = this.key(gameId);
     const game = await this.redisClient.hgetall(gameKey);
 
     if (!game || isEmpty(game)) {
-      throw new Error('Game not found!')
+      throw new Error(GAME_NOT_FOUND)
     }
 
     if (game.status === GameStatus.Awaiting) {
@@ -104,15 +114,15 @@ export class GameSessionService {
     }
 
     return updatedGame;
-  }
+  };
 
-  async getPlayers(players: string) {
+  getPlayers = (players: string) => {
     const playersIds = players.split(',');
 
     return this.playerService.findSome(playersIds);
-  }
+  };
 
-  async getObserversCount(observers: string) {
-    return observers.split(',').length
+  getObserversCount = (observers: string) => {
+    return observers ? observers.split(',').length : 0;
   }
 }

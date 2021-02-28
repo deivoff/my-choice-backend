@@ -2,7 +2,6 @@ import { Resolver, Query, Mutation, Args, ResolveField, Parent, Subscription } f
 import { GameService } from './game.service';
 import { Game } from 'src/game/game.entity';
 import { CreateGameInput } from './dto/create-game.input';
-import { UpdateGameInput } from './dto/update-game.input';
 import { Types } from 'mongoose';
 import { Inject, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -34,13 +33,12 @@ export class GameResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => Boolean)
-  async joinGame(
+  @Query(() => GameSession)
+  joinGame(
     @Args('gameId') gameId: Types.ObjectId,
     @DecodedUser() decodedUser: DecodedUser
   ) {
-    await this.gameService.join(gameId, Types.ObjectId(decodedUser._id));
-    return true
+    return this.gameService.join(gameId, Types.ObjectId(decodedUser._id));
   }
 
   @UseGuards(AuthGuard)
@@ -53,10 +51,14 @@ export class GameResolver {
     return true
   }
 
-  @UseGuards(AuthGuard)
-  @Subscription(() => GameSession)
-  async inGame () {
-    return [];
+  @Subscription(() => GameSession, {
+    filter: (payload, variables) =>
+      payload.updateActiveGame._id === variables.gameId,
+  })
+  async updateActiveGame (
+    @Args('gameId') gameId: Types.ObjectId
+  ) {
+    return this.pubSub.asyncIterator('updateActiveGame');
   }
 
   @Query(() => [GameSession])

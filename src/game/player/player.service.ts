@@ -22,11 +22,11 @@ export class PlayerService {
     const player = {
       _id: playerId,
       nickname: user.nickname,
+      avatar: user.avatar,
       status: PlayerStatus.Awaiting
     };
 
     await this.redisClient.hset(this.key(playerId), player);
-
     return await this.redisClient.hgetall(this.key(playerId));
   };
 

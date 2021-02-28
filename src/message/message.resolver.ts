@@ -57,11 +57,10 @@ export class MessageResolver {
     @Parent() { author }: Message,
   ): Promise<Author> {
     const user = await this.userService.findOne(author);
-    const avatar = user.photos?.length ? user.photos[0].url : null;
     return {
       _id: user._id,
       nickname: user.nickname,
-      avatar
+      avatar: user.avatar
     };
   }
 

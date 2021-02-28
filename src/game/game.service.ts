@@ -49,6 +49,12 @@ export class GameService {
     return this.gameSessionService.getAllAwaiting();
   }
 
+  getActiveGame(gameId: Types.ObjectId | string) {
+    return this.gameSessionService.getGame(
+      typeof gameId === 'string' ? gameId : gameId.toHexString()
+    )
+  }
+
   private async publishActiveGames() {
     const activeGames = await this.getActiveGames();
     await this.pubSub.publish('updateActiveGames', {
@@ -56,10 +62,18 @@ export class GameService {
     });
   }
 
+  private async publishActiveGame(gameId: string | Types.ObjectId) {
+    const activeGame = await  this.getActiveGame(gameId);
+    await this.pubSub.publish('updateActiveGame', {
+      updateActiveGame: activeGame
+    })
+  }
+
   async join(gameId: Types.ObjectId, userId: Types.ObjectId) {
     const game = await this.gameSessionService.join(gameId.toHexString(), userId.toHexString());
 
     this.publishActiveGames();
+    this.publishActiveGame(gameId);
     return game
   }
 

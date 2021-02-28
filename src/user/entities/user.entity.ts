@@ -90,6 +90,10 @@ export class User {
     this._nickname = val
   }
 
+  get avatar() {
+    return this.photos?.length ? this.photos[0].url : null;
+  }
+
   @Field(() => UserRole)
   @prop({ default: UserRole.User })
   role: UserRole;
