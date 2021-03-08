@@ -38,7 +38,7 @@ export class GameResolver {
     @Args('gameId') gameId: Types.ObjectId,
     @DecodedUser() decodedUser: DecodedUser
   ) {
-    return this.gameService.join(gameId, Types.ObjectId(decodedUser._id));
+    return this.gameService.join(gameId, decodedUser._id);
   }
 
   @UseGuards(AuthGuard)
@@ -47,7 +47,7 @@ export class GameResolver {
     @Args('gameId') gameId: Types.ObjectId,
     @DecodedUser() decodedUser: DecodedUser
   ) {
-    await this.gameService.leave(gameId, Types.ObjectId(decodedUser._id));
+    await this.gameService.leave(gameId, decodedUser._id);
     return true
   }
 

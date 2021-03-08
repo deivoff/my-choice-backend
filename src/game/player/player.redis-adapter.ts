@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { Resources } from 'src/game/resources/resources.entity';
 import { Player } from 'src/game/player/player.entity';
-import { ID } from 'src/utils';
+import { ID, objectIdToString } from 'src/utils';
 
 enum Connection {
   Disconnect = '1',
@@ -57,9 +57,9 @@ export const fromPlayerToRedis = ({
   ...other
   }: PlayerRedisAdapter): Record<string, string> => ({
   ...other,
-  _id: typeof _id === 'string' ? _id : _id.toHexString(),
+  _id: objectIdToString(_id),
   hold: hold ? String(hold) : '',
   disconnected: disconnected ? Connection.Disconnect : Connection.Connect,
-  gameId: !gameId ? '' : typeof gameId === 'string' ? gameId : gameId.toHexString(),
+  gameId: !gameId ? '' : objectIdToString(gameId),
   resources: fromResourcesToString(resources),
 });

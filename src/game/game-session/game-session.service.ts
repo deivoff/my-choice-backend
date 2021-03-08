@@ -50,13 +50,15 @@ export class GameSessionService {
     return await this.redisClient.hgetall(this.key(_id));
   };
 
-  getGame = (gameKey: string) => {
-    return this.redisClient.hgetall(gameKey).then(fromRedisToGameSession)
+  getGame = (id: ID) => {
+    return this.redisClient.hgetall(this.key(objectIdToString(id))).then(fromRedisToGameSession)
   };
 
   getAll = async () => {
     const [,keys] = await this.redisClient.scan(0, 'match', this.key('*'));
-    return await Promise.all(keys.sort().reverse().map(this.getGame));
+    return await Promise.all(keys.sort().reverse().map(
+      id => this.redisClient.hgetall(id).then(fromRedisToGameSession)
+    ));
   };
 
   getAllAwaiting = async () => {

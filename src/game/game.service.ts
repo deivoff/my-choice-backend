@@ -3,10 +3,10 @@ import { Types } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 
-import { UpdateGameInput } from './dto/update-game.input';
 import { Game } from 'src/game/game.entity';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSessionService } from 'src/game/game-session/game-session.service';
+import { ID } from 'src/utils';
 
 @Injectable()
 export class GameService {
@@ -49,10 +49,8 @@ export class GameService {
     return this.gameSessionService.getAllAwaiting();
   }
 
-  getActiveGame(gameId: Types.ObjectId | string) {
-    return this.gameSessionService.getGame(
-      typeof gameId === 'string' ? gameId : gameId.toHexString()
-    )
+  getActiveGame(gameId: ID) {
+    return this.gameSessionService.getGame(gameId)
   }
 
   private async publishActiveGames() {
@@ -62,23 +60,23 @@ export class GameService {
     });
   }
 
-  private async publishActiveGame(gameId: string | Types.ObjectId) {
+  private async publishActiveGame(gameId: ID) {
     const activeGame = await this.getActiveGame(gameId);
     await this.pubSub.publish('updateActiveGame', {
       updateActiveGame: activeGame
     })
   }
 
-  async join(gameId: Types.ObjectId, userId: Types.ObjectId) {
-    const game = await this.gameSessionService.join(gameId.toHexString(), userId.toHexString());
+  async join(gameId: ID, userId: ID) {
+    const game = await this.gameSessionService.join(gameId, userId);
 
     this.publishActiveGames();
     this.publishActiveGame(gameId);
     return game
   }
 
-  async leave(gameId: Types.ObjectId, userId: Types.ObjectId) {
-    const game = await this.gameSessionService.leave(gameId.toHexString(), userId.toHexString());
+  async leave(gameId: ID, userId: ID) {
+    const game = await this.gameSessionService.leave(gameId, userId);
 
     this.publishActiveGames();
     this.publishActiveGame(gameId);
