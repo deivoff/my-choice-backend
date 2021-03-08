@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { union, isEmpty } from 'lodash';
+import { union, isEmpty, without } from 'lodash';
 import { GameStatus } from 'src/game/game-session/game-session.entity';
 import { PlayerService } from 'src/game/player/player.service';
 import { GAME_NOT_FOUND } from 'src/game/game.errors';
@@ -68,7 +68,7 @@ export class GameSessionService {
 
   join = async (gameId: ID, userId: ID) => {
     const gameKey = this.key(objectIdToString(gameId));
-    const game = await this.getGame(gameKey);
+    const game = await this.getGame(gameId);
 
     if (!game || isEmpty(game)) {
       throw new Error(GAME_NOT_FOUND)
@@ -105,7 +105,7 @@ export class GameSessionService {
 
   leave = async (gameId: ID, userId: ID) => {
     const gameKey = this.key(objectIdToString(gameId));
-    const game = await this.redisClient.hgetall(gameKey);
+    const game = await this.getGame(gameId);
 
     if (!game || isEmpty(game)) {
       throw new Error(GAME_NOT_FOUND)
@@ -113,11 +113,11 @@ export class GameSessionService {
 
     if (game.status === GameStatus.Awaiting) {
       await this.redisClient.hset(gameKey, {
-        players: [...game.players.split(',').filter(id => id !== userId)].join(',')
+        players: without(game.players, objectIdToString(userId))
       })
     } else {
       await this.redisClient.hset(gameKey, {
-        observers: [...game.observers.split(',').filter(id => id !== userId)].join(',')
+        observers: without(game.observers, objectIdToString(userId))
       })
     }
 
