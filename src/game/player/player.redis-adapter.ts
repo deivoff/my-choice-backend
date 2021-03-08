@@ -28,7 +28,7 @@ function fromStringToResources(resources?: string | null): Resources | null {
 
 function fromResourcesToString(resources?: Resources | null): string {
   if (!resources) return '';
-  const { white, dark, money, lives} = resources;
+  const { white, dark, money, lives } = resources;
   return [white, dark, money, lives].join();
 }
 
