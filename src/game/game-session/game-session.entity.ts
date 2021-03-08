@@ -1,5 +1,6 @@
 import { Field, ObjectType, PickType, registerEnumType } from '@nestjs/graphql';
 import { Game } from 'src/game/game.entity';
+import { Types } from 'mongoose';
 
 export enum GameStatus {
   Awaiting = 'Awaiting',
@@ -19,9 +20,9 @@ export class GameSession extends PickType(Game, ['_id', 'name', 'creator']){
 
   winner?: string;
 
-  players: string;
+  players?: string[];
 
-  observers: string;
+  observers?: string[];
 
   @Field(() => GameStatus)
   status: GameStatus

@@ -4,6 +4,8 @@ import { union, isEmpty } from 'lodash';
 import { GameStatus } from 'src/game/game-session/game-session.entity';
 import { PlayerService } from 'src/game/player/player.service';
 import { GAME_NOT_FOUND } from 'src/game/game.errors';
+import { ID, objectIdToString } from 'src/utils';
+import { fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
 
 interface CreateGameSession {
   name: string;
@@ -49,7 +51,7 @@ export class GameSessionService {
   };
 
   getGame = (gameKey: string) => {
-    return this.redisClient.hgetall(gameKey)
+    return this.redisClient.hgetall(gameKey).then(fromRedisToGameSession)
   };
 
   getAll = async () => {
@@ -62,16 +64,15 @@ export class GameSessionService {
     return games.filter(({ status }) => status === GameStatus.Awaiting)
   };
 
-  join = async (gameId: string, userId: string) => {
-    const gameKey = this.key(gameId);
+  join = async (gameId: ID, userId: ID) => {
+    const gameKey = this.key(objectIdToString(gameId));
     const game = await this.getGame(gameKey);
 
     if (!game || isEmpty(game)) {
       throw new Error(GAME_NOT_FOUND)
     }
 
-    const players = game.players.split(',');
-    const observers = game.observers.split(',');
+    const { players, observers } = game;
     const gameHasThisPlayer = players.some((player) => player === userId);
     const gameHasThisObserver = observers.some((observer) => observer === userId);
 
@@ -100,8 +101,8 @@ export class GameSessionService {
     return this.redisClient.hgetall(gameKey);
   };
 
-  leave = async (gameId: string, userId: string) => {
-    const gameKey = this.key(gameId);
+  leave = async (gameId: ID, userId: ID) => {
+    const gameKey = this.key(objectIdToString(gameId));
     const game = await this.redisClient.hgetall(gameKey);
 
     if (!game || isEmpty(game)) {
@@ -127,13 +128,11 @@ export class GameSessionService {
     return updatedGame;
   };
 
-  getPlayers = (players: string) => {
-    const playersIds = players.split(',');
-
-    return this.playerService.findSome(playersIds);
+  getPlayers = (players: ID[]) => {
+    return this.playerService.findSome(players);
   };
 
-  getObserversCount = (observers: string) => {
-    return observers ? observers.split(',').length : 0;
+  getObserversCount = (observers: ID[]) => {
+    return observers.length || 0;
   }
 }

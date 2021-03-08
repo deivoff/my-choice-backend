@@ -81,6 +81,7 @@ export class GameService {
     const game = await this.gameSessionService.leave(gameId.toHexString(), userId.toHexString());
 
     this.publishActiveGames();
+    this.publishActiveGame(gameId);
     return game;
   }
 

@@ -9,13 +9,4 @@ export class PlayerResolver {
     private readonly playerService: PlayerService,
   ) {}
 
-  @ResolveField(() => Resources, { nullable: true })
-  resources(
-    @Parent() {
-      resources
-    }: Player,
-  ) {
-    return this.playerService.getResources(resources);
-  }
-
 }

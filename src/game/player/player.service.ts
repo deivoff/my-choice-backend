@@ -1,10 +1,9 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { Types } from 'mongoose';
 import { UserService } from 'src/user/user.service';
 import { Player, PlayerStatus } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
-import { Resources } from 'src/game/resources/resources.entity';
+import { fromPlayerToRedis, fromRedisToPlayer } from 'src/game/player/player.redis-adapter';
 
 @Injectable()
 export class PlayerService {
@@ -19,18 +18,18 @@ export class PlayerService {
   };
 
   initPlayer = async (userId: ID, gameId: ID) => {
-    const playerId = objectIdToString(userId);
-    const user = await this.userService.findOne(playerId);
+    const playerId = this.key(objectIdToString(userId));
+    const user = await this.userService.findOne(userId);
     const player = {
-      _id: playerId,
+      _id: userId,
       nickname: user.nickname,
       avatar: user.avatar,
       status: PlayerStatus.Awaiting,
-      gameId: objectIdToString(gameId)
+      gameId
     };
 
-    await this.redisClient.hset(this.key(playerId), player);
-    return await this.redisClient.hgetall(this.key(playerId));
+    await this.redisClient.hset(playerId, fromPlayerToRedis(player));
+    return await this.redisClient.hgetall(playerId).then(fromRedisToPlayer);
   };
 
   remove = async (userId: ID) => {
@@ -39,41 +38,29 @@ export class PlayerService {
     await this.redisClient.del(this.key(playerId));
   };
 
-  findOne = (id: ID) => {
+  findOne = async (id: ID) => {
     const playerId = this.key(objectIdToString(id));
-    return this.redisClient.hgetall(playerId) as unknown as Player;
+    return await this.redisClient.hgetall(playerId).then(fromRedisToPlayer);
   };
 
   findSome = (ids: ID[]) => {
     return Promise.all(ids.map(this.findOne))
   };
 
-  /**
-   * @param {string} resources
-   * @description parse resources string (white,dark,money,lives).
-   */
-  getResources = (resources: string = ''): Resources => {
-    const [white, dark, money, lives] = resources.split(',');
-
-    if (!white || !dark || !money || !lives) return null;
-
-    return {
-      white: Number(white),
-      dark: Number(dark),
-      money: Number(money),
-      lives: Number(lives)
-    }
-  };
-
   findOneAndUpdate = async (id: ID, updatedFields: Partial<Player>) => {
     const playerId = this.key(objectIdToString(id));
-    const player = await this.redisClient.hgetall(playerId) as unknown as Player;
-    await this.redisClient.hset(playerId, {
+    const player = await this.redisClient.hgetall(playerId).then(fromRedisToPlayer);
+    const updatedPlayer: Player = {
       ...player,
       ...updatedFields,
-    } as {});
+      resources: !player.resources ? updatedFields.resources : updatedFields.resources ? {
+        ...player.resources,
+        ...updatedFields.resources
+      } : null,
+    };
 
-    return this.findOne(playerId);
+    await this.redisClient.hset(playerId, fromPlayerToRedis(updatedPlayer));
+    return updatedPlayer;
   };
 
 }
