@@ -38,8 +38,8 @@ export const fromGameSessionToRedis = ({
   ...other
   }: GameSessionRedisAdapter): Record<string, string> => ({
   ...other,
-  _id: typeof _id === 'string' ? _id : _id.toHexString(),
-  creator: typeof creator === 'string' ? creator : creator.toHexString(),
+  _id: objectIdToString(_id),
+  creator: objectIdToString(creator),
   players: fromIDsToString(players),
   observers: fromIDsToString(observers),
 });
