@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { union, isEmpty, without } from 'lodash';
-import { GameStatus } from 'src/game/game-session/game-session.entity';
+import { GameSession, GameStatus } from 'src/game/game-session/game-session.entity';
 import { PlayerService } from 'src/game/player/player.service';
 import { GAME_NOT_FOUND } from 'src/game/game.errors';
 import { ID, objectIdToString } from 'src/utils';
@@ -103,7 +103,7 @@ export class GameSessionService {
     return this.redisClient.hgetall(gameKey);
   };
 
-  leave = async (gameId: ID, userId: ID) => {
+  leave = async (gameId: ID, userId: ID): Promise<GameSession> => {
     const gameKey = this.key(objectIdToString(gameId));
     const game = await this.getGame(gameId);
 
@@ -111,18 +111,26 @@ export class GameSessionService {
       throw new Error(GAME_NOT_FOUND)
     }
 
-    if (game.status === GameStatus.Awaiting) {
-      await this.redisClient.hset(gameKey, {
-        players: without(game.players, objectIdToString(userId))
-      })
-    } else {
-      await this.redisClient.hset(gameKey, {
-        observers: without(game.observers, objectIdToString(userId))
-      })
+    const { players, observers } = game;
+    const gameHasThisPlayer = players.some((player) => player === userId);
+    const gameHasThisObserver = observers.some((observer) => observer === userId);
+
+    switch (true) {
+      case gameHasThisPlayer: {
+        await this.redisClient.hset(gameKey, {
+          players: without(game.players, objectIdToString(userId))
+        });
+        break;
+      }
+      case gameHasThisObserver: {
+        await this.redisClient.hset(gameKey, {
+          observers: without(game.observers, objectIdToString(userId))
+        })
+      }
     }
 
-    const updatedGame = await this.redisClient.hgetall(gameKey);
-    if (!updatedGame.players && !updatedGame.observers) {
+    const updatedGame = await this.getGame(gameId);
+    if (!updatedGame.players?.length && !updatedGame.observers?.length) {
       await this.redisClient.del(gameKey);
       return null;
     }
@@ -135,6 +143,6 @@ export class GameSessionService {
   };
 
   getObserversCount = (observers: ID[]) => {
-    return observers.length || 0;
+    return observers?.length || 0;
   }
 }
