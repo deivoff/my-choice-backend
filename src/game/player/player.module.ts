@@ -3,6 +3,7 @@ import { RedisService } from 'nestjs-redis';
 import { PlayerService } from 'src/game/player/player.service';
 import { UserModule } from 'src/user/user.module';
 import { UserService } from 'src/user/user.service';
+import { PlayerResolver } from 'src/game/player/player.resolver';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { UserService } from 'src/user/user.service';
   providers: [
     PlayerService,
     UserService,
+    PlayerResolver,
     {
       provide: 'PUBLISHER',
       useFactory: (redisService: RedisService) => {

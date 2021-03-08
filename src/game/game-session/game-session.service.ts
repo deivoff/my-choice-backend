@@ -42,7 +42,7 @@ export class GameSessionService {
     });
 
     if (players?.length) {
-      await Promise.all(players.map(this.playerService.initPlayer))
+      await Promise.all(players.map((id) => this.playerService.initPlayer(id, _id)));
     }
 
     return await this.redisClient.hgetall(this.key(_id));
@@ -71,19 +71,30 @@ export class GameSessionService {
     }
 
     const players = game.players.split(',');
-    if (players.includes(userId)) {
+    const observers = game.observers.split(',');
+    const gameHasThisPlayer = players.some((player) => player === userId);
+    const gameHasThisObserver = observers.some((observer) => observer === userId);
 
-    }
-
-    if (game.status === GameStatus.Awaiting) {
-      await this.playerService.initPlayer(userId);
-      await this.redisClient.hset(gameKey, {
-        players: union(players, [userId]).join()
-      })
-    } else {
-      await this.redisClient.hset(gameKey, {
-        observers: union(game.observers.split(','), [userId]).join()
-      })
+    switch (true) {
+      case gameHasThisObserver:
+      case gameHasThisPlayer: {
+        await this.playerService.findOneAndUpdate(userId, {
+          disconnected: false,
+        });
+        break;
+      }
+      case game.status === GameStatus.Awaiting: {
+        await this.playerService.initPlayer(userId, gameId);
+        await this.redisClient.hset(gameKey, {
+          players: union(players, [userId]).join()
+        });
+        break;
+      }
+      default: {
+        await this.redisClient.hset(gameKey, {
+          observers: union(observers, [userId]).join()
+        })
+      }
     }
 
     return this.redisClient.hgetall(gameKey);

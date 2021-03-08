@@ -1,6 +1,5 @@
-import { Field, ObjectType, PickType, registerEnumType, Int } from '@nestjs/graphql';
-import { User } from 'src/user/entities/user.entity';
-import { Resources } from 'src/game/resources/resources.entity';
+import { Field, ObjectType, registerEnumType, Int } from '@nestjs/graphql';
+import { Types } from 'mongoose';
 
 export enum PlayerPosition {
   Awaiting = 'Awaiting',
@@ -12,9 +11,9 @@ export enum PlayerPosition {
 export enum PlayerStatus {
   Awaiting = 'Awaiting',
   InGame = 'InGame',
-  Gameover = 'Gameover',
   Hold = 'Hold',
   Winner = 'Winner',
+  Gameover = 'Gameover'
 }
 
 registerEnumType(PlayerPosition, {
@@ -26,7 +25,10 @@ registerEnumType(PlayerStatus, {
 });
 
 @ObjectType()
-export class Player extends PickType(User, ['_id']){
+export class Player {
+
+  @Field(() => Types.ObjectId)
+  _id: string;
 
   @Field({ nullable: true })
   avatar: string;
@@ -34,14 +36,19 @@ export class Player extends PickType(User, ['_id']){
   @Field()
   nickname: string;
 
-  @Field(() => Resources, { nullable: true })
-  resources?: Resources;
+  @Field(() => PlayerStatus)
+  status: PlayerStatus;
+
+  /**
+   * @description save resources as array string: white,dark,money,lives.
+   */
+  resources?: string;
 
   @Field(() => PlayerPosition, { nullable: true })
   position?: PlayerPosition;
 
-  @Field(() => PlayerStatus)
-  status: PlayerStatus;
+  @Field()
+  disconnected?: boolean;
 
   @Field(() => Int, { nullable: true })
   hold?: number;

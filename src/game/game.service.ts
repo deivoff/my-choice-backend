@@ -63,7 +63,7 @@ export class GameService {
   }
 
   private async publishActiveGame(gameId: string | Types.ObjectId) {
-    const activeGame = await  this.getActiveGame(gameId);
+    const activeGame = await this.getActiveGame(gameId);
     await this.pubSub.publish('updateActiveGame', {
       updateActiveGame: activeGame
     })
