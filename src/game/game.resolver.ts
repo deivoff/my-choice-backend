@@ -34,6 +34,16 @@ export class GameResolver {
   }
 
   @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async startGame(
+    @Args('gameId') gameId: Types.ObjectId,
+    @DecodedUser() { _id }: DecodedUser
+  ) {
+    await this.gameService.start(gameId, _id);
+    return true;
+  }
+
+  @UseGuards(AuthGuard)
   @Query(() => GameSession)
   joinGame(
     @Args('gameId') gameId: Types.ObjectId,

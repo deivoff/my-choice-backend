@@ -108,6 +108,14 @@ export class GameService {
     return game;
   }
 
+  async start(gameId: ID, userId: ID) {
+    const game = await this.gameSessionService.start(gameId, userId);
+
+    this.publishActiveGames();
+    this.publishActiveGame(gameId);
+    return game;
+  }
+
   findAll() {
     return `This action returns all game`;
   }

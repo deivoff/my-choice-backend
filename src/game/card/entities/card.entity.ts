@@ -1,5 +1,5 @@
 import { prop } from '@typegoose/typegoose';
-import { Field, Int, InterfaceType, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, Int, InterfaceType, ObjectType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 import { FIELD_DICTIONARY, FieldType } from 'src/game/field/field.dictionaries';
 import { Resources } from 'src/game/resources/resources.entity';
@@ -39,6 +39,7 @@ export class Result {
   @Field(() => Boolean, { nullable: true })
   @prop()
   gameover?: boolean;
+
 }
 
 @ObjectType()
@@ -68,6 +69,7 @@ export class Card {
   @Field()
   readonly _id: Types.ObjectId;
 
+  @Field(() => FieldType)
   readonly type: FieldType;
 
   @Field()

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCardInput } from 'src/game/card/dto/create-card.input';
+import { ChoicesCardInput } from 'src/game/card/dto/create-card.input';
 import { InjectModel } from 'nestjs-typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { Card } from 'src/game/card/entities/card.entity';
@@ -10,7 +10,7 @@ export class CardService {
   constructor(
     @InjectModel(Card) private readonly cardModel: ReturnModelType<typeof Card>
   ) {}
-  create(createGameFieldInput: CreateCardInput) {
+  create(createGameFieldInput: ChoicesCardInput) {
     return this.cardModel.create(createGameFieldInput);
   }
 

@@ -57,8 +57,9 @@ export class GameSessionService {
     await this.redisClient.del(this.key(gameKey));
   };
 
-  findOne = (id: ID) => {
-    return this.redisClient.hgetall(this.key(objectIdToString(id))).then(fromRedisToGameSession)
+  findOne = async (id: ID) => {
+    const res = await this.redisClient.hgetall(this.key(objectIdToString(id)));
+    return isEmpty(res) ? null : fromRedisToGameSession(res);
   };
 
   findOneAndUpdate = async (id: ID, updatedFields: Partial<GameSession>) => {
@@ -89,7 +90,7 @@ export class GameSessionService {
   join = async (gameId: ID, userId: ID): Promise<GameSession> => {
     const game = await this.findOne(gameId);
 
-    if (!game || isEmpty(game)) {
+    if (!game) {
       throw new Error(GAME_NOT_FOUND)
     }
 
@@ -156,6 +157,16 @@ export class GameSessionService {
     return updatedGame;
   };
 
+  start = async (gameId: ID, userId: ID): Promise<GameSession> => {
+    const game = await this.findOne(gameId);
+
+    if (!game || isEmpty(game)) {
+      throw new Error(GAME_NOT_FOUND)
+    }
+
+    return null;
+  };
+
   getPlayers = (players: ID[]) => {
     return this.playerService.findSome(players);
   };
@@ -163,7 +174,6 @@ export class GameSessionService {
   getObserversCount = (observers: ID[]): number => {
     return observers?.length || 0;
   };
-
 
   connect = async (userId: ID): Promise<Types.ObjectId | void> => {
     const player = await this.playerService.findOneAndUpdate(userId, { disconnected: false });

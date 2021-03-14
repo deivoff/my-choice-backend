@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { CardService } from 'src/game/card/card.service';
 import { Card } from 'src/game/card/entities/card.entity';
-import { CreateCardInput } from 'src/game/card/dto/create-card.input';
+import { ChoicesCardInput } from 'src/game/card/dto/create-card.input';
 import { Types } from 'mongoose';
 
 @Resolver(() => Card)
@@ -9,7 +9,7 @@ export class CardResolver {
   constructor(private readonly cardService: CardService) {}
 
   @Mutation(() => Card)
-  createCard(@Args('createFieldInput') createFieldInput: CreateCardInput) {
+  createChoicesCard(@Args('createChoicesCard') createFieldInput: ChoicesCardInput) {
     return this.cardService.create(createFieldInput);
   }
 

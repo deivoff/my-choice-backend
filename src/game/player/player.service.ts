@@ -4,6 +4,7 @@ import { UserService } from 'src/user/user.service';
 import { Player, PlayerStatus } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
 import { fromPlayerToRedis, fromRedisToPlayer } from 'src/game/player/player.redis-adapter';
+import { isEmpty } from 'lodash';
 
 @Injectable()
 export class PlayerService {
@@ -38,9 +39,10 @@ export class PlayerService {
     await this.redisClient.del(this.key(playerId));
   };
 
-  findOne = async (id: ID) => {
+  findOne = async (id: ID): Promise<null | Player> => {
     const playerId = this.key(objectIdToString(id));
-    return await this.redisClient.hgetall(playerId).then(fromRedisToPlayer);
+    const res = await this.redisClient.hgetall(playerId);
+    return isEmpty(res) ? null : fromRedisToPlayer(res);
   };
 
   findSome = (ids: ID[]) => {
