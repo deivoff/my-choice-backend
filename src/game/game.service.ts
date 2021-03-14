@@ -7,6 +7,7 @@ import { Game } from 'src/game/game.entity';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSessionService } from 'src/game/game-session/game-session.service';
 import { ID } from 'src/utils';
+import { decode } from 'jsonwebtoken';
 
 @Injectable()
 export class GameService {
@@ -15,6 +16,30 @@ export class GameService {
     @Inject('PUB_SUB') private readonly  pubSub: PubSubEngine,
     private readonly gameSessionService: GameSessionService,
 ) {}
+
+  async connect(token?: string) {
+    if (!token) return;
+
+    const data = decode(token);
+    const gameId = await this.gameSessionService.connect(data['_id']);
+  }
+
+  async disconnect(token?: string) {
+    if (!token) return;
+
+    const data = decode(token);
+    const gameId = await this.gameSessionService.disconnect(data['_id']);
+
+    if (!gameId) return;
+
+    if (typeof gameId === 'boolean') {
+      await this.publishActiveGames();
+      return;
+    }
+
+
+    await this.publishActiveGame(gameId);
+  }
 
   async create(createGameInput: { name: string; creator: string, observerMode?: boolean }) {
     const gameId = Types.ObjectId();
@@ -50,7 +75,7 @@ export class GameService {
   }
 
   getActiveGame(gameId: ID) {
-    return this.gameSessionService.getGame(gameId)
+    return this.gameSessionService.findOne(gameId)
   }
 
   private async publishActiveGames() {

@@ -5,7 +5,8 @@ import { GameSession, GameStatus } from 'src/game/game-session/game-session.enti
 import { PlayerService } from 'src/game/player/player.service';
 import { GAME_NOT_FOUND } from 'src/game/game.errors';
 import { ID, objectIdToString } from 'src/utils';
-import { fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
+import { fromGameSessionToRedis, fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
+import { Types } from 'mongoose';
 
 interface CreateGameSession {
   name: string;
@@ -50,11 +51,30 @@ export class GameSessionService {
     return await this.redisClient.hgetall(this.key(_id));
   };
 
-  getGame = (id: ID) => {
+  remove = async (gameId: ID) => {
+    const gameKey = objectIdToString(gameId);
+
+    await this.redisClient.del(this.key(gameKey));
+  };
+
+  findOne = (id: ID) => {
     return this.redisClient.hgetall(this.key(objectIdToString(id))).then(fromRedisToGameSession)
   };
 
-  getAll = async () => {
+  findOneAndUpdate = async (id: ID, updatedFields: Partial<GameSession>) => {
+    const gameKey = this.key(objectIdToString(id));
+
+    const game = await this.redisClient.hgetall(gameKey).then(fromRedisToGameSession);
+    const updatedGame: GameSession = {
+      ...game,
+      ...updatedFields,
+    };
+
+    await this.redisClient.hset(gameKey, fromGameSessionToRedis(updatedGame));
+    return updatedGame;
+  };
+
+  findAll = async () => {
     const [,keys] = await this.redisClient.scan(0, 'match', this.key('*'));
     return await Promise.all(keys.sort().reverse().map(
       id => this.redisClient.hgetall(id).then(fromRedisToGameSession)
@@ -62,13 +82,12 @@ export class GameSessionService {
   };
 
   getAllAwaiting = async () => {
-    const games = await this.getAll();
+    const games = await this.findAll();
     return games.filter(({ status }) => status === GameStatus.Awaiting)
   };
 
-  join = async (gameId: ID, userId: ID) => {
-    const gameKey = this.key(objectIdToString(gameId));
-    const game = await this.getGame(gameId);
+  join = async (gameId: ID, userId: ID): Promise<GameSession> => {
+    const game = await this.findOne(gameId);
 
     if (!game || isEmpty(game)) {
       throw new Error(GAME_NOT_FOUND)
@@ -88,24 +107,23 @@ export class GameSessionService {
       }
       case game.status === GameStatus.Awaiting: {
         await this.playerService.initPlayer(userId, gameId);
-        await this.redisClient.hset(gameKey, {
-          players: union(players, [userId]).join()
+        await this.findOneAndUpdate(gameId, {
+          players: union(game.players, [objectIdToString(userId)])
         });
         break;
       }
       default: {
-        await this.redisClient.hset(gameKey, {
-          observers: union(observers, [userId]).join()
+        await this.findOneAndUpdate(gameId, {
+          observers: union(game.observers, [objectIdToString(userId)])
         })
       }
     }
 
-    return this.redisClient.hgetall(gameKey);
+    return await this.findOne(gameId);
   };
 
   leave = async (gameId: ID, userId: ID): Promise<GameSession> => {
-    const gameKey = this.key(objectIdToString(gameId));
-    const game = await this.getGame(gameId);
+    const game = await this.findOne(gameId);
 
     if (!game || isEmpty(game)) {
       throw new Error(GAME_NOT_FOUND)
@@ -117,21 +135,21 @@ export class GameSessionService {
 
     switch (true) {
       case gameHasThisPlayer: {
-        await this.redisClient.hset(gameKey, {
+        await this.findOneAndUpdate(gameId, {
           players: without(game.players, objectIdToString(userId))
         });
         break;
       }
       case gameHasThisObserver: {
-        await this.redisClient.hset(gameKey, {
+        await this.findOneAndUpdate(gameId, {
           observers: without(game.observers, objectIdToString(userId))
         })
       }
     }
 
-    const updatedGame = await this.getGame(gameId);
+    const updatedGame = await this.findOne(gameId);
     if (!updatedGame.players?.length && !updatedGame.observers?.length) {
-      await this.redisClient.del(gameKey);
+      await this.remove(gameId);
       return null;
     }
 
@@ -142,7 +160,32 @@ export class GameSessionService {
     return this.playerService.findSome(players);
   };
 
-  getObserversCount = (observers: ID[]) => {
+  getObserversCount = (observers: ID[]): number => {
     return observers?.length || 0;
-  }
+  };
+
+
+  connect = async (userId: ID): Promise<Types.ObjectId | void> => {
+    const player = await this.playerService.findOneAndUpdate(userId, { disconnected: false });
+
+    if (player.gameId) {
+      return player.gameId;
+    }
+  };
+
+  disconnect = async (userId: ID): Promise<Types.ObjectId | true | void>  => {
+    const player = await this.playerService.findOneAndUpdate(userId, { disconnected: true });
+
+    if (!player.gameId) return;
+
+
+    const game = await this.findOne(player.gameId);
+
+    if (!game.observers.length && !game.players.length) {
+      await this.remove(player.gameId);
+      return true;
+    }
+
+    return player.gameId;
+  };
 }

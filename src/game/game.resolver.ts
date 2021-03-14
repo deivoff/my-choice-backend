@@ -10,6 +10,7 @@ import { UserService } from 'src/user/user.service';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSession } from 'src/game/game-session/game-session.entity';
 import { Player } from 'src/game/player/player.entity';
+import { objectIdToString } from 'src/utils';
 
 @Resolver(() => Game)
 export class GameResolver {
@@ -52,8 +53,12 @@ export class GameResolver {
   }
 
   @Subscription(() => GameSession, {
-    filter: (payload, variables) =>
-      payload.updateActiveGame._id === variables.gameId,
+    filter: (
+      payload: { updateActiveGame: GameSession },
+      variables: { gameId: Types.ObjectId }
+      ) => {
+      return objectIdToString(payload.updateActiveGame._id) === objectIdToString(variables.gameId);
+    },
   })
   async updateActiveGame (
     @Args('gameId') gameId: Types.ObjectId

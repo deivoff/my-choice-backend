@@ -26,8 +26,8 @@ export const fromRedisToGameSession = ({
   ...other as unknown as GameSessionRecord,
   _id: Types.ObjectId(_id),
   creator: Types.ObjectId(creator),
-  players: players.split(','),
-  observers: observers.split(',')
+  players: players?.split(',') ?? [],
+  observers: observers?.split(',') ?? []
 });
 
 export const fromGameSessionToRedis = ({

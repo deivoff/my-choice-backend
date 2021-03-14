@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { GameModule } from './game/game.module';
 import { MessageModule } from './message/message.module';
+import { GameService } from 'src/game/game.service';
 
 @Module({
   imports: [
@@ -33,12 +34,27 @@ import { MessageModule } from './message/message.module';
       },
       inject:[ConfigService]
     }),
-    GraphQLModule.forRoot({
-      autoSchemaFile: 'schema.gql',
-      installSubscriptionHandlers: true,
-      subscriptions: {
-        onConnect: (connectionParams) => ({ authToken: connectionParams['authToken'] }),
-      }
+    GraphQLModule.forRootAsync({
+      imports: [GameModule],
+      inject: [GameService],
+      useFactory: (gameService: GameService) => ({
+        autoSchemaFile: 'schema.gql',
+        installSubscriptionHandlers: true,
+        subscriptions: {
+          onConnect: (connectionParams) => {
+            const authToken = connectionParams['authToken'];
+            if (authToken) {
+              gameService.connect(authToken);
+            }
+            return ({ authToken });
+            },
+          onDisconnect: ( _ ,ctx) => ctx.initPromise.then(res => {
+            if (typeof res === 'object') {
+              gameService.disconnect(res?.authToken)
+            }
+          }),
+        }
+      }),
     }),
     TypegooseModule.forRootAsync({
       imports: [ConfigModule],

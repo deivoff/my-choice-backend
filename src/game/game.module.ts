@@ -45,5 +45,6 @@ import { UserService } from 'src/user/user.service';
       inject: [RedisService]
     },
   ],
+  exports: [GameService],
 })
 export class GameModule {}
