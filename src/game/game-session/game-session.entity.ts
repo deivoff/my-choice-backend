@@ -1,6 +1,5 @@
 import { Field, ObjectType, PickType, registerEnumType } from '@nestjs/graphql';
 import { Game } from 'src/game/game.entity';
-import { Types } from 'mongoose';
 
 export enum GameStatus {
   Awaiting = 'Awaiting',

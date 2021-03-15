@@ -19,7 +19,7 @@ import { FieldType } from 'src/game/field/field.dictionaries';
       schemaOptions: { discriminatorKey: 'type', collection: 'cards' },
       typegooseClass: Card,
       discriminators: [
-        { typegooseClass: DreamTest, discriminatorId: FieldType.DreamTest },
+        { typegooseClass: DreamTest, discriminatorId: FieldType.Dream },
         { typegooseClass: Situation, discriminatorId: FieldType.Situation },
         { typegooseClass: Reaction, discriminatorId: FieldType.Reaction },
         { typegooseClass: Offer, discriminatorId: FieldType.Offer },

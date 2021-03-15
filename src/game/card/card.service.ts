@@ -10,8 +10,12 @@ export class CardService {
   constructor(
     @InjectModel(Card) private readonly cardModel: ReturnModelType<typeof Card>
   ) {}
-  create(createGameFieldInput: ChoicesCardInput) {
-    return this.cardModel.create(createGameFieldInput);
+  createChoicesCard(createChoicesCardInput: ChoicesCardInput) {
+    return this.cardModel.create(createChoicesCardInput);
+  }
+
+  remove(cardId: Types.ObjectId) {
+    return this.cardModel.findByIdAndRemove(cardId)
   }
 
   findAll() {

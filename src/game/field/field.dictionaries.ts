@@ -7,7 +7,7 @@ export enum FieldType {
   Offer = 'Offer',
   Reaction = 'Reaction',
   Opportunity = 'Opportunity',
-  DreamTest = 'Dream',
+  Dream = 'Dream',
   Activity = 'Activity',
   Problem = 'Problem'
 }
@@ -22,7 +22,7 @@ export const FIELD_DICTIONARY = {
   [FieldType.Offer]: 'Предложение',
   [FieldType.Reaction]: 'Реакция',
   [FieldType.Opportunity]: 'Возможность',
-  [FieldType.DreamTest]: 'Мечта-тест',
+  [FieldType.Dream]: 'Мечта-тест',
   [FieldType.Activity]: 'Активность',
   [FieldType.Problem]: 'Проблема',
 };

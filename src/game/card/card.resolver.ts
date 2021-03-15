@@ -9,8 +9,15 @@ export class CardResolver {
   constructor(private readonly cardService: CardService) {}
 
   @Mutation(() => Card)
-  createChoicesCard(@Args('createChoicesCard') createFieldInput: ChoicesCardInput) {
-    return this.cardService.create(createFieldInput);
+  createChoicesCard(@Args('createChoicesCard') createChoicesCard: ChoicesCardInput) {
+    return this.cardService.createChoicesCard(createChoicesCard);
+  }
+
+  @Mutation(() => Card)
+  removeCard(
+    @Args('cardId') cardId: Types.ObjectId
+  ) {
+    return this.cardService.remove(cardId)
   }
 
   @Query(() => [Card], { name: 'cards' })
