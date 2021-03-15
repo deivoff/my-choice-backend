@@ -70,7 +70,7 @@ export class Card {
   readonly _id: Types.ObjectId;
 
   @Field(() => FieldType)
-  readonly type: FieldType;
+  type: FieldType;
 
   @Field()
   get typeName(): string {
@@ -104,7 +104,7 @@ export class Incident extends Card {
 
 }
 
-export class DreamTest extends ChoiceCard {}
+export class Dream extends ChoiceCard {}
 export class Situation extends ChoiceCard {}
 export class Reaction extends ChoiceCard {}
 export class Offer extends ChoiceCard {}

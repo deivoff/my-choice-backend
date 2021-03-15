@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ChoicesCardInput } from 'src/game/card/dto/create-card.input';
 import { InjectModel } from 'nestjs-typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { Card } from 'src/game/card/entities/card.entity';
 import { Types } from 'mongoose';
+import { IncidentCardInput } from 'src/game/card/dto/create-incident-card.input';
+import { ChoicesCardInput } from 'src/game/card/dto/create-choices-card.input';
+import { FieldType } from 'src/game/field/field.dictionaries';
 
 @Injectable()
 export class CardService {
@@ -12,6 +14,13 @@ export class CardService {
   ) {}
   createChoicesCard(createChoicesCardInput: ChoicesCardInput) {
     return this.cardModel.create(createChoicesCardInput);
+  }
+
+  createIncidentCard(createIncidentCard: IncidentCardInput) {
+    return this.cardModel.create({
+      ...createIncidentCard,
+      type: FieldType.Incident,
+    });
   }
 
   remove(cardId: Types.ObjectId) {

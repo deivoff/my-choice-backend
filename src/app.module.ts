@@ -61,6 +61,7 @@ import { GameService } from 'src/game/game.service';
       useFactory: async (configService: ConfigService) => ({
         useUnifiedTopology: true,
         useNewUrlParser: true,
+        useFindAndModify: true,
         ...configService.get('database')
       }),
       inject: [ConfigService],

@@ -4,7 +4,7 @@ import { TypegooseModule } from 'nestjs-typegoose';
 import { CardService } from 'src/game/card/card.service';
 import { CardResolver } from 'src/game/card/card.resolver';
 import {
-  DreamTest,
+  Dream,
   Card,
   Incident,
   Offer,
@@ -19,7 +19,7 @@ import { FieldType } from 'src/game/field/field.dictionaries';
       schemaOptions: { discriminatorKey: 'type', collection: 'cards' },
       typegooseClass: Card,
       discriminators: [
-        { typegooseClass: DreamTest, discriminatorId: FieldType.Dream },
+        { typegooseClass: Dream, discriminatorId: FieldType.Dream },
         { typegooseClass: Situation, discriminatorId: FieldType.Situation },
         { typegooseClass: Reaction, discriminatorId: FieldType.Reaction },
         { typegooseClass: Offer, discriminatorId: FieldType.Offer },
