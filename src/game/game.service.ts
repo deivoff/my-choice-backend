@@ -97,15 +97,17 @@ export class GameService {
 
     this.publishActiveGames();
     this.publishActiveGame(gameId);
-    return game
+    return game;
   }
 
-  async leave(gameId: ID, userId: ID) {
-    const game = await this.gameSessionService.leave(gameId, userId);
+  async leave(userId: ID) {
+    const game = await this.gameSessionService.leave(userId);
 
     this.publishActiveGames();
-    this.publishActiveGame(gameId);
-    return game;
+
+    if (game) {
+      this.publishActiveGame(game._id);
+    }
   }
 
   async start(gameId: ID, userId: ID) {

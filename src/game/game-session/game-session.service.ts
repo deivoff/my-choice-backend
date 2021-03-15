@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { union, isEmpty, without } from 'lodash';
+import { isEmpty, union, without } from 'lodash';
 import { GameSession, GameStatus } from 'src/game/game-session/game-session.entity';
 import { PlayerService } from 'src/game/player/player.service';
 import { GAME_NOT_FOUND } from 'src/game/game.errors';
@@ -115,7 +115,7 @@ export class GameSessionService {
       }
       default: {
         await this.findOneAndUpdate(gameId, {
-          observers: union(game.observers, [objectIdToString(userId)])
+          observers: union(game.observers, [objectIdToString(userId)]),
         })
       }
     }
@@ -123,27 +123,34 @@ export class GameSessionService {
     return await this.findOne(gameId);
   };
 
-  leave = async (gameId: ID, userId: ID): Promise<GameSession> => {
-    const game = await this.findOne(gameId);
+  leave = async (userId: ID): Promise<GameSession | null> => {
+    const player = await this.playerService.findOne(userId);
+
+    if (!player.gameId) return null;
+    const game = await this.findOne(player.gameId);
 
     if (!game || isEmpty(game)) {
       throw new Error(GAME_NOT_FOUND)
     }
 
+    const { _id: gameId } = game;
     const { players, observers } = game;
     const gameHasThisPlayer = players.some((player) => player === userId);
     const gameHasThisObserver = observers.some((observer) => observer === userId);
 
     switch (true) {
       case gameHasThisPlayer: {
-        await this.findOneAndUpdate(gameId, {
-          players: without(game.players, objectIdToString(userId))
-        });
+        await Promise.all([
+          this.findOneAndUpdate(gameId, {
+            players: without(game.players, objectIdToString(userId)),
+          }),
+          this.playerService.remove(userId)]
+        );
         break;
       }
       case gameHasThisObserver: {
         await this.findOneAndUpdate(gameId, {
-          observers: without(game.observers, objectIdToString(userId))
+          observers: without(game.observers, objectIdToString(userId)),
         })
       }
     }
@@ -187,7 +194,6 @@ export class GameSessionService {
     const player = await this.playerService.findOneAndUpdate(userId, { disconnected: true });
 
     if (!player.gameId) return;
-
 
     const game = await this.findOne(player.gameId);
 

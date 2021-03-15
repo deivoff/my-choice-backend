@@ -55,10 +55,9 @@ export class GameResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async leaveGame(
-    @Args('gameId') gameId: Types.ObjectId,
     @DecodedUser() decodedUser: DecodedUser
   ) {
-    await this.gameService.leave(gameId, decodedUser._id);
+    await this.gameService.leave(decodedUser._id);
     return true
   }
 

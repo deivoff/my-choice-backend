@@ -50,6 +50,6 @@ export class Player extends PickType(User, ['_id']){
   @Field(() => Int, { nullable: true })
   hold?: number;
 
-  gameId?: Types.ObjectId;
+  gameId?: Types.ObjectId | null;
 
 }
