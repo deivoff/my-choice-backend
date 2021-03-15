@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CardService } from './game-field.service';
+import { CardService } from './card.service';
 
 describe('GameFieldService', () => {
   let service: CardService;
