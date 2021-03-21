@@ -32,6 +32,9 @@ export class Player extends PickType(User, ['_id']){
   @Field({ nullable: true })
   avatar: string;
 
+  @Field(() => Int, { nullable: true })
+  dream?: number;
+
   @Field()
   nickname: string;
 

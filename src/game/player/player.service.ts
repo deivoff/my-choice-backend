@@ -49,9 +49,12 @@ export class PlayerService {
     return Promise.all(ids.map(this.findOne))
   };
 
-  findOneAndUpdate = async (id: ID, updatedFields: Partial<Player>) => {
+  findOneAndUpdate = async (id: ID, updatedFields: Partial<Player>): Promise<null | Player> => {
     const playerId = this.key(objectIdToString(id));
-    const player = await this.redisClient.hgetall(playerId).then(fromRedisToPlayer);
+    const player = await this.findOne(id);
+
+    if (!player) return null;
+
     const updatedPlayer: Player = {
       ...player,
       ...updatedFields,

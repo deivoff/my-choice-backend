@@ -118,6 +118,12 @@ export class GameService {
     return game;
   }
 
+  async choiceDream(dream: number, userId: ID) {
+    const game = await this.gameSessionService.choiceDream(dream, userId);
+
+    this.publishActiveGame(game._id);
+  }
+
   findAll() {
     return `This action returns all game`;
   }

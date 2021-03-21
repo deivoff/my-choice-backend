@@ -12,26 +12,26 @@ export class CardService {
   constructor(
     @InjectModel(Card) private readonly cardModel: ReturnModelType<typeof Card>
   ) {}
-  createChoicesCard(createChoicesCardInput: ChoicesCardInput) {
+  createChoicesCard = (createChoicesCardInput: ChoicesCardInput) => {
     return this.cardModel.create(createChoicesCardInput);
-  }
+  };
 
-  createIncidentCard(createIncidentCard: IncidentCardInput) {
+  createIncidentCard = (createIncidentCard: IncidentCardInput) => {
     return this.cardModel.create({
       ...createIncidentCard,
       type: FieldType.Incident,
     });
-  }
+  };
 
-  remove(cardId: Types.ObjectId) {
+  remove = (cardId: Types.ObjectId) => {
     return this.cardModel.findByIdAndRemove(cardId)
-  }
+  };
 
-  findAll() {
+  findAll = () => {
     return this.cardModel.find();
-  }
+  };
 
-  findOne(_id: Types.ObjectId) {
+  findOne = (_id: Types.ObjectId) => {
     return this.cardModel.findById(_id);
   }
 

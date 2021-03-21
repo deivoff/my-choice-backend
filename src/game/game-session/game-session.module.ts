@@ -6,15 +6,19 @@ import { PlayerService } from 'src/game/player/player.service';
 import { GameSessionResolver } from 'src/game/game-session/game-session.resolver';
 import { UserModule } from 'src/user/user.module';
 import { UserService } from 'src/user/user.service';
+import { CardModule } from 'src/game/card/card.module';
+import { CardService } from 'src/game/card/card.service';
 
 @Module({
   imports: [
     PlayerModule,
     UserModule,
+    CardModule,
   ],
   providers: [
     PlayerService,
     UserService,
+    CardService,
     GameSessionService,
     GameSessionResolver,
     {
@@ -27,7 +31,6 @@ import { UserService } from 'src/user/user.service';
   ],
   exports: [
     GameSessionService,
-    PlayerModule,
   ]
 })
 export class GameSessionModule {}

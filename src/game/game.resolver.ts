@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ResolveField, Parent, Subscription } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent, Subscription, Int } from '@nestjs/graphql';
 import { GameService } from './game.service';
 import { Game } from 'src/game/game.entity';
 import { CreateGameInput } from './dto/create-game.input';
@@ -58,6 +58,17 @@ export class GameResolver {
     @DecodedUser() decodedUser: DecodedUser
   ) {
     await this.gameService.leave(decodedUser._id);
+    return true
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async choiceDream(
+    @Args('dream', { type: () => Int }) dream: number,
+    @DecodedUser() decodedUser: DecodedUser
+  ) {
+    await this.gameService.choiceDream(dream, decodedUser._id);
+
     return true
   }
 

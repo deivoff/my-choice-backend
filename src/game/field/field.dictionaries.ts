@@ -26,3 +26,64 @@ export const FIELD_DICTIONARY = {
   [FieldType.Activity]: 'Активность',
   [FieldType.Problem]: 'Проблема',
 };
+
+export const INNER_FIELDS_COUNT = 20;
+
+const OFFERS_FIELDS = [0, 4, 8, 12, 17];
+const SITUATIONS_FIELDS = [1, 7, 9, 13, 18];
+const INCIDENTS_FIELDS = [2, 6, 10, 15, 19];
+const OPPORTUNITIES_FIELDS = [3, 11, 16];
+const REACTION_FIELDS = [5, 14];
+
+export const INNER_FIELDS = {
+  [FieldType.Offer]: OFFERS_FIELDS,
+  [FieldType.Situation]: SITUATIONS_FIELDS,
+  [FieldType.Incident]: INCIDENTS_FIELDS,
+  [FieldType.Opportunity]: OPPORTUNITIES_FIELDS,
+  [FieldType.Reaction]: REACTION_FIELDS,
+};
+
+export const OUTER_FIELDS_COUNT = 30;
+
+const PROBLEM_FIELDS = {
+  0: 10,
+  4: 5,
+  10: 10,
+  14: 5,
+  18: 5,
+  22: 10,
+  26: 5,
+};
+const ACTIVITY_FIELDS = {
+  1: 10,
+  3: 10,
+  5: 20,
+  7: 20,
+  9: 20,
+  11: 15,
+  13: 10,
+  15: 10,
+  17: 15,
+  19: 15,
+  21: 15,
+  23: 25,
+  25: 10,
+  27: 20,
+  29: 10,
+};
+export const DREAM_FIELDS = {
+  2: 50,
+  6: 100,
+  8: 50,
+  12: 100,
+  16: 50,
+  20: 50,
+  24: 50,
+  28: 100,
+};
+
+export const FROM_INNER_TO_OUTER = {
+  3: 4,
+  11: 16,
+  16: 25,
+};

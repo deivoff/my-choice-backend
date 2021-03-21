@@ -1,5 +1,5 @@
 import { prop } from '@typegoose/typegoose';
-import { Field, InputType, Int, InterfaceType, ObjectType } from '@nestjs/graphql';
+import { Field, Int, InterfaceType, ObjectType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 import { FIELD_DICTIONARY, FieldType } from 'src/game/field/field.dictionaries';
 import { Resources } from 'src/game/resources/resources.entity';
@@ -16,6 +16,7 @@ export class Option {
   @prop()
   description: string;
 
+  @Field(() => Resources)
   @prop({ _id: false })
   resources: Resources
 
@@ -99,6 +100,7 @@ export class ChoiceCard extends Card {
 })
 export class Incident extends Card {
 
+  @Field(() => Action)
   @prop({ _id: false })
   action: Action;
 

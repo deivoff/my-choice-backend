@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
-import { Resources } from 'src/game/resources/resources.entity';
 import { Player } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
+import { fromResourcesToString, fromStringToResources } from 'src/game/resources/resources.redis-adapter';
+import { isNil } from '@nestjs/common/utils/shared.utils';
 
 enum Connection {
   Disconnect = '1',
@@ -14,25 +15,10 @@ type PlayerRedisAdapter = Omit<Player, '_id' | 'gameId'> & {
 }
 
 type PlayerRecord = Omit<Player, '_id' | 'resources' | 'gameId' | 'disconnected' | 'hold'>;
-function fromStringToResources(resources?: string | null): Resources | null {
-  if (!resources) return null;
-  const [white, dark, money, lives] = resources.split(',');
 
-  return {
-    white: white ? Number(white) : null,
-    dark: dark ? Number(dark) : null,
-    money: money ? Number(money) : null,
-    lives: lives ? Number(lives) : null
-  };
-}
-
-function fromResourcesToString(resources?: Resources | null): string {
-  if (!resources) return '';
-  const { white, dark, money, lives } = resources;
-  return [white, dark, money, lives].join();
-}
 
 export const fromRedisToPlayer = ({
+  dream,
   resources,
   gameId,
   disconnected,
@@ -46,9 +32,11 @@ export const fromRedisToPlayer = ({
   disconnected: disconnected === Connection.Disconnect,
   gameId: gameId ? Types.ObjectId(gameId) : null,
   resources: fromStringToResources(resources),
+  dream: dream === '' ? null : Number(dream),
 });
 
 export const fromPlayerToRedis = ({
+  dream,
   resources,
   gameId,
   disconnected,
@@ -62,4 +50,5 @@ export const fromPlayerToRedis = ({
   disconnected: disconnected ? Connection.Disconnect : Connection.Connect,
   gameId: !gameId ? '' : objectIdToString(gameId),
   resources: fromResourcesToString(resources),
+  dream: isNil(dream) ? '' : String(dream)
 });

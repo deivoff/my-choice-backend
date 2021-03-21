@@ -16,6 +16,10 @@ function fromIDsToString(ids?: ID[]):string {
   return ids.map(objectIdToString).join()
 }
 
+function fromStringToIDs(idsString?: string) {
+  return idsString?.split(',').filter(Boolean) ?? []
+}
+
 export const fromRedisToGameSession = ({
   _id,
   creator,
@@ -26,8 +30,8 @@ export const fromRedisToGameSession = ({
   ...other as unknown as GameSessionRecord,
   _id: Types.ObjectId(_id),
   creator: Types.ObjectId(creator),
-  players: players?.split(',') ?? [],
-  observers: observers?.split(',') ?? []
+  players: fromStringToIDs(players),
+  observers: fromStringToIDs(observers)
 });
 
 export const fromGameSessionToRedis = ({
