@@ -10,20 +10,8 @@ export enum PlayerPosition {
   Outer = 'Outer',
 }
 
-export enum PlayerStatus {
-  Awaiting = 'Awaiting',
-  InGame = 'InGame',
-  Hold = 'Hold',
-  Winner = 'Winner',
-  Gameover = 'Gameover'
-}
-
 registerEnumType(PlayerPosition, {
   name: 'PlayerPosition',
-});
-
-registerEnumType(PlayerStatus, {
-  name: 'PlayerStatus'
 });
 
 @ObjectType()
@@ -38,21 +26,24 @@ export class Player extends PickType(User, ['_id']){
   @Field()
   nickname: string;
 
-  @Field(() => PlayerStatus)
-  status: PlayerStatus;
-
   @Field(() => Resources, { nullable: true })
   resources?: Resources;
 
   @Field(() => PlayerPosition, { nullable: true })
   position?: PlayerPosition;
 
-  @Field()
-  disconnected?: boolean;
-
   @Field(() => Int, { nullable: true })
   hold?: number;
 
   gameId?: Types.ObjectId | null;
+
+  @Field()
+  disconnected?: boolean;
+
+  @Field()
+  gameover?: boolean;
+
+  @Field()
+  winner?: boolean
 
 }

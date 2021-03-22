@@ -1,10 +1,18 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { UserService } from 'src/user/user.service';
-import { Player, PlayerStatus } from 'src/game/player/player.entity';
+import { Player } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
 import { fromPlayerToRedis, fromRedisToPlayer } from 'src/game/player/player.redis-adapter';
 import { isEmpty } from 'lodash';
+import { Types } from 'mongoose';
+
+
+type GameState = {
+  mover?: string;
+  winner?: string;
+  error?: any;
+}
 
 @Injectable()
 export class PlayerService {
@@ -25,12 +33,69 @@ export class PlayerService {
       _id: userId,
       nickname: user.nickname,
       avatar: user.avatar,
-      status: PlayerStatus.Awaiting,
-      gameId
+      gameover: false,
+      winner: false,
+      gameId,
     };
 
     await this.redisClient.hset(playerId, fromPlayerToRedis(player));
     return await this.redisClient.hgetall(playerId).then(fromRedisToPlayer);
+  };
+
+  private updatePlayersAndGetMover = async (
+    activePlayers: Player[],
+    currentPlayerIndex: number = 0,
+    deep: number = activePlayers.length * 3
+  ): Promise<Types.ObjectId | null> => {
+    if (!deep) return null;
+
+    const moverIndex = currentPlayerIndex % activePlayers.length;
+    const mover = await this.findOne(activePlayers[moverIndex]._id);
+
+    if (!mover.hold) return mover._id;
+
+    await this.findOneAndUpdate(mover._id, {
+      hold: mover.hold - 1
+    });
+
+    return await this.updatePlayersAndGetMover(activePlayers, moverIndex + 1, deep - 1);
+  };
+
+  getNextMover = async (players: Player[], currentPlayer: Player = players[0]): Promise<GameState> => {
+    if (players.length === 1) {
+      const [player] = players;
+      const playerId = player._id.toHexString();
+      return {
+        mover: playerId,
+        winner: player.winner ? playerId : null
+      }
+    }
+
+    const activePlayers = players.filter(player => !(player.gameover || player.disconnected));
+
+    if (activePlayers.length === 1) {
+      const [winner] = activePlayers;
+      await this.findOneAndUpdate(winner._id, {
+        winner: true,
+      });
+      const winnerId = winner._id.toHexString();
+      return {
+        winner: winnerId
+      }
+    }
+
+    const currentPlayerIndex = players.findIndex(({ _id }) => currentPlayer._id.equals(_id));
+    const moverId = await this.updatePlayersAndGetMover(activePlayers, currentPlayerIndex + 1)
+
+    if (!moverId) {
+      return {
+        error: 'Cycled in game move!'
+      }
+    }
+
+    return {
+      mover: moverId.toHexString()
+    }
   };
 
   remove = async (userId: ID) => {

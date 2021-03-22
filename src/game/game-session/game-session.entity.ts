@@ -17,7 +17,7 @@ registerEnumType(GameStatus, {
 @ObjectType()
 export class GameSession extends PickType(Game, ['_id', 'name', 'creator']){
 
-  currentMover?: string;
+  mover?: string;
 
   winner?: string;
 

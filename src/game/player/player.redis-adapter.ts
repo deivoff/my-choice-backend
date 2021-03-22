@@ -1,12 +1,22 @@
 import { Types } from 'mongoose';
+import { isNil } from 'lodash';
 import { Player } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
 import { fromResourcesToString, fromStringToResources } from 'src/game/resources/resources.redis-adapter';
-import { isNil } from '@nestjs/common/utils/shared.utils';
 
-enum Connection {
-  Disconnect = '1',
-  Connect = '0'
+enum RedisBoolean {
+  true = '1',
+  false = '0'
+}
+
+function fromRedisBooleanToBoolean(boolean: string): boolean {
+  return boolean === ''
+    ? false
+    : boolean === RedisBoolean.true
+}
+
+function fromBooleanToRedisBoolean(boolean?: boolean): RedisBoolean {
+  return isNil(boolean) ? RedisBoolean.false : boolean ? RedisBoolean.true : RedisBoolean.false
 }
 
 type PlayerRedisAdapter = Omit<Player, '_id' | 'gameId'> & {
@@ -18,6 +28,8 @@ type PlayerRecord = Omit<Player, '_id' | 'resources' | 'gameId' | 'disconnected'
 
 
 export const fromRedisToPlayer = ({
+  winner,
+  gameover,
   dream,
   resources,
   gameId,
@@ -29,13 +41,17 @@ export const fromRedisToPlayer = ({
   ...other as unknown as PlayerRecord,
   _id: Types.ObjectId(_id),
   hold: hold ? Number(hold) : null,
-  disconnected: disconnected === Connection.Disconnect,
+  disconnected: fromRedisBooleanToBoolean(disconnected),
   gameId: gameId ? Types.ObjectId(gameId) : null,
   resources: fromStringToResources(resources),
   dream: dream === '' ? null : Number(dream),
+  gameover: fromRedisBooleanToBoolean(gameover),
+  winner: fromRedisBooleanToBoolean(winner)
 });
 
 export const fromPlayerToRedis = ({
+  winner,
+  gameover,
   dream,
   resources,
   gameId,
@@ -47,8 +63,10 @@ export const fromPlayerToRedis = ({
   ...other,
   _id: objectIdToString(_id),
   hold: hold ? String(hold) : '',
-  disconnected: disconnected ? Connection.Disconnect : Connection.Connect,
+  disconnected: fromBooleanToRedisBoolean(disconnected),
   gameId: !gameId ? '' : objectIdToString(gameId),
   resources: fromResourcesToString(resources),
-  dream: isNil(dream) ? '' : String(dream)
+  dream: isNil(dream) ? '' : String(dream),
+  gameover: fromBooleanToRedisBoolean(gameover),
+  winner: fromBooleanToRedisBoolean(winner),
 });

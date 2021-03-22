@@ -183,8 +183,11 @@ export class GameSessionService {
     const allDreamsExist = players.every(player => player.dream);
 
     if (allDreamsExist) {
-      await this.findOneAndUpdate(game._id, {
+      const { mover, winner, error } = await this.playerService.getNextMover(players);
+      return await this.findOneAndUpdate(game._id, {
         status: GameStatus.InProgress,
+        mover,
+        winner
       })
     }
 
@@ -216,7 +219,7 @@ export class GameSessionService {
 
     if (!game) return;
     const players = await this.getPlayers(game.players);
-    if (!game.observers.length && players.every(player => player.disconnected)) {
+    if (!game.observers?.length && players.every(player => player.disconnected)) {
       await this.remove(player.gameId);
       return true;
     }
