@@ -5,19 +5,19 @@ import { prop } from '@typegoose/typegoose';
 export class Resources {
 
   @Field(() => Int, { nullable: true })
-  @prop()
-  lives?: number;
+  @prop({ type: Number, required: false })
+  lives?: number | null;
 
   @Field(() => Int, { nullable: true })
-  @prop()
-  money?: number;
+  @prop({ type: Number, required: false })
+  money?: number | null;
 
   @Field(() => Int, { nullable: true })
-  @prop()
-  white?: number;
+  @prop({ type: Number, required: false })
+  white?: number | null;
 
   @Field(() => Int, { nullable: true })
-  @prop()
-  dark?: number;
+  @prop({ type: Number, required: false })
+  dark?: number | null;
 
 }

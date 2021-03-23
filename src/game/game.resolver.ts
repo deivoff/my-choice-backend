@@ -68,8 +68,18 @@ export class GameResolver {
     @DecodedUser() decodedUser: DecodedUser
   ) {
     await this.gameService.choiceDream(dream, decodedUser._id);
-
     return true
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async move(
+    @Args('moveCount', { type: () => Int }) moveCount: number,
+    @DecodedUser() decodedUser: DecodedUser
+  ) {
+    await this.gameService.playerMove(moveCount, decodedUser._id);
+
+    return true;
   }
 
   @Subscription(() => GameSession, {
@@ -109,7 +119,7 @@ export class GameResolver {
     @Parent() game: Game,
   ) {
     const { players } = game;
-    return this.userService.findMany(players);
+    return this.userService.findMany(players ?? []);
   }
 
   @Query(() => [Game], { name: 'games' })

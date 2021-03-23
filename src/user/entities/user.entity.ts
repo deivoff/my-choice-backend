@@ -132,6 +132,6 @@ export const DecodedUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const { req } = ctx.getArgByIndex<{ req: IncomingMessage }>(2) || {};
 
-    return decode(req.headers.authorization);
+    return decode(req?.headers?.authorization ?? '');
   }
 );

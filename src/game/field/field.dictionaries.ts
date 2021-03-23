@@ -1,4 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
+import { PlayerPosition } from 'src/game/player/player.entity';
 
 export enum FieldType {
   Start = 'Start',
@@ -27,7 +28,14 @@ export const FIELD_DICTIONARY = {
   [FieldType.Problem]: 'Проблема',
 };
 
-export const INNER_FIELDS_COUNT = 20;
+const INNER_FIELDS_COUNT = 20;
+const OUTER_FIELDS_COUNT = 30;
+
+export const FIELDS_COUNT = {
+  [PlayerPosition.Inner]: INNER_FIELDS_COUNT,
+  [PlayerPosition.Outer]: OUTER_FIELDS_COUNT,
+};
+
 
 const OFFERS_FIELDS = [0, 4, 8, 12, 17];
 const SITUATIONS_FIELDS = [1, 7, 9, 13, 18];
@@ -42,8 +50,6 @@ export const INNER_FIELDS = {
   [FieldType.Opportunity]: OPPORTUNITIES_FIELDS,
   [FieldType.Reaction]: REACTION_FIELDS,
 };
-
-export const OUTER_FIELDS_COUNT = 30;
 
 const PROBLEM_FIELDS = {
   0: 10,

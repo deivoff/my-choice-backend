@@ -7,6 +7,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { DecodedUser, User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Types } from 'mongoose';
+import { USER_NOT_FOUND } from 'src/user/user.errors';
 
 @Resolver(() => Message)
 export class MessageResolver {
@@ -57,10 +58,15 @@ export class MessageResolver {
     @Parent() { author }: Message,
   ): Promise<Author> {
     const user = await this.userService.findOne(author);
+
+    if (!user) {
+      throw new Error(USER_NOT_FOUND)
+    }
+
     return {
       _id: user._id,
       nickname: user.nickname,
-      avatar: user.avatar
+      avatar: user?.avatar ?? undefined
     };
   }
 

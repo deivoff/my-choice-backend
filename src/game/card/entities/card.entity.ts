@@ -17,7 +17,7 @@ export class Option {
   description: string;
 
   @Field(() => Resources)
-  @prop({ _id: false })
+  @prop({ _id: false, type: Resources })
   resources: Resources
 
 }
@@ -30,7 +30,7 @@ export class Result {
   move?: FieldType;
 
   @Field(() => Resources, { nullable: true })
-  @prop()
+  @prop({ _id: false, type: Resources })
   resources?: Resources;
 
   @Field(() => Int, { nullable: true })
@@ -47,15 +47,15 @@ export class Result {
 export class Action {
 
   @Field(() => Resources, { nullable: true})
-  @prop({ _id: false })
+  @prop({ _id: false, type: Resources })
   less?: Resources;
 
   @Field(() => Resources, { nullable: true})
-  @prop({ _id: false })
+  @prop({ _id: false, type: Resources })
   more?: Resources;
 
   @Field(() => Result, { nullable: true})
-  @prop({ _id: false })
+  @prop({ _id: false, type: Result })
   result: Result
 
 }

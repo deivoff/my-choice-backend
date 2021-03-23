@@ -12,7 +12,7 @@ export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const { req } = context.getArgByIndex<{ req: IncomingMessage }>(2) || {};
 
-    verify(req?.headers?.authorization || '', this.configService.get<string>('secretKey'));
+    verify(req?.headers?.authorization || '', this.configService.get<string>('secretKey') || '');
     return true;
   }
 

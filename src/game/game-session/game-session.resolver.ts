@@ -25,7 +25,7 @@ export class GameSessionResolver {
       players
     }: GameSession,
   ) {
-    return this.gameSessionService.getPlayers(players);
+    return this.gameSessionService.getPlayers(players || []);
   }
 
   @ResolveField(() => Int)
@@ -34,6 +34,6 @@ export class GameSessionResolver {
       observers
     }: GameSession,
   ) {
-    return this.gameSessionService.getObserversCount(observers)
+    return this.gameSessionService.getObserversCount(observers || [])
   }
 }

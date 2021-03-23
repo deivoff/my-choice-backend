@@ -21,29 +21,32 @@ export class Player extends PickType(User, ['_id']){
   avatar: string;
 
   @Field(() => Int, { nullable: true })
-  dream?: number;
+  dream?: number | null;
 
   @Field()
   nickname: string;
 
   @Field(() => Resources, { nullable: true })
-  resources?: Resources;
+  resources?: Resources | null;
 
   @Field(() => PlayerPosition, { nullable: true })
-  position?: PlayerPosition;
+  position?: PlayerPosition | null;
 
   @Field(() => Int, { nullable: true })
-  hold?: number;
+  cell?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  hold?: number | null;
 
   gameId?: Types.ObjectId | null;
 
-  @Field()
-  disconnected?: boolean;
+  @Field(() => Boolean, { nullable: true })
+  disconnected?: boolean | null;
 
-  @Field()
-  gameover?: boolean;
+  @Field(() => Boolean, { nullable: true })
+  gameover?: boolean | null;
 
-  @Field()
-  winner?: boolean
+  @Field(() => Boolean, { nullable: true })
+  winner?: boolean | null;
 
 }

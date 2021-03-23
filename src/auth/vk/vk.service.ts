@@ -10,9 +10,9 @@ export class VkService {
     ) {}
 
   vkClient = new VKClient(
-    this.configService.get('vkConfig.clientID'),
-    this.configService.get('vkConfig.clientSecret'),
-    this.configService.get('vkConfig.callbackURL'),
+    this.configService.get('vkConfig.clientID') || '',
+    this.configService.get('vkConfig.clientSecret') || '',
+    this.configService.get('vkConfig.callbackURL') || '',
     <T>(uri) => {
       return new Promise<T>((resolve, reject) => {
         return this.httpService.get<T>(uri).toPromise()

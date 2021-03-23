@@ -40,7 +40,7 @@ export const fromGameSessionToRedis = ({
   players,
   observers,
   ...other
-  }: GameSessionRedisAdapter): Record<string, string> => ({
+  }: GameSessionRedisAdapter): Record<string, string | any> => ({
   ...other,
   _id: objectIdToString(_id),
   creator: objectIdToString(creator),

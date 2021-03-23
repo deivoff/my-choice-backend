@@ -48,7 +48,7 @@ import { GameService } from 'src/game/game.service';
             }
             return ({ authToken });
             },
-          onDisconnect: ( _ ,ctx) => ctx.initPromise.then(res => {
+          onDisconnect: ( _ ,ctx) => ctx?.initPromise?.then(res => {
             if (typeof res === 'object') {
               gameService.disconnect(res?.authToken)
             }
@@ -62,7 +62,7 @@ import { GameService } from 'src/game/game.service';
         useUnifiedTopology: true,
         useNewUrlParser: true,
         useFindAndModify: true,
-        ...configService.get('database')
+        ...configService.get<ReturnType<typeof configuration>['database']>('database')!
       }),
       inject: [ConfigService],
     }),

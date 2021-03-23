@@ -26,7 +26,7 @@ export class AuthResolver {
     const { accessToken, profile } = await this.vkService.serializeAccountFromCode(code);
 
     const user = await this.userService.upsertVKUser({ accessToken, profile });
-    const token = user.generateJWT(this.configService.get<string>('secretKey'));
+    const token = user.generateJWT(this.configService.get<string>('secretKey') || '');
     return {
       token
     }

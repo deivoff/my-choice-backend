@@ -8,6 +8,7 @@ import { ID, objectIdToString } from 'src/utils';
 import { fromGameSessionToRedis, fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
 import { Types } from 'mongoose';
 import { CardService } from 'src/game/card/card.service';
+import { PlayerPosition } from 'src/game/player/player.entity';
 
 interface CreateGameSession {
   name: string;
@@ -102,8 +103,8 @@ export class GameSessionService {
     }
 
     const { players, observers } = game;
-    const gameHasThisPlayer = players.some((player) => player === objectIdToString(userId));
-    const gameHasThisObserver = observers.some((observer) => observer === objectIdToString(userId));
+    const gameHasThisPlayer = players?.some((player) => player === objectIdToString(userId));
+    const gameHasThisObserver = observers?.some((observer) => observer === objectIdToString(userId));
 
     switch (true) {
       case gameHasThisObserver:
@@ -127,19 +128,22 @@ export class GameSessionService {
       }
     }
 
-    return await this.findOne(gameId);
+    const updatedGame = await this.findOne(gameId);
+    if (!updatedGame) throw new Error(GAME_NOT_FOUND);
+    return updatedGame;
   };
 
   leave = async (userId: ID): Promise<GameSession | null> => {
     const player = await this.playerService.findOne(userId);
 
-    if (!player.gameId) return null;
+
+    if (!player?.gameId) return null;
     const game = await this.findOne(player.gameId);
     if (!game) return null;
     const { _id: gameId } = game;
     const { players, observers } = game;
-    const gameHasThisPlayer = players.some((player) => player === objectIdToString(userId));
-    const gameHasThisObserver = observers.some((observer) => observer === objectIdToString(userId));
+    const gameHasThisPlayer = players?.some((player) => player === objectIdToString(userId));
+    const gameHasThisObserver = observers?.some((observer) => observer === objectIdToString(userId));
 
     switch (true) {
       case gameHasThisPlayer: {
@@ -160,7 +164,7 @@ export class GameSessionService {
 
     const updatedGame = await this.findOne(gameId);
 
-    if (!updatedGame.players?.length && !updatedGame.observers?.length) {
+    if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
       await this.remove(gameId);
       return null;
     }
@@ -169,18 +173,37 @@ export class GameSessionService {
   };
 
   start = async (gameId: ID, userId: ID): Promise<GameSession> => {
-    return await this.findOneAndUpdate(gameId, {
+    const game = await this.findOneAndUpdate(gameId, {
       status: GameStatus.ChoiceDream,
     });
+
+    if (!game) throw new Error(GAME_NOT_FOUND);
+    for (let i = 0; i < (game?.players?.length ?? 0); i++) {
+      const playerId = game.players?.[i]!;
+      await this.playerService.findOneAndUpdate(playerId, {
+        position: PlayerPosition.Start,
+        resources: {
+          white: 0,
+          dark: 0,
+          money: 0,
+          lives: 10,
+        }
+      })
+    }
+
+    return game;
   };
 
   choiceDream = async (dream: number, userId: ID): Promise<GameSession> => {
     const player = await this.playerService.findOneAndUpdate(userId, {
       dream: dream
     });
-    const game = await this.findOne(player.gameId);
-    const players = await this.getPlayers(game.players);
-    const allDreamsExist = players.every(player => player.dream);
+    const game = await this.findOne(player?.gameId!);
+
+    if (!game) throw new Error(GAME_NOT_FOUND);
+
+    const players = await this.getPlayers(game?.players!);
+    const allDreamsExist = players.every(player => player?.dream);
 
     if (allDreamsExist) {
       const { mover, winner, error } = await this.playerService.getNextMover(players);
@@ -192,6 +215,12 @@ export class GameSessionService {
     }
 
     return game;
+  };
+
+  playerMove = async (moveCount: number, userId: ID): Promise<GameSession> => {
+    const player = await this.playerService.changePlayerPosition(userId, moveCount);
+
+    return await this.findOne(player?.gameId!) as GameSession;
   };
 
   getPlayers = (players: ID[]) => {
@@ -218,10 +247,18 @@ export class GameSessionService {
     const game = await this.findOne(player.gameId);
 
     if (!game) return;
-    const players = await this.getPlayers(game.players);
+    const players = await this.getPlayers(game.players!);
     if (!game.observers?.length && players.every(player => player.disconnected)) {
       await this.remove(player.gameId);
       return true;
+    }
+
+    if (game.mover === objectIdToString(userId) && game.status !== GameStatus.Finished) {
+      const { mover, winner, error } = await this.playerService.getNextMover(players);
+      await this.findOneAndUpdate(game._id, {
+        mover,
+        winner
+      })
     }
 
     return player.gameId;

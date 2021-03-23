@@ -15,19 +15,20 @@ function fromRedisBooleanToBoolean(boolean: string): boolean {
     : boolean === RedisBoolean.true
 }
 
-function fromBooleanToRedisBoolean(boolean?: boolean): RedisBoolean {
+function fromBooleanToRedisBoolean(boolean?: boolean | null): RedisBoolean {
   return isNil(boolean) ? RedisBoolean.false : boolean ? RedisBoolean.true : RedisBoolean.false
 }
 
 type PlayerRedisAdapter = Omit<Player, '_id' | 'gameId'> & {
   _id: ID;
-  gameId?: ID;
+  gameId?: ID | null;
 }
 
-type PlayerRecord = Omit<Player, '_id' | 'resources' | 'gameId' | 'disconnected' | 'hold'>;
+type PlayerRecord = Omit<Player, '_id' | 'resources' | 'gameId' | 'disconnected' | 'hold' | 'position'>;
 
 
 export const fromRedisToPlayer = ({
+  cell,
   winner,
   gameover,
   dream,
@@ -46,10 +47,12 @@ export const fromRedisToPlayer = ({
   resources: fromStringToResources(resources),
   dream: dream === '' ? null : Number(dream),
   gameover: fromRedisBooleanToBoolean(gameover),
-  winner: fromRedisBooleanToBoolean(winner)
+  winner: fromRedisBooleanToBoolean(winner),
+  cell: cell ? Number(cell) : null,
 });
 
 export const fromPlayerToRedis = ({
+  cell,
   winner,
   gameover,
   dream,
@@ -59,7 +62,7 @@ export const fromPlayerToRedis = ({
   hold,
   _id,
   ...other
-  }: PlayerRedisAdapter): Record<string, string> => ({
+  }: PlayerRedisAdapter): any => ({
   ...other,
   _id: objectIdToString(_id),
   hold: hold ? String(hold) : '',
@@ -69,4 +72,5 @@ export const fromPlayerToRedis = ({
   dream: isNil(dream) ? '' : String(dream),
   gameover: fromBooleanToRedisBoolean(gameover),
   winner: fromBooleanToRedisBoolean(winner),
+  cell: cell ? String(cell) : '',
 });

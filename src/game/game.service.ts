@@ -8,6 +8,7 @@ import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSessionService } from 'src/game/game-session/game-session.service';
 import { ID } from 'src/utils';
 import { decode } from 'jsonwebtoken';
+import { GameStatus } from 'src/game/game-session/game-session.entity';
 
 @Injectable()
 export class GameService {
@@ -21,14 +22,14 @@ export class GameService {
     if (!token) return;
 
     const data = decode(token);
-    const gameId = await this.gameSessionService.connect(data['_id']);
+    const gameId = await this.gameSessionService.connect(data?.['_id']);
   }
 
   async disconnect(token?: string) {
     if (!token) return;
 
     const data = decode(token);
-    const gameId = await this.gameSessionService.disconnect(data['_id']);
+    const gameId = await this.gameSessionService.disconnect(data?.['_id']);
 
     if (!gameId) return;
 
@@ -103,7 +104,9 @@ export class GameService {
   async leave(userId: ID) {
     const game = await this.gameSessionService.leave(userId);
 
-    this.publishActiveGames();
+    if (game?.status === GameStatus.Awaiting) {
+      this.publishActiveGames();
+    }
 
     if (game) {
       this.publishActiveGame(game._id);
@@ -120,6 +123,12 @@ export class GameService {
 
   async choiceDream(dream: number, userId: ID) {
     const game = await this.gameSessionService.choiceDream(dream, userId);
+
+    this.publishActiveGame(game._id);
+  }
+
+  async playerMove(moveCount: number, userId: ID) {
+    const game = await this.gameSessionService.playerMove(moveCount, userId);
 
     this.publishActiveGame(game._id);
   }
