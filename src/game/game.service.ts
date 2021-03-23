@@ -6,9 +6,10 @@ import { ReturnModelType } from '@typegoose/typegoose';
 import { Game } from 'src/game/game.entity';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSessionService } from 'src/game/game-session/game-session.service';
-import { ID } from 'src/utils';
+import { ID, objectIdToString } from 'src/utils';
 import { decode } from 'jsonwebtoken';
 import { GameStatus } from 'src/game/game-session/game-session.entity';
+import { Card } from 'src/game/card/entities/card.entity';
 
 @Injectable()
 export class GameService {
@@ -93,6 +94,14 @@ export class GameService {
     })
   }
 
+  private async publishDroppedCard(gameId: ID, userId: ID, card: Card) {
+    await this.pubSub.publish('cardDropped', {
+      cardDropped: card,
+      gameId,
+      userId,
+    })
+  }
+
   async join(gameId: ID, userId: ID) {
     const game = await this.gameSessionService.join(gameId, userId);
 
@@ -128,9 +137,12 @@ export class GameService {
   }
 
   async playerMove(moveCount: number, userId: ID) {
-    const game = await this.gameSessionService.playerMove(moveCount, userId);
+    const result = await this.gameSessionService.playerMove(moveCount, userId);
 
-    this.publishActiveGame(game._id);
+    await this.publishActiveGame(result.gameId);
+    if (result.card) {
+      this.publishDroppedCard(result.gameId, userId, result.card)
+    }
   }
 
   findAll() {

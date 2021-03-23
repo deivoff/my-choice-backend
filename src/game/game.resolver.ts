@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ResolveField, Parent, Subscription, Int } from '@nestjs/graphql';
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver, Subscription } from '@nestjs/graphql';
 import { GameService } from './game.service';
 import { Game } from 'src/game/game.entity';
 import { CreateGameInput } from './dto/create-game.input';
@@ -10,7 +10,8 @@ import { UserService } from 'src/user/user.service';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSession } from 'src/game/game-session/game-session.entity';
 import { Player } from 'src/game/player/player.entity';
-import { objectIdToString } from 'src/utils';
+import { ID, objectIdToString } from 'src/utils';
+import { Card, DroppedCard } from 'src/game/card/entities/card.entity';
 
 @Resolver(() => Game)
 export class GameResolver {
@@ -90,10 +91,40 @@ export class GameResolver {
       return objectIdToString(payload.updateActiveGame._id) === objectIdToString(variables.gameId);
     },
   })
-  async updateActiveGame (
+  async updateActiveGame(
     @Args('gameId') gameId: Types.ObjectId
   ) {
     return this.pubSub.asyncIterator('updateActiveGame');
+  }
+
+  @Subscription(() => DroppedCard, {
+    filter: (
+      payload: {
+        cardDropped: Card,
+        gameId: ID,
+        userId: ID,
+      },
+      variables: { gameId: Types.ObjectId }
+    ) => {
+      return objectIdToString(payload.gameId) === objectIdToString(variables.gameId);
+    },
+    resolve: (
+      payload: {
+        cardDropped: Card,
+        gameId: ID,
+        userId: ID,
+      },
+    ): DroppedCard => {
+      return ({
+        card: payload.cardDropped,
+        forPlayer: Types.ObjectId(objectIdToString(payload.userId)),
+      });
+    }
+  })
+  async cardDropped(
+    @Args('gameId') gameId: Types.ObjectId
+  ) {
+    return this.pubSub.asyncIterator('cardDropped')
   }
 
   @Query(() => [GameSession])

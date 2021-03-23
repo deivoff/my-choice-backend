@@ -12,6 +12,7 @@ import { GameSessionService } from 'src/game/game-session/game-session.service';
 import { PlayerModule } from 'src/game/player/player.module';
 import { PlayerService } from 'src/game/player/player.service';
 import { UserService } from 'src/user/user.service';
+import { FieldModule } from 'src/game/field/field.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserService } from 'src/user/user.service';
     UserModule,
     PlayerModule,
     CardModule,
+    FieldModule
   ],
   providers: [
     GameResolver,

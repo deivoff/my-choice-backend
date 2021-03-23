@@ -41,14 +41,14 @@ export const fromRedisToPlayer = ({
   }: Record<string, string>): Player => ({
   ...other as unknown as PlayerRecord,
   _id: Types.ObjectId(_id),
-  hold: hold ? Number(hold) : null,
+  hold: isNil(hold) ? null: Number(hold),
   disconnected: fromRedisBooleanToBoolean(disconnected),
   gameId: gameId ? Types.ObjectId(gameId) : null,
   resources: fromStringToResources(resources),
   dream: dream === '' ? null : Number(dream),
   gameover: fromRedisBooleanToBoolean(gameover),
   winner: fromRedisBooleanToBoolean(winner),
-  cell: cell ? Number(cell) : null,
+  cell: isNil(cell) ? null: Number(cell),
 });
 
 export const fromPlayerToRedis = ({

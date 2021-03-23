@@ -112,33 +112,29 @@ export class PlayerService {
 
     switch (true) {
       case player?.position === PlayerPosition.Start: {
-        await this.findOneAndUpdate(playerId, {
+        return await this.findOneAndUpdate(playerId, {
           position: PlayerPosition.Inner,
           cell: moveCount - 1
         });
 
-        break;
       }
       case newPosition === PlayerPosition.Outer: {
         const newCell = FROM_INNER_TO_OUTER[player.cell!];
 
-        await this.findOneAndUpdate(playerId, {
+        return await this.findOneAndUpdate(playerId, {
           position: PlayerPosition.Outer,
           cell: newCell
         });
 
-        break;
       }
       default: {
         const newCell = ((player?.cell ?? 0) + moveCount) % FIELDS_COUNT[player?.position!];
 
-        await this.findOneAndUpdate(playerId, {
+        return await this.findOneAndUpdate(playerId, {
           cell: newCell
         })
       }
     }
-
-    return player;
   };
 
   remove = async (userId: ID) => {

@@ -42,24 +42,6 @@ const SITUATIONS_FIELDS = [1, 7, 9, 13, 18];
 const INCIDENTS_FIELDS = [2, 6, 10, 15, 19];
 const OPPORTUNITIES_FIELDS = [3, 11, 16];
 const REACTION_FIELDS = [5, 14];
-
-export const INNER_FIELDS = {
-  [FieldType.Offer]: OFFERS_FIELDS,
-  [FieldType.Situation]: SITUATIONS_FIELDS,
-  [FieldType.Incident]: INCIDENTS_FIELDS,
-  [FieldType.Opportunity]: OPPORTUNITIES_FIELDS,
-  [FieldType.Reaction]: REACTION_FIELDS,
-};
-
-const PROBLEM_FIELDS = {
-  0: 10,
-  4: 5,
-  10: 10,
-  14: 5,
-  18: 5,
-  22: 10,
-  26: 5,
-};
 const ACTIVITY_FIELDS = {
   1: 10,
   3: 10,
@@ -77,7 +59,7 @@ const ACTIVITY_FIELDS = {
   27: 20,
   29: 10,
 };
-export const DREAM_FIELDS = {
+const DREAM_FIELDS = {
   2: 50,
   6: 100,
   8: 50,
@@ -87,6 +69,32 @@ export const DREAM_FIELDS = {
   24: 50,
   28: 100,
 };
+const PROBLEM_FIELDS = {
+  0: 10,
+  4: 5,
+  10: 10,
+  14: 5,
+  18: 5,
+  22: 10,
+  26: 5,
+};
+
+
+export const INNER_FIELDS: [FieldType, number[]][] = [
+  [FieldType.Offer, OFFERS_FIELDS],
+  [FieldType.Situation, SITUATIONS_FIELDS],
+  [FieldType.Incident, INCIDENTS_FIELDS],
+  [FieldType.Opportunity, OPPORTUNITIES_FIELDS],
+  [FieldType.Reaction, REACTION_FIELDS],
+];
+
+export const OUTER_FIELDS: [FieldType, Record<number, number>][] = [
+  [FieldType.Problem, PROBLEM_FIELDS],
+  [FieldType.Dream, DREAM_FIELDS],
+  [FieldType.Activity, ACTIVITY_FIELDS],
+];
+
+
 
 export const FROM_INNER_TO_OUTER = {
   3: 4,

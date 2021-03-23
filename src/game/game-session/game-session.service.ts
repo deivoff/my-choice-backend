@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { isNil } from 'lodash';
 import { Redis } from 'ioredis';
 import { isEmpty, union, without } from 'lodash';
 import { GameSession, GameStatus } from 'src/game/game-session/game-session.entity';
@@ -7,8 +8,11 @@ import { GAME_NOT_FOUND } from 'src/game/game.errors';
 import { ID, objectIdToString } from 'src/utils';
 import { fromGameSessionToRedis, fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
 import { Types } from 'mongoose';
-import { CardService } from 'src/game/card/card.service';
 import { PlayerPosition } from 'src/game/player/player.entity';
+import { PLAYER_NOT_FOUND } from 'src/game/player/player.errors';
+import { FieldService } from 'src/game/field/field.service';
+import { Card } from 'src/game/card/entities/card.entity';
+import { CardService } from 'src/game/card/card.service';
 
 interface CreateGameSession {
   name: string;
@@ -18,12 +22,18 @@ interface CreateGameSession {
   observers: string[];
 }
 
+type PlayerMoveResult = {
+  gameId: Types.ObjectId
+  card?: Card
+}
+
 @Injectable()
 export class GameSessionService {
   constructor(
     @Inject('PUBLISHER') private readonly  redisClient: Redis,
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
+    private readonly fieldService: FieldService,
     private readonly cardService: CardService,
   ) {}
 
@@ -56,8 +66,10 @@ export class GameSessionService {
 
   remove = async (gameId: ID) => {
     const gameKey = objectIdToString(gameId);
-
-    await this.redisClient.del(this.key(gameKey));
+    await Promise.all([
+      this.redisClient.del(this.key(gameKey)),
+      this.cardService.clearDeck(gameId),
+    ]);
   };
 
   findOne = async (id: ID) => {
@@ -217,10 +229,44 @@ export class GameSessionService {
     return game;
   };
 
-  playerMove = async (moveCount: number, userId: ID): Promise<GameSession> => {
+  playerMove = async (moveCount: number, userId: ID): Promise<PlayerMoveResult> => {
     const player = await this.playerService.changePlayerPosition(userId, moveCount);
 
-    return await this.findOne(player?.gameId!) as GameSession;
+    if (!player) throw new Error(PLAYER_NOT_FOUND);
+
+    const result = await this.fieldService.stoodOnField(player);
+
+    if (isNil(result)) {
+      await Promise.all([
+        this.findOneAndUpdate(player?.gameId!, {
+          winner: objectIdToString(player._id)
+        }),
+        this.playerService.findOneAndUpdate(player._id, {
+          winner: true
+        }),
+      ]);
+
+      return {
+        gameId: player.gameId!
+      };
+    }
+
+    if (typeof result === 'number') {
+      await this.playerService.findOneAndUpdate(player._id, {
+        resources: {
+          white: player.resources?.white! + result
+        }
+      });
+
+      return {
+        gameId: player.gameId!
+      };
+    }
+
+    return {
+      gameId: player.gameId!,
+      card: result
+    };
   };
 
   getPlayers = (players: ID[]) => {

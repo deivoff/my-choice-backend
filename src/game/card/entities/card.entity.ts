@@ -74,11 +74,6 @@ export class Card {
   type: FieldType;
 
   @Field()
-  get typeName(): string {
-    return FIELD_DICTIONARY[this.type]
-  }
-
-  @Field()
   @prop()
   description: string;
 
@@ -106,6 +101,18 @@ export class Incident extends Card {
 
 }
 
+@ObjectType()
+export class DroppedCard {
+
+  @Field()
+  forPlayer: Types.ObjectId;
+
+  @Field()
+  card: Card;
+
+}
+
+export class Opportunity extends Card {}
 export class Dream extends ChoiceCard {}
 export class Situation extends ChoiceCard {}
 export class Reaction extends ChoiceCard {}
