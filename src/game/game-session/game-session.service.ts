@@ -4,15 +4,16 @@ import { Redis } from 'ioredis';
 import { isEmpty, union, without } from 'lodash';
 import { GameSession, GameStatus } from 'src/game/game-session/game-session.entity';
 import { PlayerService } from 'src/game/player/player.service';
-import { GAME_NOT_FOUND } from 'src/game/game.errors';
+import { CYCLED_ERROR, GAME_NOT_FOUND } from 'src/game/game.errors';
 import { ID, objectIdToString } from 'src/utils';
 import { fromGameSessionToRedis, fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
 import { Types } from 'mongoose';
 import { PlayerPosition } from 'src/game/player/player.entity';
 import { PLAYER_NOT_FOUND } from 'src/game/player/player.errors';
 import { FieldService } from 'src/game/field/field.service';
-import { Card } from 'src/game/card/entities/card.entity';
+import { Card, CHOICES_CARD } from 'src/game/card/entities/card.entity';
 import { CardService } from 'src/game/card/card.service';
+import { NEED_CHOICE } from 'src/game/card/card.errors';
 
 interface CreateGameSession {
   name: string;
@@ -219,6 +220,7 @@ export class GameSessionService {
 
     if (allDreamsExist) {
       const { mover, winner, error } = await this.playerService.getNextMover(players);
+      if (error) throw new Error(CYCLED_ERROR);
       return await this.findOneAndUpdate(game._id, {
         status: GameStatus.InProgress,
         mover,
@@ -227,6 +229,17 @@ export class GameSessionService {
     }
 
     return game;
+  };
+
+  choice = async (cardId: ID, userId: ID, choiceId?: ID) => {
+    const card = await this.cardService.findOne(cardId);
+
+    if (!choiceId && !CHOICES_CARD.some(type => type === card?.type)) {
+      throw new Error(NEED_CHOICE);
+    }
+
+
+    return null;
   };
 
   playerMove = async (moveCount: number, userId: ID): Promise<PlayerMoveResult> => {
@@ -301,6 +314,7 @@ export class GameSessionService {
 
     if (game.mover === objectIdToString(userId) && game.status !== GameStatus.Finished) {
       const { mover, winner, error } = await this.playerService.getNextMover(players);
+      if (error) throw new Error(CYCLED_ERROR);
       await this.findOneAndUpdate(game._id, {
         mover,
         winner

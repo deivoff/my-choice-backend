@@ -83,6 +83,17 @@ export class GameResolver {
     return true;
   }
 
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async choice(
+    @DecodedUser() decodedUser: DecodedUser,
+    @Args('cardId') cardId: Types.ObjectId,
+    @Args('choiceId', { nullable: true }) choiceId?: Types.ObjectId,
+  ) {
+    await this.gameService.choice(cardId, decodedUser._id, choiceId);
+    return true
+  }
+
   @Subscription(() => GameSession, {
     filter: (
       payload: { updateActiveGame: GameSession },

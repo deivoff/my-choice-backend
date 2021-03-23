@@ -136,6 +136,10 @@ export class GameService {
     this.publishActiveGame(game._id);
   }
 
+  async choice(cardId: ID, userId: ID, choiceId?: ID) {
+    const result = await this.gameSessionService.choice(cardId, userId, choiceId)
+  }
+
   async playerMove(moveCount: number, userId: ID) {
     const result = await this.gameSessionService.playerMove(moveCount, userId);
 

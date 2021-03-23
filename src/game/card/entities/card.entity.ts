@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { FIELD_DICTIONARY, FieldType } from 'src/game/field/field.dictionaries';
 import { Resources } from 'src/game/resources/resources.entity';
 
-const CHOICES_CARD = [FieldType.Dream, FieldType.Situation, FieldType.Reaction, FieldType.Offer];
+export const CHOICES_CARD = [FieldType.Dream, FieldType.Situation, FieldType.Reaction, FieldType.Offer];
 
 @ObjectType()
 export class Option {
