@@ -106,7 +106,6 @@ export class PlayerService {
 
 
     const currentPlayerIndex = players.findIndex(({ _id }) => currentPlayer?._id.equals(_id));
-    console.log({ currentPlayerIndex, currentPlayer: currentPlayer?._id });
 
     const moverId = await this.updatePlayerAndGetMover(activePlayers, currentPlayerIndex + 1);
     if (!moverId) {
