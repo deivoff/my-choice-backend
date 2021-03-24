@@ -59,7 +59,7 @@ const ACTIVITY_FIELDS = {
   27: 20,
   29: 10,
 };
-const DREAM_FIELDS = {
+export const DREAM_FIELDS = {
   2: 50,
   6: 100,
   8: 50,
@@ -79,6 +79,13 @@ const PROBLEM_FIELDS = {
   26: 5,
 };
 
+export const INNER_FIELD_DICT = {
+  [FieldType.Offer]: OFFERS_FIELDS,
+  [FieldType.Situation]: SITUATIONS_FIELDS,
+  [FieldType.Incident]: INCIDENTS_FIELDS,
+  [FieldType.Opportunity]: OPPORTUNITIES_FIELDS,
+  [FieldType.Reaction]: REACTION_FIELDS,
+};
 
 export const INNER_FIELDS: [FieldType, number[]][] = [
   [FieldType.Offer, OFFERS_FIELDS],

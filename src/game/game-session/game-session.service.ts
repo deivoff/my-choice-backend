@@ -8,7 +8,7 @@ import { CYCLED_ERROR, GAME_NOT_FOUND } from 'src/game/game.errors';
 import { ID, objectIdToString } from 'src/utils';
 import { fromGameSessionToRedis, fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
 import { Types } from 'mongoose';
-import { PlayerPosition } from 'src/game/player/player.entity';
+import { Player, PlayerPosition } from 'src/game/player/player.entity';
 import { PLAYER_NOT_FOUND } from 'src/game/player/player.errors';
 import { FieldService } from 'src/game/field/field.service';
 import { Card, CHOICES_CARD } from 'src/game/card/entities/card.entity';
@@ -23,9 +23,14 @@ interface CreateGameSession {
   observers: string[];
 }
 
-type PlayerMoveResult = {
+type PlayerActionResult = {
   gameId: Types.ObjectId
   card?: Card
+}
+
+type ChoiceResult = {
+  isFieldChanged?: boolean;
+  gameId: ID;
 }
 
 @Injectable()
@@ -231,22 +236,45 @@ export class GameSessionService {
     return game;
   };
 
-  choice = async (cardId: ID, userId: ID, choiceId?: ID) => {
-    const card = await this.cardService.findOne(cardId);
+  choice = async (cardId: ID, userId: ID, choiceId?: ID): Promise<PlayerActionResult> => {
+    const isFieldChanged = await this.playerService.updateAfterChoice(cardId, userId, choiceId);
+    const updatedPlayer = await this.playerService.findOne(userId);
 
-    if (!choiceId && !CHOICES_CARD.some(type => type === card?.type)) {
-      throw new Error(NEED_CHOICE);
+    if (updatedPlayer?.winner) {
+      await this.findOneAndUpdate(updatedPlayer.gameId!, {
+        winner: objectIdToString(userId)
+      })
     }
 
+    if (isFieldChanged) {
+      return await this.playerStoodOnField(updatedPlayer!);
+    } else {
+      const game = await this.findOne(updatedPlayer?.gameId!);
+      const players = await this.getPlayers(game?.players!);
+      const { mover, winner, error } = await this.playerService.getNextMover(players, updatedPlayer!);
+      if (error) throw new Error(CYCLED_ERROR);
 
-    return null;
+      await this.findOneAndUpdate(game?._id!, {
+        status: GameStatus.InProgress,
+        mover,
+        winner
+      });
+
+      return {
+        gameId: updatedPlayer?.gameId!,
+      }
+    }
   };
 
-  playerMove = async (moveCount: number, userId: ID): Promise<PlayerMoveResult> => {
+  playerMove = async (moveCount: number, userId: ID): Promise<PlayerActionResult> => {
     const player = await this.playerService.changePlayerPosition(userId, moveCount);
 
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
+    return await this.playerStoodOnField(player);
+  };
+
+  private playerStoodOnField = async (player: Player): Promise<PlayerActionResult> => {
     const result = await this.fieldService.stoodOnField(player);
 
     if (isNil(result)) {

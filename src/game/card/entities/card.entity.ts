@@ -112,7 +112,11 @@ export class DroppedCard {
 
 }
 
+@ObjectType({
+  implements: [Card]
+})
 export class Opportunity extends Card {}
+
 export class Dream extends ChoiceCard {}
 export class Situation extends ChoiceCard {}
 export class Reaction extends ChoiceCard {}

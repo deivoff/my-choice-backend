@@ -94,6 +94,13 @@ export class GameService {
     })
   }
 
+  private async publishChoiceInGame(gameId: ID, choiceId: ID) {
+    await this.pubSub.publish('playerChoice', {
+      choiceId,
+      gameId
+    })
+  }
+
   private async publishDroppedCard(gameId: ID, userId: ID, card: Card) {
     await this.pubSub.publish('cardDropped', {
       cardDropped: card,
@@ -137,7 +144,16 @@ export class GameService {
   }
 
   async choice(cardId: ID, userId: ID, choiceId?: ID) {
-    const result = await this.gameSessionService.choice(cardId, userId, choiceId)
+    const { gameId, card } = await this.gameSessionService.choice(cardId, userId, choiceId);
+
+    if (choiceId) {
+      await this.publishChoiceInGame(gameId, choiceId)
+    }
+
+    await this.publishActiveGame(gameId);
+    if (card) {
+      this.publishDroppedCard(gameId, userId, card)
+    }
   }
 
   async playerMove(moveCount: number, userId: ID) {

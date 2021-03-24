@@ -6,9 +6,20 @@ import { ID, objectIdToString } from 'src/utils';
 import { fromPlayerToRedis, fromRedisToPlayer } from 'src/game/player/player.redis-adapter';
 import { isEmpty } from 'lodash';
 import { Types } from 'mongoose';
-import { FIELDS_COUNT, FROM_INNER_TO_OUTER } from 'src/game/field/field.dictionaries';
+import {
+  DREAM_FIELDS,
+  FIELDS_COUNT,
+  FieldType,
+  FROM_INNER_TO_OUTER,
+  INNER_FIELD_DICT,
+  INNER_FIELDS,
+} from 'src/game/field/field.dictionaries';
 import { PLAYER_NOT_FOUND } from 'src/game/player/player.errors';
 import { USER_NOT_FOUND } from 'src/user/user.errors';
+import { CardService } from 'src/game/card/card.service';
+import { Action, ChoiceCard, CHOICES_CARD, Incident } from 'src/game/card/entities/card.entity';
+import { NEED_CHOICE } from 'src/game/card/card.errors';
+import { Resources } from 'src/game/resources/resources.entity';
 
 
 type GameState = {
@@ -23,6 +34,7 @@ export class PlayerService {
     @Inject('PUBLISHER') private readonly redisClient: Redis,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    private readonly cardService: CardService,
   ) {}
 
   private key = (_id: string = '') => {
@@ -69,7 +81,7 @@ export class PlayerService {
     return await this.updatePlayerAndGetMover(activePlayers, moverIndex + 1, deep - 1);
   };
 
-  getNextMover = async (players: Player[], currentPlayer: Player = players[0]): Promise<GameState> => {
+  getNextMover = async (players: Player[], currentPlayer?: Player): Promise<GameState> => {
     if (players.length === 1) {
       const [player] = players;
       const playerId = player._id.toHexString();
@@ -92,9 +104,11 @@ export class PlayerService {
       }
     }
 
-    const currentPlayerIndex = players.findIndex(({ _id }) => currentPlayer._id.equals(_id));
-    const moverId = await this.updatePlayerAndGetMover(activePlayers, currentPlayerIndex + 1);
 
+    const currentPlayerIndex = players.findIndex(({ _id }) => currentPlayer?._id.equals(_id));
+    console.log({ currentPlayerIndex, currentPlayer: currentPlayer?._id });
+
+    const moverId = await this.updatePlayerAndGetMover(activePlayers, currentPlayerIndex + 1);
     if (!moverId) {
       return {
         error: 'Cycled in game move!'
@@ -135,6 +149,144 @@ export class PlayerService {
         })
       }
     }
+  };
+
+  updateAfterChoice = async (cardId: ID, playerId: ID, choiceId?: ID) => {
+    const card = await this.cardService.findOne(cardId);
+    const isChoiceCard = CHOICES_CARD.some(type => type === card?.type);
+    if (!choiceId && isChoiceCard) {
+      throw new Error(NEED_CHOICE);
+    }
+
+    switch (true) {
+      case card?.type === FieldType.Incident: {
+        return await this.setPlayerAction(playerId, (card as unknown as Incident)?.action)
+      }
+      case isChoiceCard: {
+        const { choices } = card as unknown as ChoiceCard;
+        const { resources } = choices.find(choice => choice._id.equals(choiceId!)) || {};
+        const updatedPlayer = await this.setPlayerResources(playerId, resources);
+        const { cell, resources: playerResources, dream } = updatedPlayer!;
+        if (
+          card?.type === FieldType.Dream
+          && cell === dream
+          && playerResources!.white! >= DREAM_FIELDS[cell!]
+        ) {
+          await this.setPlayerWin(playerId);
+        }
+      }
+    }
+  };
+
+  setPlayerAction = async (playerId: ID, action: Action) => {
+    const player = await this.findOne(playerId);
+
+    if (!player) throw new Error(PLAYER_NOT_FOUND);
+
+    let lessCheck = true;
+    let moreCheck = true;
+    let isFieldChange = false;
+
+    if (action.less) {
+      Object.entries(action.less).forEach(([key, value]) => {
+        lessCheck = player.resources?.[key] ?? 0 < value ?? 0
+      })
+    }
+
+    if (action.more) {
+      Object.entries(action.more).forEach(([key, value]) => {
+        moreCheck = player.resources?.[key] ?? 0 >= value
+      })
+    }
+
+    if (lessCheck && moreCheck) {
+      if (action.result.resources) {
+        await this.setPlayerResources(playerId, action.result.resources);
+      }
+
+      if (action.result.hold) {
+        await this.findOneAndUpdate(playerId, {
+          hold: action.result.hold
+        });
+      }
+
+      if (action.result.move) {
+        await this.setInnerFieldPosition(playerId, action.result.move);
+
+        isFieldChange = true
+      }
+
+      if (action.result.gameover) {
+        await this.findOneAndUpdate(playerId, {
+          gameover: true
+        });
+      }
+    }
+
+    return isFieldChange;
+  };
+
+  setInnerFieldPosition = async (playerId: ID, field: FieldType) => {
+    const player = await this.findOne(playerId);
+    if (!player) throw new Error(PLAYER_NOT_FOUND);
+
+    const nextField = INNER_FIELD_DICT[field]
+      .find(elem => player?.cell! < elem) || INNER_FIELDS[field][0];
+
+
+    await this.findOneAndUpdate(playerId, {
+      cell: nextField
+    });
+  };
+
+  setPlayerResources = async (playerId: ID, resources: Resources = {}) => {
+    const player = await this.findOne(playerId);
+    if (!player) throw new Error(PLAYER_NOT_FOUND);
+
+    const { resources: playerResources = {} } = player;
+    const {
+      white,
+      lives,
+      money,
+      dark,
+    } = resources!;
+    let gameover = false;
+    const newResources = Object
+      .entries({
+        white,
+        lives,
+        money,
+        dark
+      })
+      .reduce<Resources>((acc, [key, value]) => {
+        if (value === 0) {
+          return {
+            ...acc,
+            [key]: 0
+          }
+        } else {
+          const newValue = (acc?.[key] ?? 0) + (value ?? 0);
+          return {
+            ...acc,
+            [key]: newValue >= 0 ? newValue : key === 'money' ? newValue : 0
+          }
+        }
+    }, playerResources!);
+
+    if (newResources?.lives! <= 0) {
+      gameover = true
+    }
+
+    return await this.findOneAndUpdate(playerId, {
+      resources: newResources,
+      gameover,
+    })
+  };
+
+  setPlayerWin = async (playerId: ID) => {
+    return await this.findOneAndUpdate(playerId, {
+      winner: true
+    })
   };
 
   remove = async (userId: ID) => {
