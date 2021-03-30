@@ -44,7 +44,7 @@ export class UserService {
   updateNickname(userId: Types.ObjectId, newNickname: string) {
     return this.userModel.findByIdAndUpdate(userId, {
       _nickname: newNickname,
-    });
+    }, { new: true });
   }
 
   findMany(_ids: Types.ObjectId[]) {

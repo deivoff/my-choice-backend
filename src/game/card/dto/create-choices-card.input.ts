@@ -1,12 +1,11 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { ResourcesInput } from 'src/game/resources/resources.input';
-import { ResultInput } from 'src/game/card/dto/create-incident-card.input';
 import { CardInput } from 'src/game/card/dto/create-card.input';
 
 
 
 @InputType()
-export class ChoicesCardInput extends CardInput {
+export class CreateChoicesCardInput extends CardInput {
 
   @Field(() => [OptionInput])
   choices: OptionInput[];

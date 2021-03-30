@@ -35,7 +35,7 @@ export class ActionInput {
 }
 
 @InputType()
-export class IncidentCardInput extends OmitType(CardInput, ['type']){
+export class CreateIncidentCardInput extends OmitType(CardInput, ['type']){
 
   @Field(() => ActionInput)
   action: ActionInput;

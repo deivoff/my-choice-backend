@@ -1,6 +1,6 @@
-import { Resolver, Query, Args, Mutation, ResolveField, Parent } from '@nestjs/graphql';
+import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { DecodedUser, User } from './entities/user.entity';
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 import { UserService } from 'src/user/user.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -26,11 +26,11 @@ export class UserResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  updateNickname(
+  async updateNickname(
     @Args('nickname') newNickname: string,
     @DecodedUser() { _id }: DecodedUser
   ) {
-    return this.userService.updateNickname(Types.ObjectId(_id), newNickname)
+    return this.userService.updateNickname(Types.ObjectId(_id), newNickname);
   }
 
 }

@@ -1,13 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
-import { ReturnModelType } from '@typegoose/typegoose';
-import { Card } from 'src/game/card/entities/card.entity';
+import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
+import { Card, ChoiceCard, Option } from 'src/game/card/entities/card.entity';
 import { Types } from 'mongoose';
-import { IncidentCardInput } from 'src/game/card/dto/create-incident-card.input';
-import { ChoicesCardInput } from 'src/game/card/dto/create-choices-card.input';
+import { CreateIncidentCardInput } from 'src/game/card/dto/create-incident-card.input';
+import { CreateChoicesCardInput } from 'src/game/card/dto/create-choices-card.input';
 import { FieldType } from 'src/game/field/field.dictionaries';
 import { ID, objectIdToString } from 'src/utils';
 import { Redis } from 'ioredis';
+import { UpdateChoicesCardInput } from 'src/game/card/dto/update-choices-card.input';
+import { UpdateIncidentCardInput } from 'src/game/card/dto/update-incident-card.input';
+import { CARD_NOT_FOUND } from 'src/game/card/card.errors';
 
 @Injectable()
 export class CardService {
@@ -20,15 +23,41 @@ export class CardService {
     return `cards:${type}:${_id}`
   };
 
-  createChoicesCard = (createChoicesCardInput: ChoicesCardInput) => {
+  createChoicesCard = (createChoicesCardInput: CreateChoicesCardInput) => {
     return this.cardModel.create(createChoicesCardInput);
   };
 
-  createIncidentCard = (createIncidentCard: IncidentCardInput) => {
+  updateChoicesCard = async (cardId: ID, { description, type, choices }: UpdateChoicesCardInput) => {
+    const doc = await this.cardModel.findById(cardId) as DocumentType<ChoiceCard | null>;
+    if (!doc) {
+      throw new Error(CARD_NOT_FOUND);
+    }
+
+    if (description && doc.description !== description) {
+      doc.description = description;
+    }
+
+    if (choices) {
+      doc.choices = choices as Option[]
+    }
+
+    if (type && doc.type !== type) {
+      doc.type = type
+    }
+
+    await doc.save();
+    return doc;
+  };
+
+  createIncidentCard = (createIncidentCard: CreateIncidentCardInput) => {
     return this.cardModel.create({
       ...createIncidentCard,
       type: FieldType.Incident,
     });
+  };
+
+  updateIncidentCard = (cardId: ID, updateIncidentCard: UpdateIncidentCardInput) => {
+    return this.cardModel.findByIdAndUpdate(cardId, updateIncidentCard);
   };
 
   remove = (cardId: Types.ObjectId) => {

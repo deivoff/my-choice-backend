@@ -2,23 +2,40 @@ import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/g
 import { CardService } from 'src/game/card/card.service';
 import { Card } from 'src/game/card/entities/card.entity';
 import { Types } from 'mongoose';
-import { IncidentCardInput } from 'src/game/card/dto/create-incident-card.input';
-import { ChoicesCardInput } from 'src/game/card/dto/create-choices-card.input';
+import { CreateIncidentCardInput } from 'src/game/card/dto/create-incident-card.input';
+import { CreateChoicesCardInput } from 'src/game/card/dto/create-choices-card.input';
 import { FIELD_DICTIONARY } from 'src/game/field/field.dictionaries';
+import { UpdateChoicesCardInput } from 'src/game/card/dto/update-choices-card.input';
+import { UpdateIncidentCardInput } from 'src/game/card/dto/update-incident-card.input';
 
 @Resolver(() => Card)
 export class CardResolver {
   constructor(private readonly cardService: CardService) {}
 
   @Mutation(() => Card)
-  createChoicesCard(@Args('createChoicesCard') createChoicesCard: ChoicesCardInput) {
-
+  createChoicesCard(@Args('createChoicesCard') createChoicesCard: CreateChoicesCardInput) {
     return this.cardService.createChoicesCard(createChoicesCard);
   }
 
   @Mutation(() => Card)
-  createIncidentCard(@Args('createIncidentCard') createIncidentCard: IncidentCardInput) {
+  updateChoicesCard(
+    @Args('updateChoicesCard') updateChoicesCard: UpdateChoicesCardInput,
+    @Args('cardId') cardId: Types.ObjectId,
+  ) {
+    return this.cardService.updateChoicesCard(cardId, updateChoicesCard);
+  }
+
+  @Mutation(() => Card)
+  createIncidentCard(@Args('createIncidentCard') createIncidentCard: CreateIncidentCardInput) {
     return this.cardService.createIncidentCard(createIncidentCard);
+  }
+
+  @Mutation(() => Card)
+  updateIncidentCard(
+    @Args('updateIncidentCard') updateIncidentCard: UpdateIncidentCardInput,
+    @Args('cardId') cardId: Types.ObjectId,
+  ) {
+    return this.cardService.updateChoicesCard(cardId, updateIncidentCard);
   }
 
   @Mutation(() => Card)
