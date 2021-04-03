@@ -29,6 +29,15 @@ export class GameSessionResolver {
   }
 
   @ResolveField(() => Int)
+  playersCount(
+    @Parent() {
+      players
+    }: GameSession,
+  ) {
+    return players?.length || 0;
+  }
+
+  @ResolveField(() => Int)
   observers(
     @Parent() {
       observers

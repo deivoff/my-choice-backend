@@ -1,7 +1,7 @@
 import { prop } from '@typegoose/typegoose';
 import { Field, Int, InterfaceType, ObjectType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
-import { FIELD_DICTIONARY, FieldType } from 'src/game/field/field.dictionaries';
+import { FieldType } from 'src/game/field/field.dictionaries';
 import { Resources } from 'src/game/resources/resources.entity';
 
 export const CHOICES_CARD = [FieldType.Dream, FieldType.Situation, FieldType.Reaction, FieldType.Offer];
@@ -115,7 +115,12 @@ export class DroppedCard {
 @ObjectType({
   implements: [Card]
 })
-export class Opportunity extends Card {}
+export class Opportunity extends Card {
+
+  @Field(() => Boolean)
+  canTryLuck: boolean
+
+}
 
 export class Dream extends ChoiceCard {}
 export class Situation extends ChoiceCard {}

@@ -9,7 +9,7 @@ import { ID, objectIdToString } from 'src/utils';
 import { fromGameSessionToRedis, fromRedisToGameSession } from 'src/game/game-session/game-session.redis-adapter';
 import { Types } from 'mongoose';
 import { Player, PlayerPosition } from 'src/game/player/player.entity';
-import { PLAYER_NOT_FOUND } from 'src/game/player/player.errors';
+import { PLAYER_NOT_FOUND, PLAYERS_NOT_FOUND } from 'src/game/player/player.errors';
 import { FieldService } from 'src/game/field/field.service';
 import { Card, CHOICES_CARD } from 'src/game/card/entities/card.entity';
 import { CardService } from 'src/game/card/card.service';
@@ -240,6 +240,10 @@ export class GameSessionService {
     const isFieldChanged = await this.playerService.updateAfterChoice(cardId, userId, choiceId);
     const updatedPlayer = await this.playerService.findOne(userId);
 
+    if (!updatedPlayer) {
+      throw new Error(PLAYER_NOT_FOUND);
+    }
+
     if (updatedPlayer?.winner) {
       await this.findOneAndUpdate(updatedPlayer.gameId!, {
         winner: objectIdToString(userId)
@@ -249,16 +253,7 @@ export class GameSessionService {
     if (isFieldChanged) {
       return await this.playerStoodOnField(updatedPlayer!);
     } else {
-      const game = await this.findOne(updatedPlayer?.gameId!);
-      const players = await this.getPlayers(game?.players!);
-      const { mover, winner, error } = await this.playerService.getNextMover(players, updatedPlayer!);
-      if (error) throw new Error(CYCLED_ERROR);
-
-      await this.findOneAndUpdate(game?._id!, {
-        status: GameStatus.InProgress,
-        mover,
-        winner
-      });
+      await this.setNewMover(updatedPlayer);
 
       return {
         gameId: updatedPlayer?.gameId!,
@@ -266,21 +261,59 @@ export class GameSessionService {
     }
   };
 
-  playerMove = async (moveCount: number, userId: ID): Promise<PlayerActionResult> => {
-    const player = await this.playerService.changePlayerPosition(userId, moveCount);
+  setNewMover = async (currentMover: Player) => {
+    const game = await this.findOne(currentMover?.gameId!);
+    const players = await this.getPlayers(game?.players!);
+    const { mover, winner, error } = await this.playerService.getNextMover(players, currentMover!);
+    if (error) throw new Error(CYCLED_ERROR);
 
+    await this.findOneAndUpdate(game?._id!, {
+      status: GameStatus.InProgress,
+      mover,
+      winner
+    });
+  };
+
+  updateAfterOpportunity = async (
+    playerId: ID,
+    diceResult?: number
+  ): Promise<PlayerActionResult> => {
+    const isFieldChanged = await this.playerService.updateAfterOpportunity(playerId, diceResult);
+    const player = await this.playerService.findOne(playerId);
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
+    if (isFieldChanged) {
+      return await this.playerStoodOnField(player);
+    } else {
+      await this.setNewMover(player);
+    }
+
+    return {
+      gameId: player.gameId!
+    }
+  };
+
+  playerMove = async (moveCount: number, playerId: ID): Promise<PlayerActionResult> => {
+    const player = await this.playerService.changePlayerPosition(playerId, moveCount);
+
+    if (!player) throw new Error(PLAYER_NOT_FOUND);
+    await this.findOneAndUpdate(player.gameId!, {
+      mover: undefined
+    });
     return await this.playerStoodOnField(player);
   };
 
   private playerStoodOnField = async (player: Player): Promise<PlayerActionResult> => {
-    const result = await this.fieldService.stoodOnField(player);
+    const {
+      white,
+      winner,
+      card,
+    } = await this.fieldService.stoodOnField(player);
 
-    if (isNil(result)) {
+    if (winner) {
       await Promise.all([
         this.findOneAndUpdate(player?.gameId!, {
-          winner: objectIdToString(player._id)
+          winner: objectIdToString(player._id),
         }),
         this.playerService.findOneAndUpdate(player._id, {
           winner: true
@@ -292,10 +325,10 @@ export class GameSessionService {
       };
     }
 
-    if (typeof result === 'number') {
+    if (white) {
       await this.playerService.findOneAndUpdate(player._id, {
         resources: {
-          white: player.resources?.white! + result
+          white: player.resources?.white! + white
         }
       });
 
@@ -306,11 +339,14 @@ export class GameSessionService {
 
     return {
       gameId: player.gameId!,
-      card: result
+      card: card!
     };
   };
 
   getPlayers = (players: ID[]) => {
+    if (!players) {
+      throw new Error(PLAYERS_NOT_FOUND);
+    }
     return this.playerService.findSome(players);
   };
 

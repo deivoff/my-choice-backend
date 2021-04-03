@@ -6,7 +6,7 @@ import { ReturnModelType } from '@typegoose/typegoose';
 import { Game } from 'src/game/game.entity';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSessionService } from 'src/game/game-session/game-session.service';
-import { ID, objectIdToString } from 'src/utils';
+import { ID } from 'src/utils';
 import { decode } from 'jsonwebtoken';
 import { GameStatus } from 'src/game/game-session/game-session.entity';
 import { Card } from 'src/game/card/entities/card.entity';
@@ -153,6 +153,17 @@ export class GameService {
     await this.publishActiveGame(gameId);
     if (card) {
       this.publishDroppedCard(gameId, userId, card)
+    }
+  }
+
+
+  async updateAfterOpportunity(userId: ID, diceResult?: number) {
+    const { gameId, card } = await this.gameSessionService.updateAfterOpportunity(userId, diceResult);
+
+    await this.publishActiveGame(gameId);
+
+    if (card) {
+      this.publishDroppedCard(gameId, userId, card);
     }
   }
 

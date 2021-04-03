@@ -18,7 +18,6 @@ const CardModel = TypegooseModule.forFeature([
       { typegooseClass: Reaction, discriminatorId: FieldType.Reaction },
       { typegooseClass: Offer, discriminatorId: FieldType.Offer },
       { typegooseClass: Incident, discriminatorId: FieldType.Incident },
-      { typegooseClass: Opportunity, discriminatorId: FieldType.Opportunity }
     ],
   },
 ]);

@@ -150,7 +150,7 @@ export class PlayerService {
     }
   };
 
-  updateAfterChoice = async (cardId: ID, playerId: ID, choiceId?: ID) => {
+  updateAfterChoice = async (cardId: ID, playerId: ID, choiceId?: ID): Promise<boolean> => {
     const card = await this.cardService.findOne(cardId);
     const isChoiceCard = CHOICES_CARD.some(type => type === card?.type);
     if (!choiceId && isChoiceCard) {
@@ -175,6 +175,42 @@ export class PlayerService {
         }
       }
     }
+
+    return false;
+  };
+
+  updateAfterOpportunity = async (playerId: ID, diceResult?: number): Promise<boolean> => {
+    let isFieldChanged = false;
+    const player = await this.findOne(playerId);
+    if (!player) throw new Error(PLAYER_NOT_FOUND);
+
+    if (diceResult) {
+      const { white = 0, lives = 0, money = 0 } = player.resources || {};
+
+      switch (true) {
+        case (lives! + diceResult) >= 10 && white! >= 10:
+        case (lives! + diceResult) >= 15 && money! >= 100: {
+          isFieldChanged = true;
+          await this.setPlayerResources(playerId, {
+            lives: diceResult
+          });
+          break;
+        }
+        case lives! >= 10 && (white! + diceResult) >= 10: {
+          isFieldChanged = true;
+          await this.setPlayerResources(playerId, {
+            lives: diceResult
+          });
+          break
+        }
+      }
+    }
+
+    if (isFieldChanged) {
+      await this.changePlayerPosition(playerId, 0, PlayerPosition.Outer);
+    }
+
+    return isFieldChanged;
   };
 
   setPlayerAction = async (playerId: ID, action: Action) => {

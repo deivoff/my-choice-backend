@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
-import { Card, ChoiceCard, Option } from 'src/game/card/entities/card.entity';
+import { Card, ChoiceCard, Opportunity, Option } from 'src/game/card/entities/card.entity';
 import { Types } from 'mongoose';
 import { CreateIncidentCardInput } from 'src/game/card/dto/create-incident-card.input';
 import { CreateChoicesCardInput } from 'src/game/card/dto/create-choices-card.input';
@@ -11,6 +11,7 @@ import { Redis } from 'ioredis';
 import { UpdateChoicesCardInput } from 'src/game/card/dto/update-choices-card.input';
 import { UpdateIncidentCardInput } from 'src/game/card/dto/update-incident-card.input';
 import { CARD_NOT_FOUND } from 'src/game/card/card.errors';
+import { getOpportunityDescription, OpportunityCardType } from 'src/game/card/entities/opportunity.utils';
 
 @Injectable()
 export class CardService {
@@ -63,6 +64,13 @@ export class CardService {
   remove = (cardId: Types.ObjectId) => {
     return this.cardModel.findByIdAndRemove(cardId)
   };
+
+  getOpportunityCard = (type: OpportunityCardType): Opportunity => ({
+    _id: Types.ObjectId(),
+    type: FieldType.Opportunity,
+    description: getOpportunityDescription(type),
+    canTryLuck: type === OpportunityCardType.tryYourLuck,
+  });
 
   getCardFromDeck = async (gameId: ID, type: FieldType) => {
     const cardId = await this.getCardIdDeck(gameId, type);

@@ -94,6 +94,17 @@ export class GameResolver {
     return true
   }
 
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async opportunityResult(
+    @DecodedUser() decodedUser: DecodedUser,
+    @Args('diceResult', { type: () => Int, nullable: true }) diceResult?: number,
+  ) {
+    await this.gameService.updateAfterOpportunity(decodedUser._id, diceResult);
+
+    return true
+  }
+
   @Subscription(() => GameSession, {
     filter: (
       payload: { updateActiveGame: GameSession },
