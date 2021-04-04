@@ -5,7 +5,7 @@ import { CardService } from 'src/game/card/card.service';
 import { Player, PlayerPosition } from 'src/game/player/player.entity';
 import { Card } from 'src/game/card/entities/card.entity';
 import { FieldType, INNER_FIELDS, OUTER_FIELDS } from 'src/game/field/field.dictionaries';
-import { OpportunityCardType } from 'src/game/card/entities/opportunity.utils';
+import { OpportunityCardType, opportunitySuccess } from 'src/game/card/entities/opportunity.utils';
 import { Resources } from 'src/game/resources/resources.entity';
 
 type FieldResult<C extends Card = Card> = {
@@ -57,7 +57,7 @@ export class FieldService {
                 card: this.cardService.getOpportunityCard(OpportunityCardType.darkFail)
               }
             } else {
-              if ((lives! >= 10 && white! >= 10) || (lives! >= 15 && money! >= 100)) {
+              if (opportunitySuccess(resources!)) {
                 return {
                   card: this.cardService.getOpportunityCard(OpportunityCardType.success)
                 }

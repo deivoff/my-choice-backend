@@ -24,6 +24,11 @@ export class GameService {
 
     const data = decode(token);
     const gameId = await this.gameSessionService.connect(data?.['_id']);
+
+    if (gameId) {
+      await this.publishActiveGame(gameId);
+      return
+    }
   }
 
   async disconnect(token?: string) {

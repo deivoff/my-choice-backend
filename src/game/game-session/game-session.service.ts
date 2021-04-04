@@ -377,7 +377,7 @@ export class GameSessionService {
     }
 
     if (game.mover === objectIdToString(userId) && game.status !== GameStatus.Finished) {
-      const { mover, winner, error } = await this.playerService.getNextMover(players);
+      const { mover, winner, error } = await this.playerService.getNextMover(players, player);
       if (error) throw new Error(CYCLED_ERROR);
       await this.findOneAndUpdate(game._id, {
         mover,

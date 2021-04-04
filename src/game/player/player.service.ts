@@ -20,6 +20,7 @@ import { CardService } from 'src/game/card/card.service';
 import { Action, ChoiceCard, CHOICES_CARD, Incident } from 'src/game/card/entities/card.entity';
 import { NEED_CHOICE } from 'src/game/card/card.errors';
 import { Resources } from 'src/game/resources/resources.entity';
+import { opportunitySuccess } from 'src/game/card/entities/opportunity.utils';
 
 
 type GameState = {
@@ -183,10 +184,9 @@ export class PlayerService {
     let isFieldChanged = false;
     const player = await this.findOne(playerId);
     if (!player) throw new Error(PLAYER_NOT_FOUND);
+    const { white = 0, lives = 0, money = 0, dark = 0 } = player.resources || {};
 
     if (diceResult) {
-      const { white = 0, lives = 0, money = 0 } = player.resources || {};
-
       switch (true) {
         case (lives! + diceResult) >= 10 && white! >= 10:
         case (lives! + diceResult) >= 15 && money! >= 100: {
@@ -204,6 +204,10 @@ export class PlayerService {
           break
         }
       }
+    }
+
+    if (!dark && opportunitySuccess({ white, lives, money})) {
+      isFieldChanged = true
     }
 
     if (isFieldChanged) {
