@@ -130,7 +130,6 @@ export class PlayerService {
           position: PlayerPosition.Inner,
           cell: moveCount - 1
         });
-
       }
       case newPosition === PlayerPosition.Outer: {
         const newCell = FROM_INNER_TO_OUTER[player.cell!];
@@ -139,7 +138,6 @@ export class PlayerService {
           position: PlayerPosition.Outer,
           cell: newCell
         });
-
       }
       default: {
         const newCell = ((player?.cell ?? 0) + moveCount) % FIELDS_COUNT[player?.position!];

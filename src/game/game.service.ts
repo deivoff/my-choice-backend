@@ -173,7 +173,11 @@ export class GameService {
   }
 
   async playerMove(moveCount: number, userId: ID) {
-    const result = await this.gameSessionService.playerMove(moveCount, userId);
+    const result = await this.gameSessionService.playerMove(
+      moveCount,
+      userId,
+      (gameId) => this.publishActiveGame(gameId)
+    );
 
     await this.publishActiveGame(result.gameId);
     if (result.card) {

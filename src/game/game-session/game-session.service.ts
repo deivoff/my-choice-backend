@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { isNil } from 'lodash';
 import { Redis } from 'ioredis';
 import { isEmpty, union, without } from 'lodash';
 import { GameSession, GameStatus } from 'src/game/game-session/game-session.entity';
@@ -11,9 +10,8 @@ import { Types } from 'mongoose';
 import { Player, PlayerPosition } from 'src/game/player/player.entity';
 import { PLAYER_NOT_FOUND, PLAYERS_NOT_FOUND } from 'src/game/player/player.errors';
 import { FieldService } from 'src/game/field/field.service';
-import { Card, CHOICES_CARD } from 'src/game/card/entities/card.entity';
+import { Card } from 'src/game/card/entities/card.entity';
 import { CardService } from 'src/game/card/card.service';
-import { NEED_CHOICE } from 'src/game/card/card.errors';
 
 interface CreateGameSession {
   name: string;
@@ -293,13 +291,18 @@ export class GameSessionService {
     }
   };
 
-  playerMove = async (moveCount: number, playerId: ID): Promise<PlayerActionResult> => {
+  playerMove = async (moveCount: number, playerId: ID, onMove?: (gameId: ID) => Promise<void>): Promise<PlayerActionResult> => {
     const player = await this.playerService.changePlayerPosition(playerId, moveCount);
 
     if (!player) throw new Error(PLAYER_NOT_FOUND);
     await this.findOneAndUpdate(player.gameId!, {
       mover: undefined
     });
+
+    if (onMove) {
+      await onMove(player.gameId!);
+    }
+
     return await this.playerStoodOnField(player);
   };
 
@@ -326,11 +329,12 @@ export class GameSessionService {
     }
 
     if (white) {
-      await this.playerService.findOneAndUpdate(player._id, {
+      const updatedPlayer = await this.playerService.findOneAndUpdate(player._id, {
         resources: {
           white: player.resources?.white! + white
         }
       });
+      await this.setNewMover(updatedPlayer!);
 
       return {
         gameId: player.gameId!
