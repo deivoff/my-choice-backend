@@ -14,8 +14,8 @@ type Opengraph = {
 }
 
 const GAME_STATUS: { [key in GameStatus]: [string, string] } = {
-  [GameStatus.InProgress]: ['В прогрессе', 'Но вы можете посмотреть как она проходит!'],
-  [GameStatus.ChoiceDream]: ['В прогрессе', 'Но вы можете посмотреть как она проходит!'],
+  [GameStatus.InProgress]: ['В процессе', 'Но вы можете посмотреть как она проходит!'],
+  [GameStatus.ChoiceDream]: ['В процессе', 'Но вы можете посмотреть как она проходит!'],
   [GameStatus.Awaiting]: ['Ожидает игроков', 'Присоединяйтесь, скоро она начнется!'],
   [GameStatus.Finished]: ['Завершена', 'Начните новую игру прямо сейчас!'],
 };
