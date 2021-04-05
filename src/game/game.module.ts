@@ -13,6 +13,7 @@ import { PlayerModule } from 'src/game/player/player.module';
 import { PlayerService } from 'src/game/player/player.service';
 import { UserService } from 'src/user/user.service';
 import { FieldModule } from 'src/game/field/field.module';
+import { GameController } from 'src/game/game.controller';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { FieldModule } from 'src/game/field/field.module';
       inject: [RedisService]
     },
   ],
+  controllers: [GameController],
   exports: [GameService],
 })
 export class GameModule {}
