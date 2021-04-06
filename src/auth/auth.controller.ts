@@ -1,20 +1,19 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Render } from '@nestjs/common';
+
+type OAuthCode = {
+  code: string;
+}
 
 @Controller('oauth')
 export class AuthController {
+
   @Get('vk')
+  @Render('oauth.pug')
   vkOAuthMessage(
     @Query() query: { code: string },
-  ) {
-    return `
-    <script>
-    if (window.opener) {
-      window.opener.postMessage(
-      { source: 'auth', payload: { code: '${query.code}' } },
-      '*'
-      );
+  ): OAuthCode {
+    return {
+      code: query.code,
     }
-    </script>
-    `
   }
 }

@@ -107,11 +107,11 @@ export class CardService {
   };
 
   findAll = () => {
-    return this.cardModel.find();
+    return this.cardModel.find().lean();
   };
 
   findOne = (_id: ID) => {
-    return this.cardModel.findById(_id);
+    return this.cardModel.findById(_id).lean();
   }
 
 }

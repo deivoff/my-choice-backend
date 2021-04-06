@@ -26,11 +26,6 @@ type PlayerActionResult = {
   card?: Card
 }
 
-type ChoiceResult = {
-  isFieldChanged?: boolean;
-  gameId: ID;
-}
-
 @Injectable()
 export class GameSessionService {
   constructor(

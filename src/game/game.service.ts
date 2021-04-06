@@ -10,6 +10,10 @@ import { ID } from 'src/utils';
 import { decode } from 'jsonwebtoken';
 import { GameStatus } from 'src/game/game-session/game-session.entity';
 import { Card } from 'src/game/card/entities/card.entity';
+import { DecodedUser } from 'src/user/entities/user.entity';
+
+const DISCONNECT_TIMEOUT_MS = 3000;
+const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
 
 @Injectable()
 export class GameService {
@@ -22,7 +26,15 @@ export class GameService {
   async connect(token?: string) {
     if (!token) return;
 
-    const data = decode(token);
+    const data = decode(token) as DecodedUser;
+    if (!data?._id) return;
+    const timeout = disconnectTimeouts.get(data._id);
+    if (timeout) {
+      clearTimeout(timeout);
+      disconnectTimeouts.delete(data._id);
+      return;
+    }
+
     const gameId = await this.gameSessionService.connect(data?.['_id']);
 
     if (gameId) {
@@ -34,18 +46,24 @@ export class GameService {
   async disconnect(token?: string) {
     if (!token) return;
 
-    const data = decode(token);
-    const gameId = await this.gameSessionService.disconnect(data?.['_id']);
+    const data = decode(token) as DecodedUser;
+    if (!data?._id) return;
 
-    if (!gameId) return;
+    const timeout = setTimeout(async () => {
+      const gameId = await this.gameSessionService.disconnect(data._id);
 
-    if (typeof gameId === 'boolean') {
-      await this.publishActiveGames();
-      return;
-    }
+      if (!gameId) return;
 
+      if (typeof gameId === 'boolean') {
+        await this.publishActiveGames();
+        return;
+      }
 
-    await this.publishActiveGame(gameId);
+      disconnectTimeouts.delete(data._id);
+      await this.publishActiveGame(gameId);
+    }, DISCONNECT_TIMEOUT_MS);
+
+    disconnectTimeouts.set(data._id, timeout);
   }
 
   async create(createGameInput: { name: string; creator: string, observerMode?: boolean }) {

@@ -1,10 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
+import { isEmpty, isNil } from 'lodash';
 import { UserService } from 'src/user/user.service';
 import { Player, PlayerPosition } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
 import { fromPlayerToRedis, fromRedisToPlayer } from 'src/game/player/player.redis-adapter';
-import { isEmpty } from 'lodash';
 import { Types } from 'mongoose';
 import {
   DREAM_FIELDS,
@@ -226,13 +226,15 @@ export class PlayerService {
 
     if (action.less) {
       Object.entries(action.less).forEach(([key, value]) => {
-        lessCheck = player.resources?.[key] ?? 0 < value ?? 0
+        if (isNil(value)) return;
+        lessCheck = (player.resources?.[key] ?? 0) < value
       })
     }
 
     if (action.more) {
       Object.entries(action.more).forEach(([key, value]) => {
-        moreCheck = player.resources?.[key] ?? 0 >= value
+        if (isNil(value)) return;
+        moreCheck = (player.resources?.[key] ?? 0) >= value;
       })
     }
 
