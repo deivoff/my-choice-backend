@@ -22,10 +22,10 @@ import { LogLevel } from '@sentry/types';
     }),
     SentryModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (cfg:ConfigService) => ({
-        dsn: cfg.get('sentry.dsn'),
-        debug: !cfg.get<boolean>('isProd'),
-        environment: cfg.get<string>('env'),
+      useFactory: async (configService: ConfigService) => ({
+        dsn: configService.get('sentry.dsn'),
+        debug: !configService.get<boolean>('isProd'),
+        environment: configService.get<string>('env'),
         release: 'some_release', // must create a release in sentry.io dashboard
         logLevel: LogLevel.Debug, //based on sentry.io loglevel //
         tracesSampleRate: 1.0,
