@@ -28,12 +28,12 @@ export class GameService {
 
     const data = decode(token) as DecodedUser;
     if (!data?._id) return;
-    const timeout = disconnectTimeouts.get(data._id);
-    if (timeout) {
-      clearTimeout(timeout);
-      disconnectTimeouts.delete(data._id);
-      return;
-    }
+    // const timeout = disconnectTimeouts.get(data._id);
+    // if (timeout) {
+    //   clearTimeout(timeout);
+    //   disconnectTimeouts.delete(data._id);
+    //   return;
+    // }
 
     const gameId = await this.gameSessionService.connect(data?.['_id']);
 
@@ -48,22 +48,33 @@ export class GameService {
 
     const data = decode(token) as DecodedUser;
     if (!data?._id) return;
+    const gameId = await this.gameSessionService.disconnect(data._id);
 
-    const timeout = setTimeout(async () => {
-      const gameId = await this.gameSessionService.disconnect(data._id);
+    if (!gameId) return;
 
-      if (!gameId) return;
+    if (typeof gameId === 'boolean') {
+      await this.publishActiveGames();
+      return;
+    }
 
-      if (typeof gameId === 'boolean') {
-        await this.publishActiveGames();
-        return;
-      }
+    disconnectTimeouts.delete(data._id);
+    await this.publishActiveGame(gameId)
 
-      disconnectTimeouts.delete(data._id);
-      await this.publishActiveGame(gameId);
-    }, DISCONNECT_TIMEOUT_MS);
-
-    disconnectTimeouts.set(data._id, timeout);
+    // const timeout = setTimeout(async () => {
+    //   const gameId = await this.gameSessionService.disconnect(data._id);
+    //
+    //   if (!gameId) return;
+    //
+    //   if (typeof gameId === 'boolean') {
+    //     await this.publishActiveGames();
+    //     return;
+    //   }
+    //
+    //   disconnectTimeouts.delete(data._id);
+    //   await this.publishActiveGame(gameId);
+    // }, DISCONNECT_TIMEOUT_MS);
+    //
+    // disconnectTimeouts.set(data._id, timeout);
   }
 
   async create(createGameInput: { name: string; creator: string, observerMode?: boolean }) {
