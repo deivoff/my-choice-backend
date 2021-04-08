@@ -10,6 +10,8 @@ import { CommonModule } from './common/common.module';
 import { GameModule } from './game/game.module';
 import { MessageModule } from './message/message.module';
 import { GameService } from 'src/game/game.service';
+import { SentryModule } from '@ntegral/nestjs-sentry';
+import { LogLevel } from '@sentry/types';
 
 @Module({
   imports: [
@@ -17,6 +19,18 @@ import { GameService } from 'src/game/game.service';
       load: [configuration],
       isGlobal: true,
       cache: true,
+    }),
+    SentryModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (cfg:ConfigService) => ({
+        dsn: cfg.get('sentry.dsn'),
+        debug: !cfg.get<boolean>('isProd'),
+        environment: cfg.get<string>('env'),
+        release: 'some_release', // must create a release in sentry.io dashboard
+        logLevel: LogLevel.Debug, //based on sentry.io loglevel //
+        tracesSampleRate: 1.0,
+      }),
+      inject: [ConfigService],
     }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => {

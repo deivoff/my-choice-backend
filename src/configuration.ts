@@ -12,6 +12,7 @@ export default () => {
     VK_CLIENT_ID,
     VK_CLIENT_SECRET,
     REDIS_URL,
+    SENTRY_DSN,
   } = process.env;
   return ({
     port: parseInt(PORT, 10),
@@ -30,6 +31,10 @@ export default () => {
       pass: DB_PASS || '',
     },
     isProd: NODE_ENV === 'production',
+    env: NODE_ENV,
+    sentry: {
+      dsn: SENTRY_DSN,
+    },
     vkConfig: {
       clientID: VK_CLIENT_ID,
       clientSecret: VK_CLIENT_SECRET,
