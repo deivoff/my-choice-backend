@@ -112,6 +112,17 @@ export class DroppedCard {
 
 }
 
+@ObjectType()
+export class ChoiceOption {
+
+  @Field()
+  cardId: Types.ObjectId;
+
+  @Field({ nullable: true })
+  choiceId?: Types.ObjectId;
+
+}
+
 @ObjectType({
   implements: [Card]
 })

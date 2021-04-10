@@ -11,7 +11,7 @@ import { PubSubEngine } from 'graphql-subscriptions';
 import { GameSession } from 'src/game/game-session/game-session.entity';
 import { Player } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
-import { Card, DroppedCard } from 'src/game/card/entities/card.entity';
+import { Card, ChoiceOption, DroppedCard } from 'src/game/card/entities/card.entity';
 import { ShareResourcesInput } from 'src/game/dto/share-resources.input';
 
 @Resolver(() => Game)
@@ -158,6 +158,36 @@ export class GameResolver {
     @Args('gameId') gameId: Types.ObjectId
   ) {
     return this.pubSub.asyncIterator('cardDropped')
+  }
+
+  @Subscription(() => ChoiceOption, {
+    filter: (
+      payload: {
+        choiceId?: ID,
+        cardId: ID,
+        gameId: ID,
+      },
+      variables: { gameId: Types.ObjectId }
+    ) => {
+      return objectIdToString(payload.gameId) === objectIdToString(variables.gameId);
+    },
+    resolve: (
+      payload: {
+        choiceId?: ID,
+        cardId: ID,
+        gameId: ID,
+      },
+    ): ChoiceOption => {
+      return ({
+        cardId: payload.cardId as Types.ObjectId,
+        choiceId: payload.choiceId as Types.ObjectId | undefined,
+      });
+    }
+  })
+  playerChoice(
+    @Args('gameId') gameId: Types.ObjectId,
+  ) {
+    return this.pubSub.asyncIterator('playerChoice')
   }
 
   @Query(() => [GameSession])

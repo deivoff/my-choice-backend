@@ -129,10 +129,11 @@ export class GameService {
     })
   }
 
-  private async publishChoiceInGame(gameId: ID, choiceId: ID) {
+  private async publishChoiceInGame(gameId: ID, cardId: ID, choiceId?: ID) {
     await this.pubSub.publish('playerChoice', {
       choiceId,
-      gameId
+      gameId,
+      cardId,
     })
   }
 
@@ -181,9 +182,7 @@ export class GameService {
   async choice(cardId: ID, userId: ID, choiceId?: ID) {
     const { gameId, card } = await this.gameSessionService.choice(cardId, userId, choiceId);
 
-    if (choiceId) {
-      await this.publishChoiceInGame(gameId, choiceId)
-    }
+    await this.publishChoiceInGame(gameId, cardId, choiceId);
 
     await this.publishActiveGame(gameId);
     if (card) {
