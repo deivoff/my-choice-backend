@@ -12,6 +12,7 @@ import { PLAYER_NOT_FOUND, PLAYERS_NOT_FOUND } from 'src/game/player/player.erro
 import { FieldService } from 'src/game/field/field.service';
 import { Card } from 'src/game/card/entities/card.entity';
 import { CardService } from 'src/game/card/card.service';
+import { ShareResourcesInput } from 'src/game/dto/share-resources.input';
 
 interface CreateGameSession {
   name: string;
@@ -340,6 +341,15 @@ export class GameSessionService {
       gameId: player.gameId!,
       card: card!
     };
+  };
+
+  shareResources = async ( playerId: ID, shareResourcesInput: ShareResourcesInput) => {
+    const player = await this.playerService.findOne(playerId);
+
+    if (!player) throw new Error(PLAYER_NOT_FOUND);
+    await this.playerService.share(player, shareResourcesInput);
+
+    return player.gameId;
   };
 
   getPlayers = (players: ID[]) => {

@@ -12,6 +12,7 @@ import { GameSession } from 'src/game/game-session/game-session.entity';
 import { Player } from 'src/game/player/player.entity';
 import { ID, objectIdToString } from 'src/utils';
 import { Card, DroppedCard } from 'src/game/card/entities/card.entity';
+import { ShareResourcesInput } from 'src/game/dto/share-resources.input';
 
 @Resolver(() => Game)
 export class GameResolver {
@@ -91,6 +92,16 @@ export class GameResolver {
     @Args('choiceId', { nullable: true }) choiceId?: Types.ObjectId,
   ) {
     await this.gameService.choice(cardId, decodedUser._id, choiceId);
+    return true
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async shareResources(
+    @DecodedUser() decodedUser: DecodedUser,
+    @Args('shareResourcesInput') shareResourcesInput: ShareResourcesInput,
+  ) {
+    await this.gameService.shareResources(shareResourcesInput, decodedUser._id);
     return true
   }
 

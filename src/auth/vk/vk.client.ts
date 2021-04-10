@@ -1,5 +1,5 @@
 import { ParsedUrlQueryInput } from 'querystring';
-
+import { isArray } from 'lodash';
 const querystring = require('querystring');
 
   const enum OAuthMethods {
@@ -28,8 +28,15 @@ type User<T extends keyof OptionalUser = never> = {
   can_access_closed: boolean;
 } & Pick<OptionalUser, T>;
 
+export enum Sex {
+  Undefined,
+  Female,
+  Male,
+}
+
 type OptionalUser = {
   photo_id: string;
+  sex: Sex
 }
 
 type Photo = {
@@ -110,15 +117,23 @@ export class VKClient {
   }
 
   private toVKQueryString(obj: ParsedUrlQueryInput) {
-    return querystring.stringify({ ...obj, v: this.apiOptions.version }, undefined, undefined, {
-      encodeURIComponent: (str) => str,
+    const newObj = Object.entries(obj).reduce((acc, [key, value]) => {
+      acc[key] = isArray(value) ? value.join(',') : value;
+      return acc;
+    }, {
+      v: this.apiOptions.version,
+    });
+    return querystring.stringify(newObj, undefined, undefined, {
+      encodeURIComponent: (str) => {
+        return str;
+        },
     })
   }
 
   generateAuthUrl({
-                    scope,
-                    ...rest
-                  }: AuthURLParams) {
+    scope,
+    ...rest
+  }: AuthURLParams) {
     const url = this.getOAuthMethod(OAuthMethods.authorize);
     const scopeBitMask = scope ? Array.isArray(scope)
       ? scope.reduce<number>((acc, s) =>  (1 << s) + acc, 0)

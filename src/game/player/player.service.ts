@@ -19,8 +19,10 @@ import { USER_NOT_FOUND } from 'src/user/user.errors';
 import { CardService } from 'src/game/card/card.service';
 import { Action, ChoiceCard, CHOICES_CARD, Incident } from 'src/game/card/entities/card.entity';
 import { NEED_CHOICE } from 'src/game/card/card.errors';
-import { Resources } from 'src/game/resources/resources.entity';
+import { Resources, ResourceType } from 'src/game/resources/resources.entity';
 import { opportunitySuccess } from 'src/game/card/entities/opportunity.utils';
+import { ShareResourcesInput } from 'src/game/dto/share-resources.input';
+import { share } from 'rxjs/operators';
 
 
 type GameState = {
@@ -52,6 +54,7 @@ export class PlayerService {
       _id: userId,
       nickname: user.nickname,
       avatar: user.avatar || '',
+      sex: user.sex,
       gameover: false,
       winner: false,
       gameId,
@@ -276,6 +279,35 @@ export class PlayerService {
     await this.findOneAndUpdate(playerId, {
       cell: nextField
     });
+  };
+
+  share = async (player: Player, { exchange, for: shareFor }: ShareResourcesInput) => {
+    const resources = player.resources!;
+    if (exchange === ResourceType.dark) {
+      resources.dark = resources!.dark! - 1;
+
+      if (shareFor === ResourceType.money) {
+        resources.money = resources!.money! - 50;
+      }
+
+      if (shareFor === ResourceType.white) {
+        resources.white = resources!.white! - 5;
+      }
+
+      if (shareFor === ResourceType.lives) {
+        resources.lives = resources!.lives! - 5;
+      }
+
+    }
+
+    if (exchange === ResourceType.lives) {
+      resources.lives = resources!.lives! + 1;
+      resources.money = resources!.money! - 10;
+    }
+
+    return this.findOneAndUpdate(player._id, {
+      resources
+    })
   };
 
   setPlayerResources = async (playerId: ID, resources: Resources = {}) => {

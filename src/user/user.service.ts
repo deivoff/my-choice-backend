@@ -16,11 +16,12 @@ export class UserService {
     return this.userModel.findById(_id);
   }
 
-  async upsertVKUser({ accessToken, profile: {
-    name, id, photos
-  } }: AuthData, onNewUser?: () => void) {
+  async upsertVKUser<User extends AuthData>({ accessToken, profile: {
+    name, id, photos, sex
+  } }: User, onNewUser?: () => void) {
     try {
       const user = await this.userModel.findOne({ 'social.vkProvider.id': id });
+
       if (!user) {
         if (onNewUser) {
           onNewUser();
@@ -35,6 +36,11 @@ export class UserService {
           photos,
         });
       }
+
+      user.photos = photos;
+      user.sex = user.sex || sex;
+      await user.save();
+
       return user;
     } catch (error) {
       throw error;

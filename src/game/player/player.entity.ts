@@ -15,7 +15,7 @@ registerEnumType(PlayerPosition, {
 });
 
 @ObjectType()
-export class Player extends PickType(User, ['_id']){
+export class Player extends PickType(User, ['_id', 'sex']){
 
   @Field({ nullable: true })
   avatar: string;

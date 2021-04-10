@@ -11,6 +11,7 @@ import { decode } from 'jsonwebtoken';
 import { GameStatus } from 'src/game/game-session/game-session.entity';
 import { Card } from 'src/game/card/entities/card.entity';
 import { DecodedUser } from 'src/user/entities/user.entity';
+import { ShareResourcesInput } from 'src/game/dto/share-resources.input';
 
 const DISCONNECT_TIMEOUT_MS = 3000;
 const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
@@ -211,6 +212,17 @@ export class GameService {
     await this.publishActiveGame(result.gameId);
     if (result.card) {
       this.publishDroppedCard(result.gameId, userId, result.card)
+    }
+  }
+
+  async shareResources(shareResourcesInput: ShareResourcesInput, userId: ID) {
+    const gameId = await this.gameSessionService.shareResources(
+      userId,
+      shareResourcesInput,
+    );
+
+    if (gameId) {
+      await this.publishActiveGame(gameId);
     }
   }
 

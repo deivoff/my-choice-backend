@@ -33,19 +33,32 @@ export class VkService {
   async serializeAccountFromCode(code: string) {
     const { access_token, user_id } = await this.vkClient.getToken(code);
     const [user] = await this.vkClient.getUsers(
-      access_token, [user_id], ['photo_id']);
+      access_token, [user_id], ['photo_id', 'sex']);
     const userName = {
       familyName: user.last_name,
       givenName: user.first_name
     };
-
     const [photo] = await this.vkClient.getPhotosUrl(access_token, [user.photo_id]);
+    const photos = photo.sizes.reduce<{ url: string }[]>((acc, size) => {
+      switch (size.type) {
+        case 'p': {
+          acc.push({
+            url: size.url,
+          });
+          return acc;
+        }
+        default: {
+          return acc
+        }
+      }
+    }, []);
     return {
       accessToken: access_token,
       profile: {
         id: user_id,
         name: userName,
-        photos: [{ url: photo.sizes[0].url }],
+        sex: user.sex,
+        photos,
       },
     }
   }

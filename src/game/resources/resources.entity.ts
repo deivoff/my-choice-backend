@@ -1,5 +1,16 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { prop } from '@typegoose/typegoose';
+
+export enum ResourceType {
+  lives = 'lives',
+  money = 'money',
+  white = 'white',
+  dark = 'dark',
+}
+
+registerEnumType(ResourceType, {
+  name: 'ResourceType'
+});
 
 @ObjectType()
 export class Resources {

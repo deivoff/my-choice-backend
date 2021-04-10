@@ -4,12 +4,33 @@ import { Types } from 'mongoose';
 import { prop } from '@typegoose/typegoose';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { IncomingMessage } from "http";
+import { Sex } from 'src/auth/vk/vk.client';
 
 export enum UserRole {
   User = 'User',
   Moderator = 'Moderator',
   Admin = 'Admin',
 }
+
+export enum UserSex {
+  Undefined = 'Undefined',
+  Male = 'Male',
+  Female = 'Female'
+}
+
+const SexToUserSex = {
+  0: 'Undefined',
+  1: 'Female',
+  2: 'Male',
+  Undefined: 'Undefined',
+  Female: 'Female',
+  Male: 'Male'
+};
+
+registerEnumType(UserSex, {
+  name: 'UserSex',
+});
+
 
 registerEnumType(UserRole, {
   name: 'UserRole',
@@ -77,6 +98,19 @@ export class User {
   @Field(() => UserName)
   @prop({ _id: false })
   name!: UserName;
+
+  @Field(() => UserSex)
+  @prop({
+    _id: false,
+    get(val?: Sex | UserSex) {
+      if (!val) return  SexToUserSex[0];
+      return SexToUserSex[val]
+    },
+    set(val: UserSex | Sex ) {
+      return SexToUserSex[val]
+    }
+  })
+  sex?: UserSex;
 
   @prop({ required: false })
   _nickname: string;
