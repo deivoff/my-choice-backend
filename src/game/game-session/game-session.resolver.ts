@@ -19,6 +19,15 @@ export class GameSessionResolver {
     return mover ? Types.ObjectId(mover) : null
   }
 
+  @ResolveField(() => Types.ObjectId, { nullable: true })
+  winner(
+    @Parent() {
+      winner
+    }: GameSession
+  ) {
+    return winner ? Types.ObjectId(winner) : null
+  }
+
   @ResolveField(() => [Player])
   players(
     @Parent() {

@@ -109,9 +109,14 @@ export class GameResolver {
   @Mutation(() => Boolean)
   async opportunityResult(
     @DecodedUser() decodedUser: DecodedUser,
+    @Args('opportunityId') opportunityId: Types.ObjectId,
     @Args('diceResult', { type: () => Int, nullable: true }) diceResult?: number,
   ) {
-    await this.gameService.updateAfterOpportunity(decodedUser._id, diceResult);
+    await this.gameService.updateAfterOpportunity(
+      decodedUser._id,
+      opportunityId,
+      diceResult,
+    );
 
     return true
   }

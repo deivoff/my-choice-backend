@@ -191,10 +191,13 @@ export class GameService {
   }
 
 
-  async updateAfterOpportunity(userId: ID, diceResult?: number) {
+  async updateAfterOpportunity(userId: ID, opportunityId: ID, diceResult?: number) {
     const { gameId, card } = await this.gameSessionService.updateAfterOpportunity(userId, diceResult);
 
-    await this.publishActiveGame(gameId);
+    await Promise.all([
+      this.publishChoiceInGame(gameId, opportunityId),
+      this.publishActiveGame(gameId),
+    ]);
 
     if (card) {
       this.publishDroppedCard(gameId, userId, card);
