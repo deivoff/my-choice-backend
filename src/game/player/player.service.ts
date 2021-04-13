@@ -200,7 +200,7 @@ export class PlayerService {
         case lives! >= 10 && (white! + diceResult) >= 10: {
           isFieldChanged = true;
           await this.setPlayerResources(playerId, {
-            lives: diceResult
+            white: diceResult
           });
           break
         }
