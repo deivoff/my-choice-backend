@@ -95,6 +95,10 @@ export class User {
   @prop()
   email?: string;
 
+  @Field({ nullable: true })
+  @prop({ required: false })
+  isBot?: boolean;
+
   @Field(() => UserName)
   @prop({ _id: false })
   name!: UserName;

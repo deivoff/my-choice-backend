@@ -4,6 +4,10 @@ import { AuthRedirect, AuthResponse } from './types/auth.types';
 import { UserService } from '../user/user.service';
 import { ConfigService } from '@nestjs/config';
 
+enum REGISTRATION_EXTRA {
+  isBot = '1dBj3X'
+}
+
 @Resolver()
 export class AuthResolver {
   constructor(
@@ -22,10 +26,12 @@ export class AuthResolver {
   @Mutation(() => AuthResponse)
   async authVK(
     @Args('code') code: string,
+    @Args('extra', { nullable: true }) extra: string,
   ): Promise<AuthResponse> {
     const { accessToken, profile } = await this.vkService.serializeAccountFromCode(code);
 
-    const user = await this.userService.upsertVKUser({ accessToken, profile });
+    const isBot = REGISTRATION_EXTRA.isBot === extra;
+    const user = await this.userService.upsertVKUser({ accessToken, profile, isBot });
     const token = user.generateJWT(this.configService.get<string>('secretKey') || '');
     return {
       token

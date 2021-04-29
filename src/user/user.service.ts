@@ -16,9 +16,19 @@ export class UserService {
     return this.userModel.findById(_id);
   }
 
-  async upsertVKUser<User extends AuthData>({ accessToken, profile: {
-    name, id, photos, sex
-  } }: User, onNewUser?: () => void) {
+  async upsertVKUser<User extends AuthData & { isBot?: boolean }>(
+    {
+      accessToken,
+      isBot,
+      profile: {
+        name,
+        id,
+        photos,
+        sex
+      }
+    }: User,
+    onNewUser?: () => void
+  ) {
     try {
       const user = await this.userModel.findOne({ 'social.vkProvider.id': id });
 
@@ -28,6 +38,7 @@ export class UserService {
         }
         return await this.userModel.create({
           name,
+          isBot,
           // @ts-ignore
           'social.vkProvider': {
             id,
