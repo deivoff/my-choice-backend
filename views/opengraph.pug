@@ -1,0 +1,21 @@
+doctype html
+html(lang="ru")
+    head
+        title Мой выбор | Социальная онлайн-игра
+        meta(property="og:type" content="article")
+        meta(property='og:locale' content="ru_RU")
+        meta(property='og:site_name' content="Мой выбор | Социальная онлайн-игра")
+        meta(property='og:image' content= url + "assets/logo.png")
+        meta(property='og:image:height' content="350")
+        meta(property='og:image:width' content="350")
+        meta(property="og:url" content= url)
+        if graph.title
+            meta(property='og:title' content= graph.title)
+        else
+            meta(property='og:title' content="На главную")
+
+        meta(property='og:description' content= graph.description)
+        meta(name='description' content= graph.description)
+        if graph.publishedTime
+            meta(property="article:published_time" content= graph.publishedTime)
+    body

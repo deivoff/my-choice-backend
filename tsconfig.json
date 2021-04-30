@@ -1,27 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es2017",
     "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
     "moduleResolution": "node",
-    "outDir": "build",
-    "sourceMap": true,
-    "inlineSources": true,
-    "sourceRoot": "/",
-    "baseUrl": ".",
-    "importHelpers": true,
-    "strict": true,
-    "noImplicitAny": false,
-    "noImplicitThis": false,
-    "alwaysStrict": true,
+    "emitDecoratorMetadata": true,
+    "strictNullChecks": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "paths": {
-      "$types/*": ["types/*"],
-      "$components/*": ["src/components/*"],
-      "$utils/*": ["src/utils/*"],
-      "$middleware/*": ["src/middleware/*"]
-    }
+    "target": "es2017",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
   }
 }

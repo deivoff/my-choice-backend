@@ -1,22 +1,6 @@
-import SocketIO from 'socket.io';
+import { Types } from 'mongoose';
 
-export interface Socket<U> extends SocketIO.Socket {
-  user?: U;
+export type ID = string | Types.ObjectId;
+export function objectIdToString(objectId: ID) {
+  return typeof objectId === 'string' ? objectId : objectId.toHexString()
 }
-
-export interface Server<R, U> extends SocketIO.Server {
-  sockets: SocketIO.Namespace & {
-    connected: {
-      [id: string]: Socket<U>
-    }
-    sockets: {
-      [id: string]: Socket<U>
-    }
-    adapter: SocketIO.Adapter & {
-      rooms: SocketIO.Rooms &{
-        [key: string]: SocketIO.Room & R
-      }
-    }
-  }
-}
-
