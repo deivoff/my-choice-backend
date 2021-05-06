@@ -14,7 +14,7 @@ const OPPORTUNITY_MESSAGES = {
   [OpportunityCardType.success]: 'Поздравляю! Вы переходите на внешний круг.',
 };
 
-export function opportunitySuccess({ white, lives, money, dark}: Resources) {
+export function opportunitySuccess({ white, lives, money }: Resources) {
   return (lives! >= 10 && white! >= 10) || (lives! >= 15 && money! >= 100);
 }
 

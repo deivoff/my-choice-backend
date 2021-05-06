@@ -73,12 +73,12 @@ export class CardService {
   });
 
   getCardFromDeck = async (gameId: ID, type: FieldType) => {
-    const cardId = await this.getCardIdDeck(gameId, type);
+    const cardId = await this.getCardIdFromDeck(gameId, type);
     const card = await this.findOne(cardId);
     return card!;
   };
 
-  private getCardIdDeck = async (gameId: ID, type: FieldType) => {
+  private getCardIdFromDeck = async (gameId: ID, type: FieldType) => {
     const deckKey = this.key(type, objectIdToString(gameId));
     let cardId = await this.redisClient.spop(deckKey);
 
