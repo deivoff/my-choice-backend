@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "copy:assets": "cp -r src/assets dist/assets",
-    "build": "nest build | yarn copy:assets",
+    "build": "nest build && yarn copy:assets",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
