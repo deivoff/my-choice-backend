@@ -68,6 +68,7 @@ export class CardService {
   getOpportunityCard = (type: OpportunityCardType): Opportunity => ({
     _id: Types.ObjectId(),
     type: FieldType.Opportunity,
+    img: 'opportunity.svg',
     description: getOpportunityDescription(type),
     canTryLuck: type === OpportunityCardType.tryYourLuck,
   });

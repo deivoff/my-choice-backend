@@ -1,16 +1,22 @@
-import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
-import { CardService } from 'src/models/game/card/card.service';
-import { Card } from 'src/models/game/card/entities/card.entity';
 import { Types } from 'mongoose';
-import { CreateIncidentCardInput } from 'src/models/game/card/dto/create-incident-card.input';
-import { CreateChoicesCardInput } from 'src/models/game/card/dto/create-choices-card.input';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { ConfigService } from '@nestjs/config';
+
+import { CreateIncidentCardInput } from './dto/create-incident-card.input';
+import { CreateChoicesCardInput } from './dto/create-choices-card.input';
 import { FIELD_DICTIONARY } from 'src/models/game/field/field.dictionaries';
-import { UpdateChoicesCardInput } from 'src/models/game/card/dto/update-choices-card.input';
-import { UpdateIncidentCardInput } from 'src/models/game/card/dto/update-incident-card.input';
+import { UpdateChoicesCardInput } from './dto/update-choices-card.input';
+import { UpdateIncidentCardInput } from './dto/update-incident-card.input';
+
+import { CardService } from './card.service';
+import { Card } from './entities/card.entity';
 
 @Resolver(() => Card)
 export class CardResolver {
-  constructor(private readonly cardService: CardService) {}
+  constructor(
+    private readonly cardService: CardService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Mutation(() => Card)
   createChoicesCard(@Args('createChoicesCard') createChoicesCard: CreateChoicesCardInput) {
@@ -60,6 +66,13 @@ export class CardResolver {
     @Parent() { type }: Card
   ) {
     return FIELD_DICTIONARY[type]
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  img(
+    @Parent() { img }: Card
+  ) {
+    return img ? `${this.configService.get('origin.http')}assets/cards/${img}` : undefined;
   }
 
 }

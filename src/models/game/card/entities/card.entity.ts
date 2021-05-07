@@ -77,6 +77,9 @@ export class Card {
   @prop()
   description: string;
 
+  @prop({ required: false })
+  img?: string;
+
 }
 
 @ObjectType({
