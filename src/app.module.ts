@@ -12,6 +12,7 @@ import { MessageModule } from './models/message/message.module';
 import { GameService } from './models/game/game.service';
 import { SentryModule } from '@ntegral/nestjs-sentry';
 import { LogLevel } from '@sentry/types';
+import { TournamentModule } from './models/tournament/tournament.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { LogLevel } from '@sentry/types';
     UserModule,
     GameModule,
     MessageModule,
+    TournamentModule,
   ],
 })
 export class AppModule {}

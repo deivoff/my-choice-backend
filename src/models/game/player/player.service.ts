@@ -88,9 +88,10 @@ export class PlayerService {
     if (players.length === 1) {
       const [player] = players;
       const playerId = player._id.toHexString();
+      const winner = player.winner ? playerId : undefined;
       return {
         mover: playerId,
-        winner: player.winner ? playerId : undefined
+        winner,
       }
     }
 

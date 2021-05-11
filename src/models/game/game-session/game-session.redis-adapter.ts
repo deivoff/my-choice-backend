@@ -25,13 +25,15 @@ export const fromRedisToGameSession = ({
   creator,
   players,
   observers,
+  tournament,
   ...other
 }: Record<string, string>): GameSession => ({
   ...other as unknown as GameSessionRecord,
   _id: Types.ObjectId(_id),
   creator: Types.ObjectId(creator),
   players: fromStringToIDs(players),
-  observers: fromStringToIDs(observers)
+  observers: fromStringToIDs(observers),
+  tournament: tournament ? Types.ObjectId(tournament) : undefined,
 });
 
 export const fromGameSessionToRedis = ({
@@ -39,6 +41,7 @@ export const fromGameSessionToRedis = ({
   creator,
   players,
   observers,
+  tournament,
   ...other
   }: GameSessionRedisAdapter): Record<string, string | any> => ({
   ...other,
@@ -46,4 +49,5 @@ export const fromGameSessionToRedis = ({
   creator: objectIdToString(creator),
   players: fromIDsToString(players),
   observers: fromIDsToString(observers),
+  tournament: tournament ? objectIdToString(tournament) : '',
 });

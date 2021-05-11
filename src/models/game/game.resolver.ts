@@ -28,11 +28,12 @@ export class GameResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => GameSession)
   createGame(
-    @Args('createGameInput') { name, observerMode}: CreateGameInput,
+    @Args('createGameInput') { name, observerMode, tournament}: CreateGameInput,
     @DecodedUser() { _id }: DecodedUser
   ) {
     return this.gameService.create({
       name,
+      tournament,
       creator: _id,
       observerMode
     });
@@ -60,9 +61,10 @@ export class GameResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async leaveGame(
+    @Args('gameId') gameId: Types.ObjectId,
     @DecodedUser() decodedUser: DecodedUser
   ) {
-    await this.gameService.leave(decodedUser._id);
+    await this.gameService.leave(decodedUser._id, gameId);
     return true
   }
 

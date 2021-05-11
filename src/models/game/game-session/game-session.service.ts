@@ -18,6 +18,7 @@ interface CreateGameSession {
   name: string;
   _id: string;
   creator: any;
+  tournament?: ID;
   players: string[];
   observers: string[];
 }
@@ -47,6 +48,7 @@ export class GameSessionService {
     creator,
     players,
     observers,
+    tournament,
          }: CreateGameSession) => {
     await this.redisClient.hset(this.key(_id), {
       _id,
@@ -54,6 +56,7 @@ export class GameSessionService {
       creator,
       players,
       observers,
+      tournament: tournament ? objectIdToString(tournament) : '',
       status: GameStatus.Awaiting,
     });
 
@@ -119,7 +122,9 @@ export class GameSessionService {
     const gameHasThisObserver = observers?.some((observer) => observer === objectIdToString(userId));
 
     switch (true) {
-      case gameHasThisObserver:
+      case gameHasThisObserver: {
+        break;
+      }
       case gameHasThisPlayer: {
         await this.playerService.findOneAndUpdate(userId, {
           disconnected: false,
@@ -145,38 +150,26 @@ export class GameSessionService {
     return updatedGame;
   };
 
-  leave = async (userId: ID): Promise<GameSession | null> => {
+  leave = async (userId: ID, gameId: ID): Promise<GameSession | null> => {
     const player = await this.playerService.findOne(userId);
-
-
-    if (!player?.gameId) return null;
-    const game = await this.findOne(player.gameId);
+    let updatedGame: GameSession | null = null;
+    const game = await this.findOne(gameId);
     if (!game) return null;
-    const { _id: gameId } = game;
-    const { players, observers } = game;
-    const gameHasThisPlayer = players?.some((player) => player === objectIdToString(userId));
-    const gameHasThisObserver = observers?.some((observer) => observer === objectIdToString(userId));
 
-    switch (true) {
-      case gameHasThisPlayer: {
-        await Promise.all([
-          this.findOneAndUpdate(gameId, {
-            players: without(game.players, objectIdToString(userId)),
-          }),
-          this.playerService.remove(userId)]
-        );
-        break;
-      }
-      case gameHasThisObserver: {
-        await this.findOneAndUpdate(gameId, {
-          observers: without(game.observers, objectIdToString(userId)),
-        })
-      }
+    if (!player) {
+      updatedGame = await this.findOneAndUpdate(gameId, {
+        observers: without(game.observers, objectIdToString(userId)),
+      });
+    } else {
+      [updatedGame] = await Promise.all([
+        this.findOneAndUpdate(gameId, {
+          players: without(game.players, objectIdToString(userId)),
+        }),
+        this.playerService.remove(userId)]
+      );
     }
 
-    const updatedGame = await this.findOne(gameId);
-
-    if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
+    if (!updatedGame?.players?.length) {
       await this.remove(gameId);
       return null;
     }

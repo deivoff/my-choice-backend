@@ -18,6 +18,13 @@ import { Game } from './game.entity';
 const DISCONNECT_TIMEOUT_MS = 3000;
 const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
 
+type CreateGame = {
+  name: string;
+  creator: string,
+  observerMode?: boolean,
+  tournament?: Types.ObjectId
+}
+
 @Injectable()
 export class GameService {
   constructor(
@@ -80,7 +87,7 @@ export class GameService {
     // disconnectTimeouts.set(data._id, timeout);
   }
 
-  async create(createGameInput: { name: string; creator: string, observerMode?: boolean }) {
+  async create(createGameInput: CreateGame) {
     const gameId = Types.ObjectId();
     const creatorId = createGameInput.creator;
     const playersOrObservers = createGameInput.observerMode ? {
@@ -94,23 +101,18 @@ export class GameService {
     const game = await this.gameSessionService.create({
       _id: gameId.toHexString(),
       name: createGameInput.name,
+      tournament: createGameInput.tournament,
       creator: createGameInput.creator,
       ...playersOrObservers
     });
 
     await this.publishActiveGames();
 
-    await this.gameModel.create({
-      _id: gameId,
-      name: createGameInput.name,
-      creator: createGameInput.creator,
-    });
-
     return game;
   }
 
   getActiveGames() {
-    return this.gameSessionService.getAllAwaiting();
+    return this.gameSessionService.findAll();
   }
 
   getActiveGame(gameId: ID) {
@@ -126,6 +128,11 @@ export class GameService {
 
   private async publishActiveGame(gameId: ID) {
     const activeGame = await this.getActiveGame(gameId);
+    if (activeGame?.winner) {
+      this.gameModel.findByIdAndUpdate(gameId, {
+        winner: Types.ObjectId(activeGame.winner)
+      })
+    }
     await this.pubSub.publish('updateActiveGame', {
       updateActiveGame: activeGame
     })
@@ -155,10 +162,10 @@ export class GameService {
     return game;
   }
 
-  async leave(userId: ID) {
-    const game = await this.gameSessionService.leave(userId);
+  async leave(userId: ID, gameId: ID) {
+    const game = await this.gameSessionService.leave(userId, gameId);
 
-    if (game?.status === GameStatus.Awaiting) {
+    if (!game || game.status === GameStatus.Awaiting) {
       this.publishActiveGames();
     }
 
@@ -170,6 +177,13 @@ export class GameService {
   async start(gameId: ID, userId: ID) {
     const game = await this.gameSessionService.start(gameId, userId);
 
+    await this.gameModel.create({
+      _id: game._id,
+      name: game.name,
+      creator: game.creator,
+      tournament: game.tournament,
+      players: game.players?.map(Types.ObjectId),
+    });
     this.publishActiveGames();
     this.publishActiveGame(gameId);
     return game;

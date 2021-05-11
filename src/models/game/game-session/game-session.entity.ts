@@ -23,6 +23,8 @@ export class GameSession extends PickType(Game, ['_id', 'name', 'creator']){
 
   players?: string[];
 
+  tournament?: Types.ObjectId;
+
   observers?: string[];
 
   @Field()
