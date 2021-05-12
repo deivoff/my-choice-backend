@@ -53,6 +53,10 @@ export class GameSessionService {
     observers,
     tournament,
          }: CreateGameSession) => {
+    const player = await this.playerService.findOne(creator);
+
+    if (player) throw new Error(YOU_IN_GAME);
+
     await this.redisClient.hset(this.key(_id), {
       _id,
       name,
