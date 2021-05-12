@@ -181,12 +181,16 @@ export class GameSessionService {
 
   leave = async (userId: ID, gameId: ID): Promise<GameSession | null> => {
     const player = await this.playerService.findOne(userId);
+    const game = await this.findOne(gameId);
 
     if (player?.gameId?.equals(gameId)) {
+      if (game?.mover && player._id.equals(game.mover)) {
+        await this.setNewMover(player);
+      }
+
       await this.playerService.remove(userId);
     }
     let updatedGame: GameSession | null = null;
-    const game = await this.findOne(gameId);
 
     if (!game) return null;
 
