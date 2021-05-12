@@ -164,7 +164,7 @@ export class GameSessionService {
       );
     }
 
-    if (!updatedGame?.players?.length) {
+    if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
       await this.remove(gameId);
       return null;
     }
