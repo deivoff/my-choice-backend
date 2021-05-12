@@ -122,7 +122,7 @@ export class GameSessionService {
   join = async (gameId: ID, userId: ID): Promise<GameSession> => {
     const player = await this.playerService.findOne(userId);
 
-    if (player?.gameId) throw new Error(YOU_IN_GAME);
+    if (player?.gameId && player.gameId !== gameId) throw new Error(YOU_IN_GAME);
 
     const game = await this.findOne(gameId);
 
