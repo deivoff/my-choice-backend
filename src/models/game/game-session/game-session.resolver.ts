@@ -34,6 +34,7 @@ export class GameSessionResolver {
       players
     }: GameSession,
   ) {
+    if (!players?.length) return [];
     return this.gameSessionService.getPlayers(players || []);
   }
 

@@ -105,11 +105,6 @@ export class GameSessionService {
     ));
   };
 
-  getAllAwaiting = async () => {
-    const games = await this.findAll();
-    return games.filter(({ status }) => status === GameStatus.Awaiting)
-  };
-
   join = async (gameId: ID, userId: ID): Promise<GameSession> => {
     const game = await this.findOne(gameId);
 

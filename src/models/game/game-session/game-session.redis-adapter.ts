@@ -17,7 +17,8 @@ function fromIDsToString(ids?: ID[]):string {
 }
 
 function fromStringToIDs(idsString?: string) {
-  return idsString?.split(',').filter(Boolean) ?? []
+  if (!idsString) return [];
+  return idsString.split(',').filter(Boolean) ?? []
 }
 
 export const fromRedisToGameSession = ({

@@ -38,8 +38,13 @@ export class VkService {
       familyName: user.last_name,
       givenName: user.first_name
     };
-    const [photo] = await this.vkClient.getPhotosUrl(access_token, [user.photo_id]);
-    const photos = photo.sizes.reduce<{ url: string }[]>((acc, size) => {
+    let photo: { sizes: { url: string, type: string } [] } | null = null;
+    try {
+      [photo] = await this.vkClient.getPhotosUrl(access_token, [user.photo_id]);
+    } catch (e) {
+      console.error(e);
+    }
+    const photos = (photo?.sizes || []).reduce<{ url: string }[]>((acc, size) => {
       switch (size.type) {
         case 'p': {
           acc.push({
