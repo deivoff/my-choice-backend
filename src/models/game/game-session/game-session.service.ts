@@ -48,6 +48,7 @@ export class GameSessionService {
   private async getAllKeys(cursor: string = '0', keys: string[] = []): Promise<string[]> {
     const [newCursor, newKeys] = await this.redisClient.scan(cursor, 'match', this.key('*'));
     keys.concat(newKeys);
+    console.log({ newCursor });
     if (newCursor && newCursor === '0') {
       return keys;
     }
