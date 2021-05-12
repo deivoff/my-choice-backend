@@ -193,6 +193,7 @@ export class GameSessionService {
     }
 
     if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
+      console.log('remove', updatedGame);
       await this.remove(gameId);
       return null;
     }
