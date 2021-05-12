@@ -122,7 +122,7 @@ export class GameSessionService {
   join = async (gameId: ID, userId: ID): Promise<GameSession> => {
     const player = await this.playerService.findOne(userId);
     console.log('join-player-init', { player });
-    if (player?.gameId && player.gameId !== gameId) throw new Error(YOU_IN_GAME);
+    if (player?.gameId && !player.gameId.equals(gameId)) throw new Error(YOU_IN_GAME);
 
     const game = await this.findOne(gameId);
     console.log('join-game-init', { game });
@@ -187,9 +187,12 @@ export class GameSessionService {
     if (!game) return null;
 
     if (!player) {
-      updatedGame = await this.findOneAndUpdate(gameId, {
-        observers: without(game.observers, objectIdToString(userId)),
-      });
+      // observer !== creator
+      if (!game.creator.equals(userId)) {
+        updatedGame = await this.findOneAndUpdate(gameId, {
+          observers: without(game.observers, objectIdToString(userId)),
+        });
+      }
     } else {
       updatedGame = await this.findOneAndUpdate(gameId, {
         players: without(game.players, objectIdToString(userId)),
