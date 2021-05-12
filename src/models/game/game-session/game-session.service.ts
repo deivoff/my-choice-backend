@@ -386,7 +386,7 @@ export class GameSessionService {
 
     if (!game) return;
     const players = await this.getPlayers(game.players!);
-    if (!game.observers?.length && players.every(player => isNil(player) ? true : player.disconnected)) {
+    if (!game.observers?.length && players.every(player => isNil(player?.disconnected) ? true : player.disconnected)) {
       await this.remove(player.gameId);
       return true;
     }
