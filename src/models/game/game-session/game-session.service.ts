@@ -49,7 +49,6 @@ export class GameSessionService {
     const [newCursor, newKeys] = await this.redisClient.scan(cursor, 'match', this.key('*'));
     const unionKeys = union(keys, newKeys);
 
-    console.log(keys, unionKeys, cursor, newCursor);
     if (newCursor === '0') {
       return unionKeys;
     }
