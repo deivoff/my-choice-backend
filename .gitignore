@@ -43,3 +43,7 @@ schema.gql
 
 # redis dump
 dump.rdb
+
+# migrations
+migrate-mongo-config.js
+migrations

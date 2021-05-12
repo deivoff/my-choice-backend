@@ -2,6 +2,10 @@ import { Scalar, CustomScalar } from '@nestjs/graphql';
 import { Kind, ValueNode } from 'graphql';
 import { Types } from 'mongoose';
 
+export type ID = string | Types.ObjectId;
+export function objectIdToString(objectId: ID) {
+  return typeof objectId === 'string' ? objectId : objectId.toHexString()
+}
 
 @Scalar('ObjectId', () => Types.ObjectId)
 export class ObjectIdScalar implements CustomScalar<string, Types.ObjectId> {
@@ -11,9 +15,7 @@ export class ObjectIdScalar implements CustomScalar<string, Types.ObjectId> {
     return new Types.ObjectId(value);
   }
 
-  serialize(value: Types.ObjectId | string) {
-    return typeof value === 'string' ? value : value.toHexString(); // value sent to the client
-  }
+  serialize = objectIdToString;
 
   parseLiteral(ast: ValueNode) {
     if (ast.kind === Kind.STRING) {

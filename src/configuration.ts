@@ -1,3 +1,8 @@
+enum Enable {
+  on = 'on',
+  off = 'off'
+}
+
 export default () => {
   const {
     DB_URI,
@@ -7,20 +12,23 @@ export default () => {
     PORT = '3000',
     NODE_ENV,
     ORIGIN_URL,
-    WS_ORIGIN_URL,
+    SSL,
     SECRET_KEY,
     VK_CLIENT_ID,
     VK_CLIENT_SECRET,
     REDIS_URL,
     SENTRY_DSN,
   } = process.env;
+  const isSSLEnable = Boolean(SSL) && SSL === Enable.on;
+
+  const origin = {
+    ws: (isSSLEnable ? 'wss://' : 'ws://') + ORIGIN_URL + '/',
+    http: (isSSLEnable ? 'https://' : 'http://') + ORIGIN_URL + '/',
+  };
   return ({
     port: parseInt(PORT, 10),
     secretKey: SECRET_KEY,
-    origin: {
-      ws: WS_ORIGIN_URL,
-      http: ORIGIN_URL,
-    },
+    origin,
     redis: {
       url: REDIS_URL
     },
@@ -38,7 +46,7 @@ export default () => {
     vkConfig: {
       clientID: VK_CLIENT_ID,
       clientSecret: VK_CLIENT_SECRET,
-      callbackURL: ORIGIN_URL + 'oauth/vk'
+      callbackURL: origin.http + 'oauth/vk'
     }
   });
 };
