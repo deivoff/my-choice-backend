@@ -28,7 +28,10 @@ export class AuthResolver {
     @Args('code') code: string,
     @Args('extra', { nullable: true }) extra: string,
   ): Promise<AuthResponse> {
-    const { accessToken, profile } = await this.vkService.serializeAccountFromCode(code);
+    const { accessToken, profile } = await this.vkService.serializeAccountFromCode(
+      code,
+      'https://miro.medium.com/max/720/1*W35QUSvGpcLuxPo3SRTH4w.png'
+    );
 
     const isBot = REGISTRATION_EXTRA.isBot === extra;
     const user = await this.userService.upsertVKUser({ accessToken, profile, isBot });

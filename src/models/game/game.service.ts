@@ -111,8 +111,11 @@ export class GameService {
     return game;
   }
 
-  deleteGameSession(gameID: ID) {
-    return this.gameSessionService.delete(gameID)
+  async deleteGameSession(gameID: ID) {
+    await this.gameSessionService.delete(gameID);
+
+    await this.publishActiveGames();
+    return true;
   }
 
   getActiveGames() {

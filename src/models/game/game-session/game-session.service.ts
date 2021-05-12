@@ -67,7 +67,7 @@ export class GameSessionService {
       await Promise.all(players.map((id) => this.playerService.initPlayer(id, _id)));
     }
 
-    return await this.redisClient.hgetall(this.key(_id));
+    return await this.findOne(_id);
   };
 
   delete = async (gameId: ID) => {
@@ -81,6 +81,9 @@ export class GameSessionService {
   remove = async (gameId: ID) => {
     const gameKey = objectIdToString(gameId);
     await Promise.all([
+      this.findOneAndUpdate(gameId, {
+        status: GameStatus.Finished,
+      }),
       this.redisClient.expire(this.key(gameKey), 60 * 60), // del(this.key(gameKey)),
       this.cardService.clearDeck(gameId),
     ]);
@@ -137,7 +140,10 @@ export class GameSessionService {
         });
         break;
       }
-      case game.status === GameStatus.Awaiting && (game?.players?.length || 0) < 8: {
+      case (
+        game.status === GameStatus.Awaiting
+        || game.status === GameStatus.ChoiceDream
+      ) && (game?.players?.length || 0) < 8: {
         await this.playerService.initPlayer(userId, gameId);
         await this.findOneAndUpdate(gameId, {
           players: union(game.players, [objectIdToString(userId)])

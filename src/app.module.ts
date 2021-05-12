@@ -10,8 +10,6 @@ import { CommonModule } from './common/common.module';
 import { GameModule } from './models/game/game.module';
 import { MessageModule } from './models/message/message.module';
 import { GameService } from './models/game/game.service';
-import { SentryModule } from '@ntegral/nestjs-sentry';
-import { LogLevel } from '@sentry/types';
 import { TournamentModule } from './models/tournament/tournament.module';
 
 @Module({
@@ -20,18 +18,6 @@ import { TournamentModule } from './models/tournament/tournament.module';
       load: [configuration],
       isGlobal: true,
       cache: true,
-    }),
-    SentryModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        dsn: configService.get('sentry.dsn'),
-        debug: !configService.get<boolean>('isProd'),
-        environment: configService.get<string>('env'),
-        release: 'some_release', // must create a release in sentry.io dashboard
-        logLevel: LogLevel.Debug, //based on sentry.io loglevel //
-        tracesSampleRate: 1.0,
-      }),
-      inject: [ConfigService],
     }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => {

@@ -368,7 +368,10 @@ export class PlayerService {
 
   findOne = async (id: ID): Promise<null | Player> => {
     const playerId = this.key(objectIdToString(id));
-    const res = await this.redisClient.hgetall(playerId);
+    const [res] = await Promise.all([
+      this.redisClient.hgetall(playerId),
+      this.redisClient.expire(playerId, 60 * 60),
+    ]);
     return isEmpty(res) ? null : fromRedisToPlayer(res);
   };
 

@@ -1,6 +1,6 @@
 import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver, Subscription } from '@nestjs/graphql';
 import { Types } from 'mongoose';
-import { Inject, UseGuards } from '@nestjs/common';
+import { Inject, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PubSubEngine } from 'graphql-subscriptions';
 
 import { DecodedUser, User } from 'src/models/user/entities/user.entity';
@@ -16,7 +16,9 @@ import { ShareResourcesInput } from './dto/share-resources.input';
 
 import { GameService } from './game.service';
 import { Game } from './game.entity';
+import { SentryInterceptor } from 'src/sentry/sentry.interceptor';
 
+@UseInterceptors(SentryInterceptor)
 @Resolver(() => Game)
 export class GameResolver {
   constructor(
@@ -40,11 +42,12 @@ export class GameResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => GameSession)
-  deleteGame(
+  @Mutation(() => Boolean)
+  async deleteGame(
     @Args('gameId') gameId: Types.ObjectId,
   ) {
-    return this.gameService.deleteGameSession(gameId);
+    await this.gameService.deleteGameSession(gameId);
+    return true;
   }
 
   @UseGuards(AuthGuard)

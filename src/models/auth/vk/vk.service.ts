@@ -30,7 +30,7 @@ export class VkService {
     })
   }
 
-  async serializeAccountFromCode(code: string) {
+  async serializeAccountFromCode(code: string, defaultPhotoUrl?: string) {
     const { access_token, user_id } = await this.vkClient.getToken(code);
     const [user] = await this.vkClient.getUsers(
       access_token, [user_id], ['photo_id', 'sex']);
@@ -44,7 +44,7 @@ export class VkService {
     } catch (e) {
       console.error(e);
     }
-    const photos = (photo?.sizes || []).reduce<{ url: string }[]>((acc, size) => {
+    let photos = (photo?.sizes || []).reduce<{ url: string }[]>((acc, size) => {
       switch (size.type) {
         case 'p': {
           acc.push({
@@ -57,6 +57,13 @@ export class VkService {
         }
       }
     }, []);
+
+    if (!photos.length && defaultPhotoUrl) {
+      photos.push({
+        url: defaultPhotoUrl
+      })
+    }
+
     return {
       accessToken: access_token,
       profile: {
