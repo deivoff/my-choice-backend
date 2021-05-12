@@ -45,6 +45,16 @@ export class GameSessionService {
     return `game:${_id}`
   };
 
+  private async getAllKeys(cursor: string = '0', keys: string[] = []): Promise<string[]> {
+    const [newCursor, newKeys] = await this.redisClient.scan(cursor, 'match', this.key('*'));
+
+    if (!newCursor) {
+      return keys.concat(newKeys);
+    }
+
+    return await this.getAllKeys(newCursor, keys)
+  }
+
   create = async ({
     _id,
     name,
@@ -117,7 +127,7 @@ export class GameSessionService {
   };
 
   findAll = async () => {
-    const [,keys] = await this.redisClient.scan(0, 'match', this.key('*'));
+    const keys = await this.getAllKeys();
     return await Promise.all(keys.sort().reverse().map(
       id => this.redisClient.hgetall(id).then(fromRedisToGameSession)
     ));
