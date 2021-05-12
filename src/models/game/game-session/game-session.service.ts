@@ -52,7 +52,7 @@ export class GameSessionService {
       return keys;
     }
 
-    console.log(keys);
+    console.log(keys, newKeys, cursor, newCursor);
     return await this.getAllKeys(newCursor, keys)
   }
 
