@@ -3,7 +3,7 @@ import { Redis } from 'ioredis';
 import { isEmpty, union, without } from 'lodash';
 import { GameSession, GameStatus } from 'src/models/game/game-session/game-session.entity';
 import { PlayerService } from 'src/models/game/player/player.service';
-import { CYCLED_ERROR, GAME_NOT_FOUND } from 'src/models/game/game.errors';
+import { CYCLED_ERROR, GAME_NOT_FOUND, YOU_IN_GAME } from 'src/models/game/game.errors';
 import {
   fromGameSessionToRedis,
   fromRedisToGameSession,
@@ -120,6 +120,10 @@ export class GameSessionService {
   };
 
   join = async (gameId: ID, userId: ID): Promise<GameSession> => {
+    const player = await this.playerService.findOne(userId);
+
+    if (player?.gameId) throw new Error(YOU_IN_GAME);
+
     const game = await this.findOne(gameId);
 
     if (!game) {
