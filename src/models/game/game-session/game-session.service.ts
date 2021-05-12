@@ -177,7 +177,9 @@ export class GameSessionService {
     const player = await this.playerService.findOne(userId);
     console.log('leave-player', player);
 
-    await this.playerService.remove(userId);
+    if (player?.gameId?.equals(gameId)) {
+      await this.playerService.remove(userId);
+    }
     let updatedGame: GameSession | null = null;
     const game = await this.findOne(gameId);
     console.log('leave-game', game);
