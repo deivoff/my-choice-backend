@@ -136,8 +136,10 @@ export class GameService {
   private async publishActiveGame(gameId: ID) {
     const activeGame = await this.getActiveGame(gameId);
     if (activeGame?.winner) {
-      this.gameModel.findByIdAndUpdate(gameId, {
-        winner: Types.ObjectId(activeGame.winner)
+      await this.gameModel.findByIdAndUpdate(gameId, {
+        $set: {
+          winner: Types.ObjectId(activeGame.winner)
+        }
       })
     }
     await this.pubSub.publish('updateActiveGame', {
