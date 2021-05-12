@@ -125,11 +125,10 @@ export class GameSessionService {
 
   join = async (gameId: ID, userId: ID): Promise<GameSession> => {
     const player = await this.playerService.findOne(userId);
-    console.log('join-player-init', { player });
+
     if (player?.gameId && !player.gameId.equals(gameId)) throw new Error(YOU_IN_GAME);
 
     const game = await this.findOne(gameId);
-    console.log('join-game-init', { game });
 
     if (!game) {
       throw new Error(GAME_NOT_FOUND)
@@ -139,23 +138,17 @@ export class GameSessionService {
     const gameHasThisPlayer = players?.some((player) => player === objectIdToString(userId));
     const gameHasThisObserver = observers?.some((observer) => observer === objectIdToString(userId));
 
-    console.log('join-state', { gameHasThisPlayer, gameHasThisObserver });
-
     switch (true) {
       case gameHasThisObserver: {
-        console.log('join-observer', game);
         break;
       }
       case gameHasThisPlayer: {
-        console.log('join-player', game);
         await this.playerService.findOneAndUpdate(userId, {
           disconnected: false,
         });
         break;
       }
       case game.status === GameStatus.Awaiting && ((game?.players?.length || 0) < 8): {
-        console.log('join-awaiting', game);
-
         await this.playerService.initPlayer(userId, gameId);
         await this.findOneAndUpdate(gameId, {
           players: union(game.players, [objectIdToString(userId)])
@@ -163,7 +156,6 @@ export class GameSessionService {
         break;
       }
       default: {
-        console.log('join-default', game);
         await this.findOneAndUpdate(gameId, {
           observers: union(game.observers, [objectIdToString(userId)]),
         })
@@ -171,7 +163,6 @@ export class GameSessionService {
     }
 
     const updatedGame = await this.findOne(gameId);
-    console.log('join-updatedGame', updatedGame);
 
     if (!updatedGame) throw new Error(GAME_NOT_FOUND);
     return updatedGame;
@@ -179,14 +170,12 @@ export class GameSessionService {
 
   leave = async (userId: ID, gameId: ID): Promise<GameSession | null> => {
     const player = await this.playerService.findOne(userId);
-    console.log('leave-player', player);
 
     if (player?.gameId?.equals(gameId)) {
       await this.playerService.remove(userId);
     }
     let updatedGame: GameSession | null = null;
     const game = await this.findOne(gameId);
-    console.log('leave-game', game);
 
     if (!game) return null;
 
@@ -203,7 +192,6 @@ export class GameSessionService {
       });
     }
 
-    console.log('leave-updatedGame', updatedGame);
     if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
       await this.remove(gameId);
       return null;
