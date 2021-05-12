@@ -24,10 +24,12 @@ import { TournamentModule } from './models/tournament/tournament.module';
         const configuration = configService.get('redis');
         return [
           {
+            showFriendlyErrorStack: true,
             name:'publisher',
             ...configuration
           },
           {
+            showFriendlyErrorStack: true,
             name:'subscriber',
             ...configuration
           },
