@@ -140,10 +140,7 @@ export class GameSessionService {
         });
         break;
       }
-      case (
-        game.status === GameStatus.Awaiting
-        || game.status === GameStatus.ChoiceDream
-      ) && (game?.players?.length || 0) < 8: {
+      case game.status === GameStatus.Awaiting && ((game?.players?.length || 0) < 8): {
         await this.playerService.initPlayer(userId, gameId);
         await this.findOneAndUpdate(gameId, {
           players: union(game.players, [objectIdToString(userId)])
