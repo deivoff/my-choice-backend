@@ -30,12 +30,10 @@ export class GameSessionResolver {
 
   @ResolveField(() => [Player])
   players(
-    @Parent() {
-      players
-    }: GameSession,
+    @Parent() gameSession: GameSession,
   ) {
-    if (!players?.length) return [];
-    return this.gameSessionService.getPlayers(players || []);
+    if (!gameSession?.players?.length) return [];
+    return this.gameSessionService.getPlayers(gameSession.players || []);
   }
 
   @ResolveField(() => Int)
