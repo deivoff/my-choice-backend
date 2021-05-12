@@ -87,7 +87,7 @@ export class GameService {
     // disconnectTimeouts.set(data._id, timeout);
   }
 
-  async create(createGameInput: CreateGame) {
+  async createGameSession(createGameInput: CreateGame) {
     const gameId = Types.ObjectId();
     const creatorId = createGameInput.creator;
     const playersOrObservers = createGameInput.observerMode ? {
@@ -109,6 +109,10 @@ export class GameService {
     await this.publishActiveGames();
 
     return game;
+  }
+
+  deleteGameSession(gameID: ID) {
+
   }
 
   getActiveGames() {

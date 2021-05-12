@@ -31,12 +31,20 @@ export class GameResolver {
     @Args('createGameInput') { name, observerMode, tournament}: CreateGameInput,
     @DecodedUser() { _id }: DecodedUser
   ) {
-    return this.gameService.create({
+    return this.gameService.createGameSession({
       name,
       tournament,
       creator: _id,
       observerMode
     });
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => GameSession)
+  deleteGame(
+    @Args('gameId') gameId: Types.ObjectId,
+  ) {
+    return this.gameService.deleteGameSession(gameId);
   }
 
   @UseGuards(AuthGuard)

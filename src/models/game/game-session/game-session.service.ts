@@ -4,7 +4,10 @@ import { isEmpty, union, without } from 'lodash';
 import { GameSession, GameStatus } from 'src/models/game/game-session/game-session.entity';
 import { PlayerService } from 'src/models/game/player/player.service';
 import { CYCLED_ERROR, GAME_NOT_FOUND } from 'src/models/game/game.errors';
-import { fromGameSessionToRedis, fromRedisToGameSession } from 'src/models/game/game-session/game-session.redis-adapter';
+import {
+  fromGameSessionToRedis,
+  fromRedisToGameSession,
+} from 'src/models/game/game-session/game-session.redis-adapter';
 import { Types } from 'mongoose';
 import { Player, PlayerPosition } from 'src/models/game/player/player.entity';
 import { PLAYER_NOT_FOUND, PLAYERS_NOT_FOUND } from 'src/models/game/player/player.errors';
@@ -70,7 +73,7 @@ export class GameSessionService {
   remove = async (gameId: ID) => {
     const gameKey = objectIdToString(gameId);
     await Promise.all([
-      this.redisClient.del(this.key(gameKey)),
+      this.redisClient.expire(this.key(gameKey), 60 * 60), // del(this.key(gameKey)),
       this.cardService.clearDeck(gameId),
     ]);
   };
@@ -228,7 +231,8 @@ export class GameSessionService {
 
     if (updatedPlayer?.winner) {
       await this.findOneAndUpdate(updatedPlayer.gameId!, {
-        winner: objectIdToString(userId)
+        winner: objectIdToString(userId),
+        status: GameStatus.Finished,
       })
     }
 
@@ -250,7 +254,7 @@ export class GameSessionService {
     if (error) throw new Error(CYCLED_ERROR);
 
     await this.findOneAndUpdate(game?._id!, {
-      status: GameStatus.InProgress,
+      status: winner ? GameStatus.Finished : GameStatus.InProgress,
       mover,
       winner
     });
@@ -300,6 +304,7 @@ export class GameSessionService {
     if (winner) {
       await Promise.all([
         this.findOneAndUpdate(player?.gameId!, {
+          status: GameStatus.Finished,
           winner: objectIdToString(player._id),
         }),
         this.playerService.findOneAndUpdate(player._id, {
@@ -378,7 +383,8 @@ export class GameSessionService {
       if (error) throw new Error(CYCLED_ERROR);
       await this.findOneAndUpdate(game._id, {
         mover,
-        winner
+        winner,
+        status: winner ? GameStatus.Finished : game.status,
       })
     }
 
