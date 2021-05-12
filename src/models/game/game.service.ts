@@ -112,7 +112,7 @@ export class GameService {
   }
 
   deleteGameSession(gameID: ID) {
-
+    return this.gameSessionService.delete(gameID)
   }
 
   getActiveGames() {

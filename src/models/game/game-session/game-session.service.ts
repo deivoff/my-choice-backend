@@ -70,6 +70,14 @@ export class GameSessionService {
     return await this.redisClient.hgetall(this.key(_id));
   };
 
+  delete = async (gameId: ID) => {
+    const gameKey = objectIdToString(gameId);
+    await Promise.all([
+      this.redisClient.del(this.key(gameKey)), // del(this.key(gameKey)),
+      this.cardService.clearDeck(gameId),
+    ]);
+  };
+
   remove = async (gameId: ID) => {
     const gameKey = objectIdToString(gameId);
     await Promise.all([
