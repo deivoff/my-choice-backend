@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { isEmpty, union, without } from 'lodash';
+import { isEmpty, union, without, isNil } from 'lodash';
 import { GameSession, GameStatus } from 'src/models/game/game-session/game-session.entity';
 import { PlayerService } from 'src/models/game/player/player.service';
 import { CYCLED_ERROR, GAME_NOT_FOUND, YOU_IN_GAME } from 'src/models/game/game.errors';
@@ -165,6 +165,7 @@ export class GameSessionService {
 
   leave = async (userId: ID, gameId: ID): Promise<GameSession | null> => {
     const player = await this.playerService.findOne(userId);
+    await this.playerService.remove(userId);
     let updatedGame: GameSession | null = null;
     const game = await this.findOne(gameId);
     if (!game) return null;
@@ -174,12 +175,9 @@ export class GameSessionService {
         observers: without(game.observers, objectIdToString(userId)),
       });
     } else {
-      [updatedGame] = await Promise.all([
-        this.findOneAndUpdate(gameId, {
-          players: without(game.players, objectIdToString(userId)),
-        }),
-        this.playerService.remove(userId)]
-      );
+      updatedGame = await this.findOneAndUpdate(gameId, {
+        players: without(game.players, objectIdToString(userId)),
+      });
     }
 
     if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
@@ -388,7 +386,7 @@ export class GameSessionService {
 
     if (!game) return;
     const players = await this.getPlayers(game.players!);
-    if (!game.observers?.length && players.every(player => player.disconnected)) {
+    if (!game.observers?.length && players.every(player => isNil(player) ? true : player.disconnected)) {
       await this.remove(player.gameId);
       return true;
     }
