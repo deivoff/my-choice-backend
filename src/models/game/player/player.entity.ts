@@ -1,7 +1,8 @@
 import { Field, ObjectType, PickType, registerEnumType, Int } from '@nestjs/graphql';
-import { User } from 'src/models/user/entities/user.entity';
+import { User, UserSex } from 'src/models/user/entities/user.entity';
 import { Resources } from 'src/models/game/resources/resources.entity';
 import { Types } from 'mongoose';
+import { HashEntity, HashField } from 'src/type-redis';
 
 export enum PlayerPosition {
   Awaiting = 'Awaiting',
@@ -15,38 +16,62 @@ registerEnumType(PlayerPosition, {
 });
 
 @ObjectType()
-export class Player extends PickType(User, ['_id', 'sex']){
+@HashEntity({
+  expires: 60 * 60,
+  pk: '_id',
+})
+export class Player extends PickType(
+  User,
+  ['_id', 'sex'],
+) {
+
+  @HashField()
+  readonly _id: Types.ObjectId;
+
+  @HashField({ required: false, type: String })
+  sex?: UserSex;
 
   @Field({ nullable: true })
+  @HashField()
   avatar: string;
 
   @Field(() => Int, { nullable: true })
-  dream?: number | null;
+  @HashField({ type: Number, required: false })
+  dream?: number;
 
   @Field()
+  @HashField()
   nickname: string;
 
   @Field(() => Resources, { nullable: true })
-  resources?: Resources | null;
+  @HashField({ type: Resources, required: false })
+  resources?: Resources;
 
   @Field(() => PlayerPosition, { nullable: true })
-  position?: PlayerPosition | null;
+  @HashField({ type: String, required: false })
+  position?: PlayerPosition;
 
   @Field(() => Int, { nullable: true })
-  cell?: number | null;
+  @HashField({ type: Number, required: false })
+  cell?: number;
 
   @Field(() => Int, { nullable: true })
-  hold?: number | null;
+  @HashField({ type: Number, required: false })
+  hold?: number;
 
-  gameId?: Types.ObjectId | null;
-
-  @Field(() => Boolean, { nullable: true })
-  disconnected?: boolean | null;
-
-  @Field(() => Boolean, { nullable: true })
-  gameover?: boolean | null;
+  @HashField({ type: Types.ObjectId, required: false })
+  gameId?: Types.ObjectId;
 
   @Field(() => Boolean, { nullable: true })
-  winner?: boolean | null;
+  @HashField({ type: Boolean, required: false })
+  disconnected?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @HashField({ type: Boolean, required: false })
+  gameover?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @HashField({ type: Boolean, required: false })
+  winner?: boolean;
 
 }

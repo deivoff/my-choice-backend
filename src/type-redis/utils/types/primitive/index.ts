@@ -1,6 +1,6 @@
 import RedisBoolean from './Boolean';
 import RedisNumber from './Number';
-import { IWriteAndRead } from 'src/type-redis/types/interfaces';
+import { IWriteAndRead } from '../../interfaces';
 
 export default {
   Number: RedisNumber,

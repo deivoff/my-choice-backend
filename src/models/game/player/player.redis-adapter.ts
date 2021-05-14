@@ -26,7 +26,6 @@ type PlayerRedisAdapter = Omit<Player, '_id' | 'gameId'> & {
 
 type PlayerRecord = Omit<Player, '_id' | 'resources' | 'gameId' | 'disconnected' | 'hold' | 'position'>;
 
-
 export const fromRedisToPlayer = ({
   cell,
   winner,
@@ -41,14 +40,14 @@ export const fromRedisToPlayer = ({
   }: Record<string, string>): Player => ({
   ...other as unknown as PlayerRecord,
   _id: Types.ObjectId(_id),
-  hold: isNil(hold) ? null: Number(hold),
+  hold: isNil(hold) ? undefined : Number(hold),
   disconnected: fromRedisBooleanToBoolean(disconnected),
-  gameId: gameId ? Types.ObjectId(gameId) : null,
+  gameId: gameId ? Types.ObjectId(gameId) : undefined,
   resources: fromStringToResources(resources),
-  dream: dream === '' ? null : Number(dream),
+  dream: dream === '' ? undefined : Number(dream),
   gameover: fromRedisBooleanToBoolean(gameover),
   winner: fromRedisBooleanToBoolean(winner),
-  cell: isNil(cell) ? null: Number(cell),
+  cell: isNil(cell) ? undefined : Number(cell),
 });
 
 export const fromPlayerToRedis = ({

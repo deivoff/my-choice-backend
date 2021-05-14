@@ -1,5 +1,7 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { prop } from '@typegoose/typegoose';
+import { HashFieldType } from 'src/type-redis';
+import { fromStringToResources, fromResourcesToString } from './resources.redis-adapter';
 
 export enum ResourceType {
   lives = 'lives',
@@ -13,6 +15,10 @@ registerEnumType(ResourceType, {
 });
 
 @ObjectType()
+@HashFieldType({
+  write: fromResourcesToString,
+  read: fromStringToResources
+})
 export class Resources {
 
   @Field(() => Int, { nullable: true })

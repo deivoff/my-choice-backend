@@ -1,1 +1,2 @@
-export * from './decorators';
+export * from './utils/decorators';
+export * from './type-redis.module';
