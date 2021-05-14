@@ -1,4 +1,13 @@
-import { Args, Mutation, Parent, Query, ResolveField, Resolver, Root, Subscription } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+  Subscription,
+} from '@nestjs/graphql';
 import { MessageService } from 'src/models/message/message.service';
 import { Author, Message } from 'src/models/message/entities/message.entity';
 import { PubSubEngine } from 'graphql-subscriptions';
@@ -8,6 +17,8 @@ import { DecodedUser, User } from 'src/models/user/entities/user.entity';
 import { UserService } from 'src/models/user/user.service';
 import { Types } from 'mongoose';
 import { USER_NOT_FOUND } from 'src/models/user/user.errors';
+import { ChatEvent, ChatPubSubPayload } from 'src/models/message/dto/chat-event.dto';
+
 
 @Resolver(() => Message)
 export class MessageResolver {
@@ -43,8 +54,27 @@ export class MessageResolver {
     return true;
   }
 
-  @Subscription(() => Message, {
-    filter: (payload, variables) =>
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async deleteMessage(
+    @Args('messageId') messageId: Types.ObjectId,
+    @Args('topic') topic: string,
+    @DecodedUser() decodedUser: DecodedUser,
+  ) {
+    await this.messageService.remove(messageId);
+
+    await this.pubSub.publish('onMessage', {
+      onMessage: {
+        _id: messageId,
+        topic,
+      },
+    });
+
+    return true;
+  }
+
+  @Subscription(() => ChatEvent, {
+    filter: (payload: ChatPubSubPayload, variables) =>
       payload.onMessage.topic === variables.topic,
   })
   onMessage(

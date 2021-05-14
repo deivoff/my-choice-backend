@@ -23,6 +23,12 @@ export class MessageService {
     });
   }
 
+  async remove(
+    messageId: Types.ObjectId
+  ) {
+    return this.messageModel.findByIdAndDelete(messageId)
+  }
+
   findByTopic(topic: string) {
     return this.messageModel.find({
       topic,

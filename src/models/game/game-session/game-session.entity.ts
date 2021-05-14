@@ -29,7 +29,7 @@ export class GameSession extends PickType(Game, ['_id', 'name', 'creator']){
   name: string;
 
   @Field()
-  @HashField({ type: Types.ObjectId })
+  @HashField()
   creator: Types.ObjectId;
 
   @HashField({ type: Types.ObjectId, required: false })
