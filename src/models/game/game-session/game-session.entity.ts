@@ -41,6 +41,7 @@ export class GameSession extends PickType(Game, ['_id', 'name', 'creator']){
   @HashField({ type: [Types.ObjectId], required: false })
   players?: string[];
 
+  @Field(() => Types.ObjectId, { nullable: true })
   @HashField({ type: Types.ObjectId, required: false })
   tournament?: Types.ObjectId;
 
