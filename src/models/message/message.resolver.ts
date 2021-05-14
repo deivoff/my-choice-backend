@@ -61,7 +61,7 @@ export class MessageResolver {
     @Args('topic') topic: string,
     @DecodedUser() decodedUser: DecodedUser,
   ) {
-    await this.messageService.remove(messageId);
+    await this.messageService.ban(messageId);
 
     await this.pubSub.publish('onMessage', {
       onMessage: {

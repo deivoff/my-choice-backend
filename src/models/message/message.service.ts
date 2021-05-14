@@ -23,6 +23,14 @@ export class MessageService {
     });
   }
 
+  async ban(
+    messageId: Types.ObjectId
+  ) {
+    return this.messageModel.findByIdAndUpdate(messageId, {
+      banned: true
+    })
+  }
+
   async remove(
     messageId: Types.ObjectId
   ) {
@@ -32,6 +40,7 @@ export class MessageService {
   findByTopic(topic: string) {
     return this.messageModel.find({
       topic,
+      banned: { $exists: false },
     }, null, {
       limit: 20,
       sort: { $natural: -1 }
