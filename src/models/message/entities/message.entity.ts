@@ -29,7 +29,7 @@ export class Message {
   @prop({ required: true })
   topic!: string;
 
-  @prop()
+  @prop({ required: false })
   banned?: boolean;
 
   @Field()
