@@ -17,8 +17,8 @@ import { Game } from './game.entity';
 import getTimeout from 'src/models/game/game-session/game-session.utils';
 import { FieldType } from 'src/models/game/field/field.dictionaries';
 
-const CHOICE_TIMEOUT_MS = 30_000;
-const MOVE_TIMEOUT_MS = 30_000;
+const CHOICE_TIMEOUT_MS = 60_000;
+const MOVE_TIMEOUT_MS = 60_000;
 
 type CreateGame = {
   name: string;
