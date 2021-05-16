@@ -107,7 +107,7 @@ export class GameResolver {
     @Args('cardId') cardId: Types.ObjectId,
     @Args('choiceId', { nullable: true }) choiceId?: Types.ObjectId,
   ) {
-    await this.gameService.choice(cardId, decodedUser._id, choiceId);
+    await this.gameService.choice(decodedUser._id, cardId, choiceId);
     return true
   }
 

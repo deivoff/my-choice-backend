@@ -16,6 +16,7 @@ import { Card } from 'src/models/game/card/entities/card.entity';
 import { CardService } from 'src/models/game/card/card.service';
 import { ShareResourcesInput } from 'src/models/game/dto/share-resources.input';
 import { ID, objectIdToString } from 'src/common/scalars/objectId.scalar';
+import getTimeout from 'src/models/game/game-session/game-session.utils';
 
 interface CreateGameSession {
   name: string;
@@ -95,6 +96,8 @@ export class GameSessionService {
 
   remove = async (gameId: ID) => {
     const gameKey = objectIdToString(gameId);
+    getTimeout('choice')(gameId).clear();
+    getTimeout('move')(gameId).clear();
     await Promise.all([
       this.findOneAndUpdate(gameId, {
         status: GameStatus.Finished,
@@ -185,6 +188,7 @@ export class GameSessionService {
 
     if (player?.gameId?.equals(gameId)) {
       if (game?.mover && player._id.equals(game.mover)) {
+        getTimeout('move')(gameId).clear();
         await this.setNewMover(player);
       }
 
@@ -264,7 +268,20 @@ export class GameSessionService {
     return game;
   };
 
-  choice = async (cardId: ID, userId: ID, choiceId?: ID): Promise<PlayerActionResult> => {
+  choice = async (userId: ID, cardId?: ID, choiceId?: ID): Promise<PlayerActionResult> => {
+    if (!cardId) {
+      const player = await this.playerService.findOne(userId);
+      if (!player) {
+        throw new Error(PLAYER_NOT_FOUND);
+      }
+      await this.setNewMover(player);
+
+      return {
+        gameId: player?.gameId!,
+      }
+
+    }
+
     const isFieldChanged = await this.playerService.updateAfterChoice(cardId, userId, choiceId);
     const updatedPlayer = await this.playerService.findOne(userId);
 
@@ -322,7 +339,17 @@ export class GameSessionService {
     }
   };
 
-  playerMove = async (moveCount: number, playerId: ID, onMove?: (gameId: ID) => Promise<void>): Promise<PlayerActionResult> => {
+  playerMove = async (playerId: ID, moveCount?: number,  onMove?: (gameId: ID) => Promise<void> | void): Promise<PlayerActionResult> => {
+    if (isNil(moveCount)) {
+      const player = await this.playerService.findOne(playerId);
+      if (!player) throw new Error(PLAYER_NOT_FOUND);
+
+      await this.setNewMover(player);
+      return {
+        gameId: player.gameId!
+      }
+    }
+
     const player = await this.playerService.changePlayerPosition(playerId, moveCount);
 
     if (!player) throw new Error(PLAYER_NOT_FOUND);
@@ -330,9 +357,7 @@ export class GameSessionService {
       mover: undefined
     });
 
-    if (onMove) {
-      await onMove(player.gameId!);
-    }
+    await onMove?.(player.gameId!);
 
     return await this.playerStoodOnField(player);
   };
@@ -422,6 +447,8 @@ export class GameSessionService {
     }
 
     if (game.mover === objectIdToString(userId) && game.status !== GameStatus.Finished) {
+      console.log('disconnect');
+      getTimeout('move')(game._id).clear();
       const { mover, winner, error } = await this.playerService.getNextMover(players, player);
       if (error) throw new Error(CYCLED_ERROR);
       await this.findOneAndUpdate(game._id, {

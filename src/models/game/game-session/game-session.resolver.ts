@@ -3,6 +3,8 @@ import { GameSession } from 'src/models/game/game-session/game-session.entity';
 import { Player } from 'src/models/game/player/player.entity';
 import { GameSessionService } from 'src/models/game/game-session/game-session.service';
 import { Types } from 'mongoose';
+import getTimeout from 'src/models/game/game-session/game-session.utils';
+import { GameSessionTimers } from 'src/models/game/game-session/dto/timers.entity';
 
 @Resolver(() => GameSession)
 export class GameSessionResolver {
@@ -43,6 +45,23 @@ export class GameSessionResolver {
     }: GameSession,
   ) {
     return players?.length || 0;
+  }
+
+  @ResolveField(() => GameSessionTimers, { nullable: true })
+  timers(
+    @Parent() {
+      _id
+    }: GameSession
+  ): GameSessionTimers | null {
+    const moveTimer = getTimeout('move')(_id).getTimerStart();
+    const choiceTimer = getTimeout('choice')(_id).getTimerStart();
+
+    if (!moveTimer && !choiceTimer) return null;
+
+    return {
+      card: choiceTimer ? new Date(choiceTimer) : null,
+      dice: moveTimer ? new Date(moveTimer) : null,
+    }
   }
 
   @ResolveField(() => Int)
