@@ -9,7 +9,6 @@ import { UserService } from 'src/models/user/user.service';
 import { ID, objectIdToString } from 'src/common/scalars/objectId.scalar';
 
 import { GameSession } from './game-session/game-session.entity';
-import { Player } from './player/player.entity';
 import { CreateGameInput } from './dto/create-game.input';
 import { Card, ChoiceOption, DroppedCard } from './card/entities/card.entity';
 import { ShareResourcesInput } from './dto/share-resources.input';
@@ -229,7 +228,15 @@ export class GameResolver {
     return this.userService.findOne(creator);
   }
 
-  @ResolveField(() => [Player])
+  @ResolveField(() => User, { nullable: true })
+  async winner(
+    @Parent() game: Game,
+  ) {
+    const { winner } = game;
+    return winner ? this.userService.findOne(winner) : null;
+  }
+
+  @ResolveField(() => [User])
   async players(
     @Parent() game: Game,
   ) {

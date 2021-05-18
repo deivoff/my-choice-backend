@@ -55,12 +55,14 @@ export class GameSessionResolver {
   ): GameSessionTimers | null {
     const moveTimer = getTimeout('move')(_id).getTimerStart();
     const choiceTimer = getTimeout('choice')(_id).getTimerStart();
+    const dreamTimer = getTimeout('dream')(_id).getTimerStart();
 
-    if (!moveTimer && !choiceTimer) return null;
+    if (!moveTimer && !choiceTimer && !dreamTimer) return null;
 
     return {
       card: choiceTimer ? new Date(choiceTimer) : null,
       dice: moveTimer ? new Date(moveTimer) : null,
+      dream: dreamTimer ? new Date(dreamTimer) : null,
     }
   }
 

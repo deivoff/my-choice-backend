@@ -9,4 +9,7 @@ export class GameSessionTimers {
   @Field(() => Date, { nullable: true })
   dice?: Date | null;
 
+  @Field(() => Date, { nullable: true })
+  dream?: Date | null;
+
 }

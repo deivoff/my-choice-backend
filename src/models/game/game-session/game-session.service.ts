@@ -17,6 +17,7 @@ import { CardService } from 'src/models/game/card/card.service';
 import { ShareResourcesInput } from 'src/models/game/dto/share-resources.input';
 import { ID, objectIdToString } from 'src/common/scalars/objectId.scalar';
 import getTimeout from 'src/models/game/game-session/game-session.utils';
+import { getRandomDream } from 'src/models/game/field/field.dictionaries';
 
 interface CreateGameSession {
   name: string;
@@ -98,6 +99,7 @@ export class GameSessionService {
     const gameKey = objectIdToString(gameId);
     getTimeout('choice')(gameId).clear();
     getTimeout('move')(gameId).clear();
+    getTimeout('dream')(gameId).clear();
     await Promise.all([
       this.findOneAndUpdate(gameId, {
         status: GameStatus.Finished,
@@ -242,6 +244,34 @@ export class GameSessionService {
     }
 
     return game;
+  };
+
+  randomDream = async (gameId: ID): Promise<GameSession> => {
+    const game = await this.findOne(gameId);
+
+    if (!game) throw new Error(GAME_NOT_FOUND);
+
+    const players = await this.playerService.findSome(game.players!);
+
+    const playersWithoutDream = players.filter(player => !player.dream);
+
+    for (let i = 0; i < (playersWithoutDream.length ?? 0); i++) {
+      const player = playersWithoutDream[i]!;
+      const randomDream = getRandomDream();
+      await this.playerService.findOneAndUpdate(player._id, {
+        dream: randomDream,
+      })
+    }
+
+    const { mover, winner, error } = await this.playerService.getNextMover(players);
+
+    if (error) throw new Error(CYCLED_ERROR);
+
+    return await this.findOneAndUpdate(game._id, {
+      status: GameStatus.InProgress,
+      mover,
+      winner
+    });
   };
 
   choiceDream = async (dream: number, userId: ID): Promise<GameSession> => {

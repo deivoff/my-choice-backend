@@ -19,6 +19,7 @@ import { FieldType } from 'src/models/game/field/field.dictionaries';
 
 const CHOICE_TIMEOUT_MS = 40_000;
 const MOVE_TIMEOUT_MS = 40_000;
+const DREAM_TIMEOUT_MS = 40_000;
 
 type CreateGame = {
   name: string;
@@ -220,6 +221,12 @@ export class GameService {
       tournament: game.tournament,
       players: game.players?.map(Types.ObjectId),
     });
+
+    getTimeout('dream')(gameId).set(async () => {
+      await this.gameSessionService.randomDream(gameId);
+      this.publishActiveGame(gameId);
+    }, DREAM_TIMEOUT_MS);
+
     this.publishActiveGames();
     this.publishActiveGame(gameId);
     return game;
@@ -227,6 +234,10 @@ export class GameService {
 
   async choiceDream(dream: number, userId: ID) {
     const game = await this.gameSessionService.choiceDream(dream, userId);
+
+    if (game.mover || game.status === GameStatus.InProgress) {
+      getTimeout('dream')(game._id).clear();
+    }
 
     this.publishActiveGame(game._id);
   }
