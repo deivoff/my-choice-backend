@@ -24,14 +24,14 @@ export class HashModel<C = new (...args: any) => any, T = InstanceType<C>, ID = 
   private readonly schema: IHashEntityConfig<T>;
 
   private stringId = (id: ID) => {
-    return `${this.collectionName.toLowerCase()}:${this.writeId(id)}`;
+    return `${this.collectionName}:${this.writeId(id)}`;
   };
 
   constructor(
     name: string,
     private redisClient: Redis.Redis,
   ) {
-    this.collectionName = name;
+    this.collectionName = name.toLowerCase();
     const schema = hashes.get(name);
 
     if (!schema) throw Error(`Hash entity for ${name} not defined!`);
