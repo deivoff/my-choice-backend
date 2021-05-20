@@ -147,7 +147,6 @@ export class HashModel<C = new (...args: any) => any, T = InstanceType<C>, ID = 
       return undefined;
     }
 
-    console.log('update', res, updatedFields);
     const updatedRes: T = merge ? merge(res, updatedFields) : {
       ...res,
       ...updatedFields,

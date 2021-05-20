@@ -176,7 +176,6 @@ export class GameSessionService {
       });
     }
 
-    console.log('leave', updatedGame?.players, userId);
     if (updatedGame) {
       if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
         await this.remove(updatedGame._id);
@@ -456,7 +455,6 @@ export class GameSessionService {
     }
 
     if (game.mover?.equals(userId) && game.status !== GameStatus.Finished) {
-      console.log('disconnect');
       getTimeout('move')(game._id).clear();
       const { mover, winner, error } = await this.playerService.getNextMover(players, player);
       if (error) throw new Error(CYCLED_ERROR);
