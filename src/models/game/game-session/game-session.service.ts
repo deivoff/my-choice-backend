@@ -1,31 +1,28 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { isEmpty, union, without, isNil } from 'lodash';
+import { union, filter, isNil } from 'lodash';
 import { GameSession, GameStatus } from 'src/models/game/game-session/game-session.entity';
 import { PlayerService } from 'src/models/game/player/player.service';
 import { CYCLED_ERROR, GAME_NOT_FOUND, YOU_IN_GAME } from 'src/models/game/game.errors';
-import {
-  fromGameSessionToRedis,
-  fromRedisToGameSession,
-} from 'src/models/game/game-session/game-session.redis-adapter';
 import { Types } from 'mongoose';
 import { Player, PlayerPosition } from 'src/models/game/player/player.entity';
-import { PLAYER_NOT_FOUND, PLAYERS_NOT_FOUND } from 'src/models/game/player/player.errors';
+import { PLAYER_NOT_FOUND } from 'src/models/game/player/player.errors';
 import { FieldService } from 'src/models/game/field/field.service';
 import { Card } from 'src/models/game/card/entities/card.entity';
 import { CardService } from 'src/models/game/card/card.service';
 import { ShareResourcesInput } from 'src/models/game/dto/share-resources.input';
-import { ID, objectIdToString } from 'src/common/scalars/objectId.scalar';
+import { ID } from 'src/common/scalars/objectId.scalar';
 import getTimeout from 'src/models/game/game-session/game-session.utils';
 import { getRandomDream } from 'src/models/game/field/field.dictionaries';
+import { createHashServiceFromHashModel, HashModel } from 'src/type-redis/utils/hash.model';
 
 interface CreateGameSession {
   name: string;
-  _id: string;
+  _id: Types.ObjectId;
   creator: any;
-  tournament?: ID;
-  players: string[];
-  observers: string[];
+  tournament?: Types.ObjectId;
+  players: Types.ObjectId[];
+  observers: Types.ObjectId[];
 }
 
 type PlayerActionResult = {
@@ -35,27 +32,19 @@ type PlayerActionResult = {
 
 @Injectable()
 export class GameSessionService {
+  public hashService: HashModel<typeof GameSession>;
+
   constructor(
-    @Inject('PUBLISHER') private readonly  redisClient: Redis,
+    @Inject('PUBLISHER') redisClient: Redis,
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
     private readonly fieldService: FieldService,
     private readonly cardService: CardService,
-  ) {}
-
-  private key = (_id: string = '') => {
-    return `game:${_id}`
-  };
-
-  private async getAllKeys(cursor: string = '0', keys: string[] = []): Promise<string[]> {
-    const [newCursor, newKeys] = await this.redisClient.scan(cursor, 'match', this.key('*'));
-    const unionKeys = union(keys, newKeys);
-
-    if (newCursor === '0') {
-      return unionKeys;
-    }
-
-    return await this.getAllKeys(newCursor, unionKeys)
+  ) {
+    this.hashService = createHashServiceFromHashModel(
+      GameSession,
+      redisClient,
+    )
   }
 
   create = async ({
@@ -65,18 +54,20 @@ export class GameSessionService {
     players,
     observers,
     tournament,
-         }: CreateGameSession) => {
-    const player = await this.playerService.findOne(creator);
+  }: CreateGameSession) => {
+    const player = await this.playerService.hashService.findOne(creator);
 
-    if (player) throw new Error(YOU_IN_GAME);
+    if (player) {
+      await this.playerInGame(player);
+    }
 
-    await this.redisClient.hset(this.key(_id), {
+    const game = await this.hashService.create(_id, {
       _id,
       name,
       creator,
       players,
       observers,
-      tournament: tournament ? objectIdToString(tournament) : '',
+      tournament,
       status: GameStatus.Awaiting,
     });
 
@@ -84,75 +75,47 @@ export class GameSessionService {
       await Promise.all(players.map((id) => this.playerService.initPlayer(id, _id)));
     }
 
-    return await this.findOne(_id);
+    return game;
   };
 
-  delete = async (gameId: ID) => {
-    const gameKey = objectIdToString(gameId);
-    await Promise.all([
-      this.redisClient.del(this.key(gameKey)), // del(this.key(gameKey)),
-      this.cardService.clearDeck(gameId),
-    ]);
-  };
-
-  remove = async (gameId: ID) => {
-    const gameKey = objectIdToString(gameId);
+  remove = async (gameId: Types.ObjectId) => {
     getTimeout('choice')(gameId).clear();
     getTimeout('move')(gameId).clear();
     getTimeout('dream')(gameId).clear();
     await Promise.all([
-      this.findOneAndUpdate(gameId, {
+      this.hashService.findOneAndUpdate(gameId, {
         status: GameStatus.Finished,
       }),
-      this.redisClient.expire(this.key(gameKey), 60 * 60), // del(this.key(gameKey)),
       this.cardService.clearDeck(gameId),
     ]);
   };
 
-  findOne = async (id: ID) => {
-    const res = await this.redisClient.hgetall(this.key(objectIdToString(id)));
-    return isEmpty(res) ? null : fromRedisToGameSession(res);
+  private playerInGame = async (player: Player) => {
+    const anotherGame = await this.hashService.findOne(player.gameId);
+
+    if (anotherGame) {
+      throw new Error(YOU_IN_GAME(anotherGame.name))
+    } else {
+      await this.playerService.hashService.delete(player._id)
+    }
   };
 
-  findOneAndUpdate = async (id: ID, updatedFields: Partial<GameSession>) => {
-    const gameKey = this.key(objectIdToString(id));
+  join = async (gameId: Types.ObjectId, userId: Types.ObjectId): Promise<GameSession> => {
+    const player = await this.playerService.hashService.findOne(userId);
 
-    const game = await this.findOne(id);
-
-    if (!game || isEmpty(game)) {
-      throw new Error(GAME_NOT_FOUND)
+    if (player?.gameId && !player.gameId.equals(gameId)) {
+      await this.playerInGame(player);
     }
 
-    const updatedGame: GameSession = {
-      ...game,
-      ...updatedFields,
-    };
-
-    await this.redisClient.hset(gameKey, fromGameSessionToRedis(updatedGame));
-    return updatedGame;
-  };
-
-  findAll = async () => {
-    const keys = await this.getAllKeys();
-    return await Promise.all(keys.sort().reverse().map(
-      id => this.redisClient.hgetall(id).then(fromRedisToGameSession)
-    ));
-  };
-
-  join = async (gameId: ID, userId: ID): Promise<GameSession> => {
-    const player = await this.playerService.findOne(userId);
-
-    if (player?.gameId && !player.gameId.equals(gameId)) throw new Error(YOU_IN_GAME);
-
-    const game = await this.findOne(gameId);
+    const game = await this.hashService.findOne(gameId);
 
     if (!game) {
       throw new Error(GAME_NOT_FOUND)
     }
 
     const { players, observers } = game;
-    const gameHasThisPlayer = players?.some((player) => player === objectIdToString(userId));
-    const gameHasThisObserver = observers?.some((observer) => observer === objectIdToString(userId));
+    const gameHasThisPlayer = players?.some((player) => player.equals(userId));
+    const gameHasThisObserver = observers?.some((observer) => observer.equals(userId));
 
     switch (true) {
       case gameHasThisObserver: {
@@ -166,27 +129,27 @@ export class GameSessionService {
       }
       case game.status === GameStatus.Awaiting && ((game?.players?.length || 0) < 8): {
         await this.playerService.initPlayer(userId, gameId);
-        await this.findOneAndUpdate(gameId, {
-          players: union(game.players, [objectIdToString(userId)])
+        await this.hashService.findOneAndUpdate(gameId, {
+          players: union(game.players, [userId])
         });
         break;
       }
       default: {
-        await this.findOneAndUpdate(gameId, {
-          observers: union(game.observers, [objectIdToString(userId)]),
+        await this.hashService.findOneAndUpdate(gameId, {
+          observers: union(game.observers, [userId]),
         })
       }
     }
 
-    const updatedGame = await this.findOne(gameId);
+    const updatedGame = await this.hashService.findOne(gameId);
 
     if (!updatedGame) throw new Error(GAME_NOT_FOUND);
     return updatedGame;
   };
 
-  leave = async (userId: ID, gameId: ID): Promise<GameSession | null> => {
-    const player = await this.playerService.findOne(userId);
-    const game = await this.findOne(gameId);
+  leave = async (userId: Types.ObjectId, gameId: Types.ObjectId): Promise<GameSession | undefined> => {
+    const player = await this.playerService.hashService.findOne(userId);
+    const game = await this.hashService.findOne(gameId);
 
     if (player?.gameId?.equals(gameId)) {
       if (game?.mover && player._id.equals(game.mover)) {
@@ -194,29 +157,30 @@ export class GameSessionService {
         await this.setNewMover(player);
       }
 
-      await this.playerService.remove(userId);
+      await this.playerService.hashService.delete(userId);
     }
-    let updatedGame: GameSession | null = null;
+    let updatedGame: GameSession | undefined;
 
-    if (!game) return null;
+    if (!game) return undefined;
 
     if (!player) {
       // observer !== creator
       if (!game.creator.equals(userId)) {
-        updatedGame = await this.findOneAndUpdate(gameId, {
-          observers: without(game.observers, objectIdToString(userId)),
+        updatedGame = await this.hashService.findOneAndUpdate(gameId, {
+          observers: filter(game.observers, observer => !observer.equals(userId)),
         });
       }
     } else {
-      updatedGame = await this.findOneAndUpdate(gameId, {
-        players: without(game.players, objectIdToString(userId)),
+      updatedGame = await this.hashService.findOneAndUpdate(gameId, {
+        players: filter(game.players, player => !player.equals(userId)),
       });
     }
 
+    console.log('leave', updatedGame?.players, userId);
     if (updatedGame) {
       if (!updatedGame?.players?.length && !updatedGame?.observers?.length) {
         await this.remove(updatedGame._id);
-        return null;
+        return undefined;
       }
     }
 
@@ -225,7 +189,7 @@ export class GameSessionService {
   };
 
   start = async (gameId: ID, userId: ID): Promise<GameSession> => {
-    const game = await this.findOneAndUpdate(gameId, {
+    const game = await this.hashService.findOneAndUpdate(gameId, {
       status: GameStatus.ChoiceDream,
     });
 
@@ -246,14 +210,14 @@ export class GameSessionService {
     return game;
   };
 
-  randomDream = async (gameId: ID): Promise<GameSession> => {
-    const game = await this.findOne(gameId);
+  randomDream = async (gameId: Types.ObjectId): Promise<GameSession> => {
+    const game = await this.hashService.findOne(gameId);
 
     if (!game) throw new Error(GAME_NOT_FOUND);
 
-    const players = await this.playerService.findSome(game.players!);
+    const players = await this.getPlayers(gameId, game?.players || []);
 
-    const playersWithoutDream = players.filter(player => !player.dream);
+    const playersWithoutDream = players.filter(player => !player?.dream);
 
     for (let i = 0; i < (playersWithoutDream.length ?? 0); i++) {
       const player = playersWithoutDream[i]!;
@@ -267,40 +231,42 @@ export class GameSessionService {
 
     if (error) throw new Error(CYCLED_ERROR);
 
-    return await this.findOneAndUpdate(game._id, {
+    const updatedGame = await this.hashService.findOneAndUpdate(game._id, {
       status: GameStatus.InProgress,
       mover,
       winner
     });
+    return updatedGame!
   };
 
-  choiceDream = async (dream: number, userId: ID): Promise<GameSession> => {
-    const player = await this.playerService.findOneAndUpdate(userId, {
+  choiceDream = async (dream: number, userId: Types.ObjectId): Promise<GameSession> => {
+    const player = await this.playerService.hashService.findOneAndUpdate(userId, {
       dream: dream
     });
-    const game = await this.findOne(player?.gameId!);
+    const game = await this.hashService.findOne(player?.gameId!);
 
     if (!game) throw new Error(GAME_NOT_FOUND);
 
-    const players = await this.getPlayers(game?.players!);
+    const players = await this.getPlayers(game._id, game?.players || []);
     const allDreamsExist = players.every(player => player?.dream);
 
     if (allDreamsExist) {
       const { mover, winner, error } = await this.playerService.getNextMover(players);
       if (error) throw new Error(CYCLED_ERROR);
-      return await this.findOneAndUpdate(game._id, {
+      const updatedGame = await this.hashService.findOneAndUpdate(game._id, {
         status: GameStatus.InProgress,
         mover,
         winner
-      })
+      });
+      return updatedGame!;
     }
 
     return game;
   };
 
-  choice = async (userId: ID, cardId?: ID, choiceId?: ID): Promise<PlayerActionResult> => {
+  choice = async (userId: Types.ObjectId, cardId?: ID, choiceId?: ID): Promise<PlayerActionResult> => {
     if (!cardId) {
-      const player = await this.playerService.findOne(userId);
+      const player = await this.playerService.hashService.findOne(userId);
       if (!player) {
         throw new Error(PLAYER_NOT_FOUND);
       }
@@ -313,15 +279,15 @@ export class GameSessionService {
     }
 
     const isFieldChanged = await this.playerService.updateAfterChoice(cardId, userId, choiceId);
-    const updatedPlayer = await this.playerService.findOne(userId);
+    const updatedPlayer = await this.playerService.hashService.findOne(userId);
 
     if (!updatedPlayer) {
       throw new Error(PLAYER_NOT_FOUND);
     }
 
     if (updatedPlayer?.winner) {
-      await this.findOneAndUpdate(updatedPlayer.gameId!, {
-        winner: objectIdToString(userId),
+      await this.hashService.findOneAndUpdate(updatedPlayer.gameId!, {
+        winner: userId,
         status: GameStatus.Finished,
       })
     }
@@ -338,12 +304,12 @@ export class GameSessionService {
   };
 
   setNewMover = async (currentMover: Player) => {
-    const game = await this.findOne(currentMover?.gameId!);
-    const players = await this.getPlayers(game?.players!);
+    const game = await this.hashService.findOne(currentMover?.gameId!);
+    const players = await this.getPlayers(game?._id!, game?.players!);
     const { mover, winner, error } = await this.playerService.getNextMover(players, currentMover!);
     if (error) throw new Error(CYCLED_ERROR);
 
-    await this.findOneAndUpdate(game?._id!, {
+    await this.hashService.findOneAndUpdate(game?._id!, {
       status: winner ? GameStatus.Finished : GameStatus.InProgress,
       mover,
       winner
@@ -351,11 +317,11 @@ export class GameSessionService {
   };
 
   updateAfterOpportunity = async (
-    playerId: ID,
+    playerId: Types.ObjectId,
     diceResult?: number
   ): Promise<PlayerActionResult> => {
     const isFieldChanged = await this.playerService.updateAfterOpportunity(playerId, diceResult);
-    const player = await this.playerService.findOne(playerId);
+    const player = await this.playerService.hashService.findOne(playerId);
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
     if (isFieldChanged) {
@@ -369,9 +335,13 @@ export class GameSessionService {
     }
   };
 
-  playerMove = async (playerId: ID, moveCount?: number,  onMove?: (gameId: ID) => Promise<void> | void): Promise<PlayerActionResult> => {
+  playerMove = async (
+    playerId: Types.ObjectId,
+    moveCount?: number,
+    onMove?: (gameId: ID
+    ) => Promise<void> | void): Promise<PlayerActionResult> => {
     if (isNil(moveCount)) {
-      const player = await this.playerService.findOne(playerId);
+      const player = await this.playerService.hashService.findOne(playerId);
       if (!player) throw new Error(PLAYER_NOT_FOUND);
 
       await this.setNewMover(player);
@@ -383,7 +353,7 @@ export class GameSessionService {
     const player = await this.playerService.changePlayerPosition(playerId, moveCount);
 
     if (!player) throw new Error(PLAYER_NOT_FOUND);
-    await this.findOneAndUpdate(player.gameId!, {
+    await this.hashService.findOneAndUpdate(player.gameId!, {
       mover: undefined
     });
 
@@ -401,9 +371,9 @@ export class GameSessionService {
 
     if (winner) {
       await Promise.all([
-        this.findOneAndUpdate(player?.gameId!, {
+        this.hashService.findOneAndUpdate(player?.gameId!, {
           status: GameStatus.Finished,
-          winner: objectIdToString(player._id),
+          winner: player._id,
         }),
         this.playerService.findOneAndUpdate(player._id, {
           winner: true
@@ -435,7 +405,7 @@ export class GameSessionService {
   };
 
   shareResources = async ( playerId: ID, shareResourcesInput: ShareResourcesInput) => {
-    const player = await this.playerService.findOne(playerId);
+    const player = await this.playerService.hashService.findOne(playerId);
 
     if (!player) throw new Error(PLAYER_NOT_FOUND);
     await this.playerService.share(player, shareResourcesInput);
@@ -443,18 +413,27 @@ export class GameSessionService {
     return player.gameId;
   };
 
-  getPlayers = (players: ID[]) => {
-    if (!players) {
-      throw new Error(PLAYERS_NOT_FOUND);
+  getPlayers = async (
+    gameId: Types.ObjectId,
+    playersIds: Types.ObjectId[],
+    ) => {
+    const players = await this.playerService.hashService.findSome(playersIds);
+    const filteredPlayers = players.filter(Boolean) as Player[];
+
+    if (filteredPlayers.length !== playersIds.length) {
+      await this.hashService.findOneAndUpdate(gameId, {
+        players: filteredPlayers.map(player => player._id)
+      })
     }
-    return this.playerService.findSome(players);
+
+    return filteredPlayers;
   };
 
   getObserversCount = (observers: ID[]): number => {
     return observers?.length || 0;
   };
 
-  connect = async (userId: ID): Promise<Types.ObjectId | void> => {
+  connect = async (userId: Types.ObjectId): Promise<Types.ObjectId | void> => {
     const player = await this.playerService.findOneAndUpdate(userId, { disconnected: false });
 
     if (player?.gameId) {
@@ -462,26 +441,26 @@ export class GameSessionService {
     }
   };
 
-  disconnect = async (userId: ID): Promise<Types.ObjectId | true | void>  => {
+  disconnect = async (userId: Types.ObjectId): Promise<Types.ObjectId | true | void>  => {
     const player = await this.playerService.findOneAndUpdate(userId, { disconnected: true });
 
     if (!player?.gameId) return;
 
-    const game = await this.findOne(player.gameId);
+    const game = await this.hashService.findOne(player.gameId);
 
     if (!game) return;
-    const players = await this.getPlayers(game.players!);
+    const players = await this.getPlayers(game._id, game.players!);
     if (!game.observers?.length && players.every(player => isNil(player?.disconnected) ? true : player.disconnected)) {
       await this.remove(player.gameId);
       return true;
     }
 
-    if (game.mover === objectIdToString(userId) && game.status !== GameStatus.Finished) {
+    if (game.mover?.equals(userId) && game.status !== GameStatus.Finished) {
       console.log('disconnect');
       getTimeout('move')(game._id).clear();
       const { mover, winner, error } = await this.playerService.getNextMover(players, player);
       if (error) throw new Error(CYCLED_ERROR);
-      await this.findOneAndUpdate(game._id, {
+      await this.hashService.findOneAndUpdate(game._id, {
         mover,
         winner,
         status: winner ? GameStatus.Finished : game.status,

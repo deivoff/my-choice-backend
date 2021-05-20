@@ -24,7 +24,7 @@ export class HashModel<C = new (...args: any) => any, T = InstanceType<C>, ID = 
   private readonly schema: IHashEntityConfig<T>;
 
   private stringId = (id: ID) => {
-    return `${this.collectionName}:${this.writeId(id)}`;
+    return `${this.collectionName.toLowerCase()}:${this.writeId(id)}`;
   };
 
   constructor(
@@ -56,7 +56,6 @@ export class HashModel<C = new (...args: any) => any, T = InstanceType<C>, ID = 
 
   private normalizeToRedisRecord = (obj: T): Record<string, string> => {
     return Object.entries(obj).reduce((acc, [key, value]) => {
-      console.log({ key, value });
       const config = this.schema.fields![(key as keyof T)];
       const isNilValue = isNil(value);
 
@@ -80,13 +79,11 @@ export class HashModel<C = new (...args: any) => any, T = InstanceType<C>, ID = 
           ? arrayConfig(normalizer).write(value)
           : normalizer.write(value);
 
-      console.log(acc);
       return acc;
     }, {})
   };
 
   private normalizeToObject = (record: Record<string, string>): T  => {
-    console.log(record, this.schema);
     return Object.entries(record).reduce((acc, [key, value]) => {
       const config = this.schema?.fields![(key as keyof T)];
       if (config.required && !value) {
@@ -139,14 +136,19 @@ export class HashModel<C = new (...args: any) => any, T = InstanceType<C>, ID = 
     return isEmpty(res) ? undefined : this.normalizeToObject(res)!;
   };
 
-  public findOneAndUpdate = async (id: ID, updatedFields: Partial<T>): Promise<T | undefined> => {
+  public findOneAndUpdate = async (
+    id: ID,
+    updatedFields: Partial<T>,
+    merge?: (exist: T, update: Partial<T>) => T,
+  ): Promise<T | undefined> => {
     const res = await this.findOne(id);
 
     if (!res || isEmpty(res)) {
       return undefined;
     }
 
-    const updatedRes: T = {
+    console.log('update', res, updatedFields);
+    const updatedRes: T = merge ? merge(res, updatedFields) : {
       ...res,
       ...updatedFields,
     };

@@ -35,7 +35,7 @@ export class GameResolver {
     return this.gameService.createGameSession({
       name,
       tournament,
-      creator: _id,
+      creator: Types.ObjectId(_id),
       observerMode
     });
   }
@@ -63,18 +63,22 @@ export class GameResolver {
   @Query(() => GameSession)
   joinGame(
     @Args('gameId') gameId: Types.ObjectId,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() {
+      _id,
+    }: DecodedUser
   ) {
-    return this.gameService.join(gameId, decodedUser._id);
+    return this.gameService.join(gameId, Types.ObjectId(_id));
   }
 
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async leaveGame(
     @Args('gameId') gameId: Types.ObjectId,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() {
+      _id
+    }: DecodedUser
   ) {
-    await this.gameService.leave(decodedUser._id, gameId);
+    await this.gameService.leave(Types.ObjectId(_id), gameId);
     return true
   }
 
@@ -82,9 +86,11 @@ export class GameResolver {
   @Mutation(() => Boolean)
   async choiceDream(
     @Args('dream', { type: () => Int }) dream: number,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() {
+      _id
+    }: DecodedUser
   ) {
-    await this.gameService.choiceDream(dream, decodedUser._id);
+    await this.gameService.choiceDream(dream, Types.ObjectId(_id));
     return true
   }
 
@@ -92,9 +98,11 @@ export class GameResolver {
   @Mutation(() => Boolean)
   async move(
     @Args('moveCount', { type: () => Int }) moveCount: number,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() {
+      _id
+    }: DecodedUser
   ) {
-    await this.gameService.playerMove(moveCount, decodedUser._id);
+    await this.gameService.playerMove(moveCount, Types.ObjectId(_id));
 
     return true;
   }
@@ -102,11 +110,13 @@ export class GameResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async choice(
-    @DecodedUser() decodedUser: DecodedUser,
+    @DecodedUser() {
+      _id
+    }: DecodedUser,
     @Args('cardId') cardId: Types.ObjectId,
     @Args('choiceId', { nullable: true }) choiceId?: Types.ObjectId,
   ) {
-    await this.gameService.choice(decodedUser._id, cardId, choiceId);
+    await this.gameService.choice(Types.ObjectId(_id), cardId, choiceId);
     return true
   }
 
@@ -123,12 +133,14 @@ export class GameResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async opportunityResult(
-    @DecodedUser() decodedUser: DecodedUser,
+    @DecodedUser() {
+      _id
+    }: DecodedUser,
     @Args('opportunityId') opportunityId: Types.ObjectId,
     @Args('diceResult', { type: () => Int, nullable: true }) diceResult?: number,
   ) {
     await this.gameService.updateAfterOpportunity(
-      decodedUser._id,
+      Types.ObjectId(_id),
       opportunityId,
       diceResult,
     );

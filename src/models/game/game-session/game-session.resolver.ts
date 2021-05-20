@@ -18,7 +18,7 @@ export class GameSessionResolver {
       mover
     }: GameSession
   ) {
-    return mover ? Types.ObjectId(mover) : null
+    return mover
   }
 
   @ResolveField(() => Types.ObjectId, { nullable: true })
@@ -27,7 +27,7 @@ export class GameSessionResolver {
       winner
     }: GameSession
   ) {
-    return winner ? Types.ObjectId(winner) : null
+    return winner
   }
 
   @ResolveField(() => [Player])
@@ -35,7 +35,10 @@ export class GameSessionResolver {
     @Parent() gameSession: GameSession,
   ) {
     if (!gameSession?.players?.length) return [];
-    return this.gameSessionService.getPlayers(gameSession.players || []);
+    return this.gameSessionService.getPlayers(
+      gameSession._id,
+      gameSession.players || []
+    );
   }
 
   @ResolveField(() => Int)

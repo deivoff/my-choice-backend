@@ -33,20 +33,20 @@ export class GameSession extends PickType(Game, ['_id', 'name', 'creator']){
   creator: Types.ObjectId;
 
   @HashField({ type: Types.ObjectId, required: false })
-  mover?: string;
+  mover?: Types.ObjectId;
 
   @HashField({ type: Types.ObjectId, required: false })
-  winner?: string;
+  winner?: Types.ObjectId;
 
   @HashField({ type: [Types.ObjectId], required: false })
-  players?: string[];
+  players?: Types.ObjectId[];
 
   @Field(() => Types.ObjectId, { nullable: true })
   @HashField({ type: Types.ObjectId, required: false })
   tournament?: Types.ObjectId;
 
   @HashField({ type: [Types.ObjectId], required: false })
-  observers?: string[];
+  observers?: Types.ObjectId[];
 
   @Field(() => GameStatus)
   @HashField()
