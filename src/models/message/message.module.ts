@@ -21,7 +21,7 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
         })
       },
       inject: [RedisService]
-    }
+    },
   ],
 })
 export class MessageModule {}

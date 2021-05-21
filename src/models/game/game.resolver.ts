@@ -3,6 +3,9 @@ import { Types } from 'mongoose';
 import { Inject, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PubSubEngine } from 'graphql-subscriptions';
 
+import * as DataLoader from 'dataloader';
+import { Loader } from 'src/dataloader';
+
 import { DecodedUser, User } from 'src/models/user/entities/user.entity';
 import { AuthGuard } from 'src/models/auth/auth.guard';
 import { UserService } from 'src/models/user/user.service';
@@ -16,6 +19,7 @@ import { ShareResourcesInput } from './dto/share-resources.input';
 import { GameService } from './game.service';
 import { Game } from './game.entity';
 import { SentryInterceptor } from 'src/sentry/sentry.interceptor';
+import { UserLoader } from 'src/models/user/user.loader';
 
 @UseInterceptors(SentryInterceptor)
 @Resolver(() => Game)
@@ -251,9 +255,10 @@ export class GameResolver {
   @ResolveField(() => [User])
   async players(
     @Parent() game: Game,
+    @Loader(UserLoader.name) userLoader: DataLoader<User['_id'], User>
   ) {
     const { players } = game;
-    return this.userService.findMany(players ?? []);
+    return userLoader.loadMany(players ?? []);
   }
 
   @Query(() => [Game], { name: 'games' })

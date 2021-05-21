@@ -5,9 +5,10 @@ import {
   Query,
   ResolveField,
   Resolver,
-  Root,
   Subscription,
 } from '@nestjs/graphql';
+import * as DataLoader from 'dataloader';
+
 import { MessageService } from 'src/models/message/message.service';
 import { Author, Message } from 'src/models/message/entities/message.entity';
 import { PubSubEngine } from 'graphql-subscriptions';
@@ -18,6 +19,8 @@ import { UserService } from 'src/models/user/user.service';
 import { Types } from 'mongoose';
 import { USER_NOT_FOUND } from 'src/models/user/user.errors';
 import { ChatEvent, ChatPubSubPayload } from 'src/models/message/dto/chat-event.dto';
+import { Loader } from 'src/dataloader';
+import { UserLoader } from 'src/models/user/user.loader';
 
 
 @Resolver(() => Message)
@@ -86,8 +89,9 @@ export class MessageResolver {
   @ResolveField(() => Author)
   async author(
     @Parent() { author }: Message,
+    @Loader(UserLoader) userLoader: DataLoader<User['_id'], User>,
   ): Promise<Author> {
-    const user = await this.userService.findOne(author);
+    const user = await userLoader.load(author);
 
     if (!user) {
       throw new Error(USER_NOT_FOUND)
