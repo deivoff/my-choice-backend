@@ -47,5 +47,4 @@ dump.rdb
 # migrations
 migrate-mongo-config.js
 migrations
-/winners.js
-/winners.json
+scripts
