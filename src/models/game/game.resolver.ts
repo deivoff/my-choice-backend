@@ -246,7 +246,9 @@ export class GameResolver {
   @Query(() => [Game], { name: 'games' })
   findAll(
     @DecodedUser() { _id }: DecodedUser,
+    @Args('userId', { nullable: true }) userId?: Types.ObjectId,
   ) {
+    if (userId) return this.gameService.findAllUserGames(userId);
     return this.gameService.findAllUserGames(Types.ObjectId(_id));
   }
 
