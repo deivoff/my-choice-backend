@@ -16,6 +16,7 @@ import { Card } from './card/entities/card.entity';
 import { Game } from './game.entity';
 import getTimeout from 'src/models/game/game-session/game-session.utils';
 import { FieldType } from 'src/models/game/field/field.dictionaries';
+import { CardDroppedPayload, PlayerChoicePayload, UpdateActiveGamePayload } from 'src/models/game/game.utils';
 
 const CHOICE_TIMEOUT_MS = 40_000;
 const MOVE_TIMEOUT_MS = 40_000;
@@ -167,13 +168,14 @@ export class GameService {
         }
       })
     }
-    await this.pubSub.publish('updateActiveGame', {
-      updateActiveGame: activeGame
+    await this.pubSub.publish<UpdateActiveGamePayload>('updateActiveGame', {
+      game: activeGame,
+      gameId: activeGame._id,
     })
   }
 
   private async publishChoiceInGame(gameId: ID, cardId: ID, choiceId?: ID) {
-    await this.pubSub.publish('playerChoice', {
+    await this.pubSub.publish<PlayerChoicePayload>('playerChoice', {
       choiceId,
       gameId,
       cardId,
@@ -193,7 +195,7 @@ export class GameService {
       }, CHOICE_TIMEOUT_MS
     );
 
-    await this.pubSub.publish('cardDropped', {
+    await this.pubSub.publish<CardDroppedPayload>('cardDropped', {
       cardDropped: card,
       gameId,
       userId,
@@ -304,8 +306,8 @@ export class GameService {
     }
   }
 
-  findAll() {
-    return `This action returns all game`;
+  findAllUserGames(userId: Types.ObjectId) {
+    return this.gameModel.find({ players: { $in: [userId] } });
   }
 
   findOne(id: Types.ObjectId) {

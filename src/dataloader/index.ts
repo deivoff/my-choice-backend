@@ -80,7 +80,6 @@ export class DataLoaderInterceptor implements NestInterceptor {
  * The decorator to be used within your graphql method.
  */
 export const Loader = createParamDecorator(
-  // tslint:disable-next-line: ban-types
   (data: string | Function, context: ExecutionContext) => {
     const name = typeof data === "string" ? data : data?.name;
     if (!name) {
@@ -106,7 +105,6 @@ export const Loader = createParamDecorator(
   }
 );
 
-// https://github.com/graphql/dataloader/issues/66#issuecomment-386252044
 export const ensureOrder = (options) => {
   const {
     docs,

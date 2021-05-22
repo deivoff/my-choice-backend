@@ -46,11 +46,12 @@ import { DataLoaderInterceptor } from 'src/dataloader';
       inject:[ConfigService]
     }),
     GraphQLModule.forRootAsync({
-      imports: [GameModule],
-      inject: [GameService],
-      useFactory: (gameService: GameService) => ({
+      imports: [GameModule, ConfigModule],
+      inject: [GameService, ConfigService],
+      useFactory: (gameService: GameService, configService: ConfigService) => ({
         autoSchemaFile: 'schema.gql',
         installSubscriptionHandlers: true,
+        playground: !configService.get('isProd'),
         subscriptions: {
           onConnect: (connectionParams) => {
             const authToken = connectionParams['authToken'];
