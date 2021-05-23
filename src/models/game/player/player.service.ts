@@ -272,7 +272,7 @@ export class PlayerService {
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
     const nextField = INNER_FIELD_DICT[field]
-      .find(elem => player?.cell! < elem) || INNER_FIELDS[field][0];
+      .find(elem => player?.cell! < elem) || INNER_FIELD_DICT[field][0];
 
 
     await this.findOneAndUpdate(playerId, {

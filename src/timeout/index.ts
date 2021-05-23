@@ -15,7 +15,7 @@ const getTimeout = (name: string) => {
 
     const clear = () => {
       const timeoutId = timeouts[name].get(stringId);
-
+      console.log('clear', { timeoutId });
       if (timeoutId) {
         clearTimeout(timeoutId);
         timeoutsStart.delete(timeoutId);
@@ -29,6 +29,7 @@ const getTimeout = (name: string) => {
         return timeouts[name].get(stringId);
       },
       set: (callback: SetTimeoutParams[0], delay: SetTimeoutParams[1] ) => {
+        clear();
         const timeoutId = setTimeout(async () => {
           callback();
           clear();

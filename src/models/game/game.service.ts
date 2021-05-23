@@ -14,9 +14,11 @@ import { ShareResourcesInput } from './dto/share-resources.input';
 import { Card } from './card/entities/card.entity';
 
 import { Game } from './game.entity';
-import getTimeout from 'src/models/game/game-session/game-session.utils';
+import getTimeout from 'src/timeout';
 import { FieldType } from 'src/models/game/field/field.dictionaries';
 import { CardDroppedPayload, PlayerChoicePayload, UpdateActiveGamePayload } from 'src/models/game/game.utils';
+
+const DISCONNECT_TIMEOUT_MS = 10_000;
 
 const CHOICE_TIMEOUT_MS = 40_000;
 const MOVE_TIMEOUT_MS = 40_000;
@@ -40,14 +42,9 @@ export class GameService {
   async connect(token?: string) {
     if (!token) return;
 
+    getTimeout('connection')(token).clear();
     const data = decode(token) as DecodedUser;
     if (!data?._id) return;
-    // const timeout = disconnectTimeouts.get(data._id);
-    // if (timeout) {
-    //   clearTimeout(timeout);
-    //   disconnectTimeouts.delete(data._id);
-    //   return;
-    // }
 
     const gameId = await this.gameSessionService.connect(
       Types.ObjectId(data?.['_id'])
@@ -62,36 +59,22 @@ export class GameService {
   async disconnect(token?: string) {
     if (!token) return;
 
-    const data = decode(token) as DecodedUser;
-    if (!data?._id) return;
-    const gameId = await this.gameSessionService.disconnect(
-      Types.ObjectId(data?.['_id'])
-    );
+    getTimeout('connection')(token).set(async () => {
+      const data = decode(token) as DecodedUser;
+      if (!data?._id) return;
+      const gameId = await this.gameSessionService.disconnect(
+        Types.ObjectId(data?.['_id'])
+      );
 
-    if (!gameId) return;
+      if (!gameId) return;
 
-    if (typeof gameId === 'boolean') {
-      await this.publishActiveGames();
-      return;
-    }
+      if (typeof gameId === 'boolean') {
+        await this.publishActiveGames();
+        return;
+      }
 
-    await this.publishActiveGame(gameId)
-
-    // const timeout = setTimeout(async () => {
-    //   const gameId = await this.gameSessionService.disconnect(data._id);
-    //
-    //   if (!gameId) return;
-    //
-    //   if (typeof gameId === 'boolean') {
-    //     await this.publishActiveGames();
-    //     return;
-    //   }
-    //
-    //   disconnectTimeouts.delete(data._id);
-    //   await this.publishActiveGame(gameId);
-    // }, DISCONNECT_TIMEOUT_MS);
-    //
-    // disconnectTimeouts.set(data._id, timeout);
+      await this.publishActiveGame(gameId)
+    }, DISCONNECT_TIMEOUT_MS);
   }
 
   async createGameSession(createGameInput: CreateGame) {

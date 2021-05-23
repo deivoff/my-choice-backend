@@ -12,7 +12,7 @@ import { Card } from 'src/models/game/card/entities/card.entity';
 import { CardService } from 'src/models/game/card/card.service';
 import { ShareResourcesInput } from 'src/models/game/dto/share-resources.input';
 import { ID } from 'src/common/scalars/objectId.scalar';
-import getTimeout from 'src/models/game/game-session/game-session.utils';
+import getTimeout from 'src/timeout';
 import { getRandomDream } from 'src/models/game/field/field.dictionaries';
 import { createHashServiceFromHashModel, HashModel } from 'src/type-redis/utils/hash.model';
 

@@ -1,10 +1,12 @@
 import { Int, Parent, ResolveField, Resolver } from '@nestjs/graphql';
-import { GameSession } from 'src/models/game/game-session/game-session.entity';
-import { Player } from 'src/models/game/player/player.entity';
-import { GameSessionService } from 'src/models/game/game-session/game-session.service';
 import { Types } from 'mongoose';
-import getTimeout from 'src/models/game/game-session/game-session.utils';
-import { GameSessionTimers } from 'src/models/game/game-session/dto/timers.entity';
+
+import { Player } from 'src/models/game/player/player.entity';
+import getTimeout from 'src/timeout';
+
+import { GameSession } from './game-session.entity';
+import { GameSessionService } from './game-session.service';
+import { GameSessionTimers } from './dto/timers.entity';
 
 @Resolver(() => GameSession)
 export class GameSessionResolver {
