@@ -15,7 +15,6 @@ const getTimeout = (name: string) => {
 
     const clear = () => {
       const timeoutId = timeouts[name].get(stringId);
-      console.log('clear', { timeoutId });
       if (timeoutId) {
         clearTimeout(timeoutId);
         timeoutsStart.delete(timeoutId);
