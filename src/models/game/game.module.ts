@@ -14,6 +14,8 @@ import { PlayerService } from 'src/models/game/player/player.service';
 import { UserService } from 'src/models/user/user.service';
 import { FieldModule } from 'src/models/game/field/field.module';
 import { GameController } from 'src/models/game/game.controller';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { DataLoaderInterceptor } from 'src/dataloader';
 
 @Module({
   imports: [
@@ -30,6 +32,10 @@ import { GameController } from 'src/models/game/game.controller';
     GameSessionService,
     UserService,
     PlayerService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DataLoaderInterceptor,
+    },
     {
       provide: 'PUBLISHER',
       useFactory: (redisService: RedisService) => {

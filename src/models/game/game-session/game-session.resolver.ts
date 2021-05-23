@@ -1,8 +1,12 @@
 import { Int, Parent, ResolveField, Resolver } from '@nestjs/graphql';
-import { GameSession } from 'src/models/game/game-session/game-session.entity';
-import { Player } from 'src/models/game/player/player.entity';
-import { GameSessionService } from 'src/models/game/game-session/game-session.service';
 import { Types } from 'mongoose';
+
+import { Player } from 'src/models/game/player/player.entity';
+import getTimeout from 'src/timeout';
+
+import { GameSession } from './game-session.entity';
+import { GameSessionService } from './game-session.service';
+import { GameSessionTimers } from './dto/timers.entity';
 
 @Resolver(() => GameSession)
 export class GameSessionResolver {
@@ -16,7 +20,7 @@ export class GameSessionResolver {
       mover
     }: GameSession
   ) {
-    return mover ? Types.ObjectId(mover) : null
+    return mover
   }
 
   @ResolveField(() => Types.ObjectId, { nullable: true })
@@ -25,7 +29,7 @@ export class GameSessionResolver {
       winner
     }: GameSession
   ) {
-    return winner ? Types.ObjectId(winner) : null
+    return winner
   }
 
   @ResolveField(() => [Player])
@@ -33,7 +37,10 @@ export class GameSessionResolver {
     @Parent() gameSession: GameSession,
   ) {
     if (!gameSession?.players?.length) return [];
-    return this.gameSessionService.getPlayers(gameSession.players || []);
+    return this.gameSessionService.getPlayers(
+      gameSession._id,
+      gameSession.players || []
+    );
   }
 
   @ResolveField(() => Int)
@@ -43,6 +50,25 @@ export class GameSessionResolver {
     }: GameSession,
   ) {
     return players?.length || 0;
+  }
+
+  @ResolveField(() => GameSessionTimers, { nullable: true })
+  timers(
+    @Parent() {
+      _id
+    }: GameSession
+  ): GameSessionTimers | null {
+    const moveTimer = getTimeout('move')(_id).getTimerStart();
+    const choiceTimer = getTimeout('choice')(_id).getTimerStart();
+    const dreamTimer = getTimeout('dream')(_id).getTimerStart();
+
+    if (!moveTimer && !choiceTimer && !dreamTimer) return null;
+
+    return {
+      card: choiceTimer ? new Date(choiceTimer) : null,
+      dice: moveTimer ? new Date(moveTimer) : null,
+      dream: dreamTimer ? new Date(dreamTimer) : null,
+    }
   }
 
   @ResolveField(() => Int)

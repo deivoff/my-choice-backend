@@ -1,9 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { isEmpty, isNil } from 'lodash';
+import { isNil } from 'lodash';
 import { UserService } from 'src/models/user/user.service';
 import { Player, PlayerPosition } from 'src/models/game/player/player.entity';
-import { fromPlayerToRedis, fromRedisToPlayer } from 'src/models/game/player/player.redis-adapter';
 import { Types } from 'mongoose';
 import {
   DREAM_FIELDS,
@@ -21,30 +20,33 @@ import { NEED_CHOICE } from 'src/models/game/card/card.errors';
 import { Resources, ResourceType } from 'src/models/game/resources/resources.entity';
 import { opportunitySuccess } from 'src/models/game/card/entities/opportunity.utils';
 import { ShareResourcesInput } from 'src/models/game/dto/share-resources.input';
-import { ID, objectIdToString } from 'src/common/scalars/objectId.scalar';
+import { ID } from 'src/common/scalars/objectId.scalar';
+import { createHashServiceFromHashModel, HashModel } from 'src/type-redis/utils/hash.model';
 
 
 type GameState = {
-  mover?: string;
-  winner?: string;
-  error?: any;
+  mover?: Types.ObjectId;
+  winner?: Types.ObjectId;
+  error?: string;
 }
 
 @Injectable()
 export class PlayerService {
+  public hashService: HashModel<typeof Player>;
+
   constructor(
-    @Inject('PUBLISHER') private readonly redisClient: Redis,
+    @Inject('PUBLISHER') redisClient: Redis,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly cardService: CardService,
-  ) {}
+  ) {
+    this.hashService = createHashServiceFromHashModel(
+      Player,
+      redisClient,
+    )
+  }
 
-  private key = (_id: string = '') => {
-    return `player:${_id}`
-  };
-
-  initPlayer = async (userId: ID, gameId: ID) => {
-    const playerId = this.key(objectIdToString(userId));
+  initPlayer = async (userId: Types.ObjectId, gameId: Types.ObjectId) => {
     const user = await this.userService.findOne(userId);
 
     if (!user) throw new Error(USER_NOT_FOUND);
@@ -59,8 +61,7 @@ export class PlayerService {
       gameId,
     };
 
-    await this.redisClient.hset(playerId, fromPlayerToRedis(player));
-    return await this.redisClient.hgetall(playerId).then(fromRedisToPlayer);
+    return this.hashService.create(userId, player);
   };
 
   private updatePlayerAndGetMover = async (
@@ -71,7 +72,7 @@ export class PlayerService {
     if (!deep) return null;
 
     const moverIndex = currentPlayerIndex % activePlayers.length;
-    const mover = await this.findOne(activePlayers[moverIndex]._id);
+    const mover = await this.hashService.findOne(activePlayers[moverIndex]._id);
 
     if (!mover) throw new Error(PLAYER_NOT_FOUND);
 
@@ -87,10 +88,9 @@ export class PlayerService {
   getNextMover = async (players: Player[], currentPlayer?: Player): Promise<GameState> => {
     if (players.length === 1) {
       const [player] = players;
-      const playerId = player._id.toHexString();
-      const winner = player.winner ? playerId : undefined;
+      const winner = player.winner ? player._id : undefined;
       return {
-        mover: playerId,
+        mover: player._id,
         winner,
       }
     }
@@ -102,9 +102,8 @@ export class PlayerService {
       await this.findOneAndUpdate(winner._id, {
         winner: true,
       });
-      const winnerId = winner._id.toHexString();
       return {
-        winner: winnerId
+        winner: winner._id
       }
     }
 
@@ -119,12 +118,12 @@ export class PlayerService {
     }
 
     return {
-      mover: moverId.toHexString()
+      mover: moverId
     }
   };
 
-  changePlayerPosition = async (playerId: ID, moveCount: number, newPosition?: PlayerPosition) => {
-    const player = await this.findOne(playerId);
+  changePlayerPosition = async (playerId: Types.ObjectId, moveCount: number, newPosition?: PlayerPosition) => {
+    const player = await this.hashService.findOne(playerId);
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
     switch (true) {
@@ -152,7 +151,7 @@ export class PlayerService {
     }
   };
 
-  updateAfterChoice = async (cardId: ID, playerId: ID, choiceId?: ID): Promise<boolean> => {
+  updateAfterChoice = async (cardId: ID, playerId: Types.ObjectId, choiceId?: ID): Promise<boolean> => {
     const card = await this.cardService.findOne(cardId);
     const isChoiceCard = CHOICES_CARD.some(type => type === card?.type);
     if (!choiceId && isChoiceCard) {
@@ -181,9 +180,9 @@ export class PlayerService {
     return false;
   };
 
-  updateAfterOpportunity = async (playerId: ID, diceResult?: number): Promise<boolean> => {
+  updateAfterOpportunity = async (playerId: Types.ObjectId, diceResult?: number): Promise<boolean> => {
     let isFieldChanged = false;
-    const player = await this.findOne(playerId);
+    const player = await this.hashService.findOne(playerId);
     if (!player) throw new Error(PLAYER_NOT_FOUND);
     const { white = 0, lives = 0, money = 0, dark = 0 } = player.resources || {};
 
@@ -218,8 +217,8 @@ export class PlayerService {
     return isFieldChanged;
   };
 
-  setPlayerAction = async (playerId: ID, action: Action) => {
-    const player = await this.findOne(playerId);
+  setPlayerAction = async (playerId: Types.ObjectId, action: Action) => {
+    const player = await this.hashService.findOne(playerId);
 
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
@@ -268,12 +267,12 @@ export class PlayerService {
     return isFieldChange;
   };
 
-  setInnerFieldPosition = async (playerId: ID, field: FieldType) => {
-    const player = await this.findOne(playerId);
+  setInnerFieldPosition = async (playerId: Types.ObjectId, field: FieldType) => {
+    const player = await this.hashService.findOne(playerId);
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
     const nextField = INNER_FIELD_DICT[field]
-      .find(elem => player?.cell! < elem) || INNER_FIELDS[field][0];
+      .find(elem => player?.cell! < elem) || INNER_FIELD_DICT[field][0];
 
 
     await this.findOneAndUpdate(playerId, {
@@ -310,8 +309,8 @@ export class PlayerService {
     })
   };
 
-  setPlayerResources = async (playerId: ID, resources: Resources = {}) => {
-    const player = await this.findOne(playerId);
+  setPlayerResources = async (playerId: Types.ObjectId, resources: Resources = {}) => {
+    const player = await this.hashService.findOne(playerId);
     if (!player) throw new Error(PLAYER_NOT_FOUND);
 
     const { resources: playerResources = {} } = player;
@@ -354,48 +353,21 @@ export class PlayerService {
     })
   };
 
-  setPlayerWin = async (playerId: ID) => {
-    return await this.findOneAndUpdate(playerId, {
+  setPlayerWin = async (playerId: Types.ObjectId) => {
+    return await this.hashService.findOneAndUpdate(playerId, {
       winner: true
     })
   };
 
-  remove = async (userId: ID) => {
-    const playerId = objectIdToString(userId);
-
-    await this.redisClient.del(this.key(playerId));
-  };
-
-  findOne = async (id: ID): Promise<null | Player> => {
-    const playerId = this.key(objectIdToString(id));
-    const [res] = await Promise.all([
-      this.redisClient.hgetall(playerId),
-      this.redisClient.expire(playerId, 60 * 60),
-    ]);
-    return isEmpty(res) ? null : fromRedisToPlayer(res);
-  };
-
-  findSome = (ids: ID[]) => {
-    return Promise.all(ids.map(this.findOne)) as unknown as Player[]
-  };
-
-  findOneAndUpdate = async (id: ID, updatedFields: Partial<Player>): Promise<null | Player> => {
-    const playerId = this.key(objectIdToString(id));
-    const player = await this.findOne(id);
-
-    if (!player) return null;
-
-    const updatedPlayer: Player = {
-      ...player,
-      ...updatedFields,
-      resources: !player.resources ? updatedFields.resources : updatedFields.resources ? {
-        ...player.resources,
-        ...updatedFields.resources
-      } : player.resources,
-    };
-
-    await this.redisClient.hset(playerId, fromPlayerToRedis(updatedPlayer));
-    return updatedPlayer;
+  findOneAndUpdate = async (id: Types.ObjectId, updatedFields: Partial<Player>): Promise<undefined | Player> => {
+    return this.hashService.findOneAndUpdate(id, updatedFields, (existed, update) => ({
+      ...existed,
+      ...update,
+      resources: !existed.resources ? update.resources : update.resources ? {
+        ...existed.resources,
+        ...update.resources
+      } : existed.resources,
+    }));
   };
 
 }

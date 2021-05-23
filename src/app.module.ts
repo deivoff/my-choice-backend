@@ -11,8 +11,16 @@ import { GameModule } from './models/game/game.module';
 import { MessageModule } from './models/message/message.module';
 import { GameService } from './models/game/game.service';
 import { TournamentModule } from './models/tournament/tournament.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { DataLoaderInterceptor } from 'src/dataloader';
 
 @Module({
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DataLoaderInterceptor,
+    },
+  ],
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
@@ -38,11 +46,12 @@ import { TournamentModule } from './models/tournament/tournament.module';
       inject:[ConfigService]
     }),
     GraphQLModule.forRootAsync({
-      imports: [GameModule],
-      inject: [GameService],
-      useFactory: (gameService: GameService) => ({
+      imports: [GameModule, ConfigModule],
+      inject: [GameService, ConfigService],
+      useFactory: (gameService: GameService, configService: ConfigService) => ({
         autoSchemaFile: 'schema.gql',
         installSubscriptionHandlers: true,
+        playground: !configService.get('isProd'),
         subscriptions: {
           onConnect: (connectionParams) => {
             const authToken = connectionParams['authToken'];

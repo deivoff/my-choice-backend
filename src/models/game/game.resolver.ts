@@ -3,20 +3,30 @@ import { Types } from 'mongoose';
 import { Inject, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PubSubEngine } from 'graphql-subscriptions';
 
+import * as DataLoader from 'dataloader';
+import { Loader } from 'src/dataloader';
+
 import { DecodedUser, User } from 'src/models/user/entities/user.entity';
 import { AuthGuard } from 'src/models/auth/auth.guard';
 import { UserService } from 'src/models/user/user.service';
-import { ID, objectIdToString } from 'src/common/scalars/objectId.scalar';
+import { objectIdToString } from 'src/common/scalars/objectId.scalar';
 
 import { GameSession } from './game-session/game-session.entity';
-import { Player } from './player/player.entity';
 import { CreateGameInput } from './dto/create-game.input';
-import { Card, ChoiceOption, DroppedCard } from './card/entities/card.entity';
+import { ChoiceOption, DroppedCard } from './card/entities/card.entity';
 import { ShareResourcesInput } from './dto/share-resources.input';
 
 import { GameService } from './game.service';
 import { Game } from './game.entity';
 import { SentryInterceptor } from 'src/sentry/sentry.interceptor';
+import { UserLoader } from 'src/models/user/user.loader';
+import { Tournament } from 'src/models/tournament/entities/tournament.entity';
+import { TournamentLoader } from 'src/models/tournament/tournament.loader';
+import {
+  CardDroppedPayload,
+  filterGameSessionSubscription, PlayerChoicePayload,
+  UpdateActiveGamePayload,
+} from 'src/models/game/game.utils';
 
 @UseInterceptors(SentryInterceptor)
 @Resolver(() => Game)
@@ -36,7 +46,7 @@ export class GameResolver {
     return this.gameService.createGameSession({
       name,
       tournament,
-      creator: _id,
+      creator: Types.ObjectId(_id),
       observerMode
     });
   }
@@ -64,18 +74,18 @@ export class GameResolver {
   @Query(() => GameSession)
   joinGame(
     @Args('gameId') gameId: Types.ObjectId,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() { _id }: DecodedUser
   ) {
-    return this.gameService.join(gameId, decodedUser._id);
+    return this.gameService.join(gameId, Types.ObjectId(_id));
   }
 
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async leaveGame(
     @Args('gameId') gameId: Types.ObjectId,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() { _id }: DecodedUser
   ) {
-    await this.gameService.leave(decodedUser._id, gameId);
+    await this.gameService.leave(Types.ObjectId(_id), gameId);
     return true
   }
 
@@ -83,9 +93,9 @@ export class GameResolver {
   @Mutation(() => Boolean)
   async choiceDream(
     @Args('dream', { type: () => Int }) dream: number,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() { _id }: DecodedUser
   ) {
-    await this.gameService.choiceDream(dream, decodedUser._id);
+    await this.gameService.choiceDream(dream, Types.ObjectId(_id));
     return true
   }
 
@@ -93,9 +103,9 @@ export class GameResolver {
   @Mutation(() => Boolean)
   async move(
     @Args('moveCount', { type: () => Int }) moveCount: number,
-    @DecodedUser() decodedUser: DecodedUser
+    @DecodedUser() { _id }: DecodedUser
   ) {
-    await this.gameService.playerMove(moveCount, decodedUser._id);
+    await this.gameService.playerMove(moveCount, Types.ObjectId(_id));
 
     return true;
   }
@@ -103,11 +113,11 @@ export class GameResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async choice(
-    @DecodedUser() decodedUser: DecodedUser,
+    @DecodedUser() { _id }: DecodedUser,
     @Args('cardId') cardId: Types.ObjectId,
     @Args('choiceId', { nullable: true }) choiceId?: Types.ObjectId,
   ) {
-    await this.gameService.choice(cardId, decodedUser._id, choiceId);
+    await this.gameService.choice(Types.ObjectId(_id), cardId, choiceId);
     return true
   }
 
@@ -124,12 +134,12 @@ export class GameResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
   async opportunityResult(
-    @DecodedUser() decodedUser: DecodedUser,
+    @DecodedUser() { _id }: DecodedUser,
     @Args('opportunityId') opportunityId: Types.ObjectId,
     @Args('diceResult', { type: () => Int, nullable: true }) diceResult?: number,
   ) {
     await this.gameService.updateAfterOpportunity(
-      decodedUser._id,
+      Types.ObjectId(_id),
       opportunityId,
       diceResult,
     );
@@ -138,12 +148,10 @@ export class GameResolver {
   }
 
   @Subscription(() => GameSession, {
-    filter: (
-      payload: { updateActiveGame: GameSession },
-      variables: { gameId: Types.ObjectId }
-      ) => {
-      return objectIdToString(payload.updateActiveGame._id) === objectIdToString(variables.gameId);
-    },
+    filter: filterGameSessionSubscription,
+    resolve: (
+      payload: UpdateActiveGamePayload
+    ): GameSession => payload.game
   })
   async updateActiveGame(
     @Args('gameId') gameId: Types.ObjectId
@@ -152,28 +160,13 @@ export class GameResolver {
   }
 
   @Subscription(() => DroppedCard, {
-    filter: (
-      payload: {
-        cardDropped: Card,
-        gameId: ID,
-        userId: ID,
-      },
-      variables: { gameId: Types.ObjectId }
-    ) => {
-      return objectIdToString(payload.gameId) === objectIdToString(variables.gameId);
-    },
+    filter: filterGameSessionSubscription,
     resolve: (
-      payload: {
-        cardDropped: Card,
-        gameId: ID,
-        userId: ID,
-      },
-    ): DroppedCard => {
-      return ({
-        card: payload.cardDropped,
-        forPlayer: Types.ObjectId(objectIdToString(payload.userId)),
-      });
-    }
+      payload: CardDroppedPayload
+    ): DroppedCard => ({
+      card: payload.cardDropped,
+      forPlayer: Types.ObjectId(objectIdToString(payload.userId)),
+    })
   })
   async cardDropped(
     @Args('gameId') gameId: Types.ObjectId
@@ -182,28 +175,13 @@ export class GameResolver {
   }
 
   @Subscription(() => ChoiceOption, {
-    filter: (
-      payload: {
-        choiceId?: ID,
-        cardId: ID,
-        gameId: ID,
-      },
-      variables: { gameId: Types.ObjectId }
-    ) => {
-      return objectIdToString(payload.gameId) === objectIdToString(variables.gameId);
-    },
+    filter: filterGameSessionSubscription,
     resolve: (
-      payload: {
-        choiceId?: ID,
-        cardId: ID,
-        gameId: ID,
-      },
-    ): ChoiceOption => {
-      return ({
-        cardId: payload.cardId as Types.ObjectId,
-        choiceId: payload.choiceId as Types.ObjectId | undefined,
-      });
-    }
+      payload: PlayerChoicePayload,
+    ): ChoiceOption => ({
+      cardId: payload.cardId as Types.ObjectId,
+      choiceId: payload.choiceId as Types.ObjectId | undefined,
+    })
   })
   playerChoice(
     @Args('gameId') gameId: Types.ObjectId,
@@ -224,24 +202,57 @@ export class GameResolver {
   @ResolveField(() => User)
   async creator(
     @Parent() game: Game,
+    @Loader(UserLoader) userLoader: DataLoader<User['_id'], User>
   ) {
     const { creator } = game;
-    return this.userService.findOne(creator);
+    return userLoader.load(creator);
   }
 
-  @ResolveField(() => [Player])
+  @ResolveField(() => User, { nullable: true })
+  async winner(
+    @Parent() game: Game,
+    @Loader(UserLoader) userLoader: DataLoader<User['_id'], User>
+  ) {
+    const { winner } = game;
+    return winner ? userLoader.load(winner) : null;
+  }
+
+  @ResolveField(() => Date)
+  createdAt(
+    @Parent() { _id }: Game
+  ) {
+    return _id.getTimestamp();
+  }
+
+  @ResolveField(() => Tournament, { nullable: true })
+  async tournament(
+    @Parent() game: Game,
+    @Loader(TournamentLoader) tournamentLoader: DataLoader<Tournament['_id'], Tournament>
+  ) {
+    const { tournament } = game;
+    return tournament ? tournamentLoader.load(tournament) : null;
+  }
+
+  @ResolveField(() => [User])
   async players(
     @Parent() game: Game,
+    @Loader(UserLoader) userLoader: DataLoader<User['_id'], User>
   ) {
     const { players } = game;
-    return this.userService.findMany(players ?? []);
+    return userLoader.loadMany(players ?? []);
   }
 
+  @UseGuards(AuthGuard)
   @Query(() => [Game], { name: 'games' })
-  findAll() {
-    return this.gameService.findAll();
+  findAll(
+    @DecodedUser() { _id }: DecodedUser,
+    @Args('userId', { nullable: true }) userId?: Types.ObjectId,
+  ) {
+    if (userId) return this.gameService.findAllUserGames(userId);
+    return this.gameService.findAllUserGames(Types.ObjectId(_id));
   }
 
+  @UseGuards(AuthGuard)
   @Query(() => Game, { name: 'game' })
   findOne(@Args('_id', ) _id: Types.ObjectId) {
     return this.gameService.findOne(_id);

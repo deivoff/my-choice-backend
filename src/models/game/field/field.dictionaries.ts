@@ -69,6 +69,13 @@ export const DREAM_FIELDS = {
   24: 50,
   28: 100,
 };
+
+const DREAM_IDS = Object.keys(DREAM_FIELDS);
+export const getRandomDream = (): number => {
+  const id = DREAM_IDS[Math.floor(Math.random() * DREAM_IDS.length)];
+  return Number(id);
+};
+
 const PROBLEM_FIELDS = {
   0: 10,
   4: 5,

@@ -1,7 +1,7 @@
 import { Resources } from './resources.entity';
 
-export function fromStringToResources(resources?: string | null): Resources | null {
-  if (!resources) return null;
+export function fromStringToResources(resources?: string | null): Resources | undefined {
+  if (!resources) return undefined;
   const [white, dark, money, lives] = resources.split(',');
 
   return {

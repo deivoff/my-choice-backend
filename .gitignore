@@ -47,3 +47,4 @@ dump.rdb
 # migrations
 migrate-mongo-config.js
 migrations
+scripts

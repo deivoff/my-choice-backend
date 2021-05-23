@@ -1,4 +1,4 @@
-import { IWriteAndRead } from '../interfaces';
+import { IWriteAndRead } from '../../interfaces';
 
 export enum RedisBoolean {
   true = '1',
@@ -6,12 +6,10 @@ export enum RedisBoolean {
 }
 
 function fromRedisBooleanToBoolean(value: string): boolean {
-  return value === ''
-    ? false
-    : value === RedisBoolean.true
+  return value === RedisBoolean.true
 }
 
-function fromBooleanToRedisBoolean(value?: boolean | null): RedisBoolean {
+function fromBooleanToRedisBoolean(value: boolean): RedisBoolean {
   return value ? RedisBoolean.true : RedisBoolean.false
 }
 

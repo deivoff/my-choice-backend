@@ -1,4 +1,4 @@
-import { IWriteAndRead } from '../interfaces';
+import { IWriteAndRead } from '../../interfaces';
 
 function fromNumberToRedis(value: number): string {
   return String(value);

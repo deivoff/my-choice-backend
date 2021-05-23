@@ -14,13 +14,19 @@ import { ShareResourcesInput } from './dto/share-resources.input';
 import { Card } from './card/entities/card.entity';
 
 import { Game } from './game.entity';
+import getTimeout from 'src/timeout';
+import { FieldType } from 'src/models/game/field/field.dictionaries';
+import { CardDroppedPayload, PlayerChoicePayload, UpdateActiveGamePayload } from 'src/models/game/game.utils';
 
-const DISCONNECT_TIMEOUT_MS = 3000;
-const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
+const DISCONNECT_TIMEOUT_MS = 10_000;
+
+const CHOICE_TIMEOUT_MS = 40_000;
+const MOVE_TIMEOUT_MS = 40_000;
+const DREAM_TIMEOUT_MS = 40_000;
 
 type CreateGame = {
   name: string;
-  creator: string,
+  creator: Types.ObjectId,
   observerMode?: boolean,
   tournament?: Types.ObjectId
 }
@@ -36,16 +42,13 @@ export class GameService {
   async connect(token?: string) {
     if (!token) return;
 
+    getTimeout('connection')(token).clear();
     const data = decode(token) as DecodedUser;
     if (!data?._id) return;
-    // const timeout = disconnectTimeouts.get(data._id);
-    // if (timeout) {
-    //   clearTimeout(timeout);
-    //   disconnectTimeouts.delete(data._id);
-    //   return;
-    // }
 
-    const gameId = await this.gameSessionService.connect(data?.['_id']);
+    const gameId = await this.gameSessionService.connect(
+      Types.ObjectId(data?.['_id'])
+    );
 
     if (gameId) {
       await this.publishActiveGame(gameId);
@@ -56,35 +59,22 @@ export class GameService {
   async disconnect(token?: string) {
     if (!token) return;
 
-    const data = decode(token) as DecodedUser;
-    if (!data?._id) return;
-    const gameId = await this.gameSessionService.disconnect(data._id);
+    getTimeout('connection')(token).set(async () => {
+      const data = decode(token) as DecodedUser;
+      if (!data?._id) return;
+      const gameId = await this.gameSessionService.disconnect(
+        Types.ObjectId(data?.['_id'])
+      );
 
-    if (!gameId) return;
+      if (!gameId) return;
 
-    if (typeof gameId === 'boolean') {
-      await this.publishActiveGames();
-      return;
-    }
+      if (typeof gameId === 'boolean') {
+        await this.publishActiveGames();
+        return;
+      }
 
-    disconnectTimeouts.delete(data._id);
-    await this.publishActiveGame(gameId)
-
-    // const timeout = setTimeout(async () => {
-    //   const gameId = await this.gameSessionService.disconnect(data._id);
-    //
-    //   if (!gameId) return;
-    //
-    //   if (typeof gameId === 'boolean') {
-    //     await this.publishActiveGames();
-    //     return;
-    //   }
-    //
-    //   disconnectTimeouts.delete(data._id);
-    //   await this.publishActiveGame(gameId);
-    // }, DISCONNECT_TIMEOUT_MS);
-    //
-    // disconnectTimeouts.set(data._id, timeout);
+      await this.publishActiveGame(gameId)
+    }, DISCONNECT_TIMEOUT_MS);
   }
 
   async createGameSession(createGameInput: CreateGame) {
@@ -99,7 +89,7 @@ export class GameService {
       };
 
     const game = await this.gameSessionService.create({
-      _id: gameId.toHexString(),
+      _id: gameId,
       name: createGameInput.name,
       tournament: createGameInput.tournament,
       creator: createGameInput.creator,
@@ -112,18 +102,18 @@ export class GameService {
   }
 
   async deleteGameSession(gameID: ID) {
-    await this.gameSessionService.delete(gameID);
+    await this.gameSessionService.hashService.delete(gameID);
 
     await this.publishActiveGames();
     return true;
   }
 
   getActiveGames() {
-    return this.gameSessionService.findAll();
+    return this.gameSessionService.hashService.findAll();
   }
 
   getActiveGame(gameId: ID) {
-    return this.gameSessionService.findOne(gameId)
+    return this.gameSessionService.hashService.findOne(gameId)
   }
 
   private async publishActiveGames() {
@@ -135,35 +125,67 @@ export class GameService {
 
   private async publishActiveGame(gameId: ID) {
     const activeGame = await this.getActiveGame(gameId);
+
+    if (!activeGame) {
+      return;
+    }
+
+    const moveTimer = getTimeout('move')(gameId);
+    if (moveTimer.get()) {
+      if (!activeGame?.mover) {
+        moveTimer.clear()
+      }
+    } else {
+      if (activeGame?.mover) {
+        moveTimer.set(async () => {
+          await this.gameSessionService.playerMove(activeGame.mover!);
+          this.publishActiveGame(gameId);
+        }, MOVE_TIMEOUT_MS)
+      }
+    }
+
     if (activeGame?.winner) {
       await this.gameModel.findByIdAndUpdate(gameId, {
         $set: {
-          winner: Types.ObjectId(activeGame.winner)
+          winner: activeGame.winner
         }
       })
     }
-    await this.pubSub.publish('updateActiveGame', {
-      updateActiveGame: activeGame
+    await this.pubSub.publish<UpdateActiveGamePayload>('updateActiveGame', {
+      game: activeGame,
+      gameId: activeGame._id,
     })
   }
 
   private async publishChoiceInGame(gameId: ID, cardId: ID, choiceId?: ID) {
-    await this.pubSub.publish('playerChoice', {
+    await this.pubSub.publish<PlayerChoicePayload>('playerChoice', {
       choiceId,
       gameId,
       cardId,
     })
   }
 
-  private async publishDroppedCard(gameId: ID, userId: ID, card: Card) {
-    await this.pubSub.publish('cardDropped', {
+  private async publishDroppedCard(gameId: ID, userId: Types.ObjectId, card: Card) {
+    getTimeout('choice')(gameId).set(
+      async () => {
+        if (card.type === FieldType.Incident) {
+          await this.gameSessionService.choice(userId, card._id);
+        } else {
+          await this.gameSessionService.choice(userId);
+        }
+        await this.publishChoiceInGame(gameId, card._id);
+        this.publishActiveGame(gameId);
+      }, CHOICE_TIMEOUT_MS
+    );
+
+    await this.pubSub.publish<CardDroppedPayload>('cardDropped', {
       cardDropped: card,
       gameId,
       userId,
     })
   }
 
-  async join(gameId: ID, userId: ID) {
+  async join(gameId: Types.ObjectId, userId: Types.ObjectId) {
     const game = await this.gameSessionService.join(gameId, userId);
 
     this.publishActiveGames();
@@ -171,7 +193,7 @@ export class GameService {
     return game;
   }
 
-  async leave(userId: ID, gameId: ID) {
+  async leave(userId: Types.ObjectId, gameId: Types.ObjectId) {
     const game = await this.gameSessionService.leave(userId, gameId);
 
     if (!game || game.status === GameStatus.Awaiting) {
@@ -183,7 +205,7 @@ export class GameService {
     }
   }
 
-  async start(gameId: ID, userId: ID) {
+  async start(gameId: Types.ObjectId, userId: ID) {
     const game = await this.gameSessionService.start(gameId, userId);
 
     await this.gameModel.create({
@@ -191,22 +213,32 @@ export class GameService {
       name: game.name,
       creator: game.creator,
       tournament: game.tournament,
-      players: game.players?.map(Types.ObjectId),
+      players: game.players,
     });
+
+    getTimeout('dream')(gameId).set(async () => {
+      await this.gameSessionService.randomDream(gameId);
+      this.publishActiveGame(gameId);
+    }, DREAM_TIMEOUT_MS);
+
     this.publishActiveGames();
     this.publishActiveGame(gameId);
     return game;
   }
 
-  async choiceDream(dream: number, userId: ID) {
+  async choiceDream(dream: number, userId: Types.ObjectId) {
     const game = await this.gameSessionService.choiceDream(dream, userId);
+
+    if (game.mover || game.status === GameStatus.InProgress) {
+      getTimeout('dream')(game._id).clear();
+    }
 
     this.publishActiveGame(game._id);
   }
 
-  async choice(cardId: ID, userId: ID, choiceId?: ID) {
-    const { gameId, card } = await this.gameSessionService.choice(cardId, userId, choiceId);
-
+  async choice(userId: Types.ObjectId, cardId: ID, choiceId?: ID) {
+    const { gameId, card } = await this.gameSessionService.choice(userId, cardId, choiceId);
+    getTimeout('choice')(gameId).clear();
     await this.publishChoiceInGame(gameId, cardId, choiceId);
 
     await this.publishActiveGame(gameId);
@@ -216,7 +248,7 @@ export class GameService {
   }
 
 
-  async updateAfterOpportunity(userId: ID, opportunityId: ID, diceResult?: number) {
+  async updateAfterOpportunity(userId: Types.ObjectId, opportunityId: ID, diceResult?: number) {
     const { gameId, card } = await this.gameSessionService.updateAfterOpportunity(userId, diceResult);
 
     await Promise.all([
@@ -229,16 +261,20 @@ export class GameService {
     }
   }
 
-  async playerMove(moveCount: number, userId: ID) {
+  async playerMove(moveCount: number, userId: Types.ObjectId) {
     const result = await this.gameSessionService.playerMove(
-      moveCount,
       userId,
-      (gameId) => this.publishActiveGame(gameId)
+      moveCount,
+      (gameId) => {
+        getTimeout('move')(gameId).clear();
+        this.publishActiveGame(gameId);
+      }
     );
 
     await this.publishActiveGame(result.gameId);
     if (result.card) {
-      this.publishDroppedCard(result.gameId, userId, result.card)
+      this.publishDroppedCard(result.gameId, userId, result.card);
+      this.publishActiveGame(result.gameId);
     }
   }
 
@@ -253,8 +289,8 @@ export class GameService {
     }
   }
 
-  findAll() {
-    return `This action returns all game`;
+  findAllUserGames(userId: Types.ObjectId) {
+    return this.gameModel.find({ players: { $in: [userId] } });
   }
 
   findOne(id: Types.ObjectId) {

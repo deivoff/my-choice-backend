@@ -5,6 +5,7 @@ import { ReturnModelType } from '@typegoose/typegoose';
 import { User } from 'src/models/user/entities/user.entity';
 import { AuthData } from 'src/models/auth/types/auth.types';
 import { Types } from 'mongoose';
+import { ID } from 'src/common/scalars/objectId.scalar';
 
 @Injectable()
 export class UserService {
@@ -64,7 +65,7 @@ export class UserService {
     }, { new: true });
   }
 
-  findMany(_ids: Types.ObjectId[]) {
-    return this.userModel.find({'_id': { $in: _ids } });
+  findByIds(_ids: ID[]) {
+    return this.userModel.find({'_id': { $in: _ids } }).exec();
   }
 }

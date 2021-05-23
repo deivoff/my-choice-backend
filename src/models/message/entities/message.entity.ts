@@ -29,6 +29,9 @@ export class Message {
   @prop({ required: true })
   topic!: string;
 
+  @prop({ required: false })
+  banned?: boolean;
+
   @Field()
   @prop({ required: true })
   message!: string;

@@ -26,6 +26,10 @@ export class TournamentService {
 
   findOne = (_id: ID) => {
     return this.tournamentModel.findById(_id).lean();
+  };
+
+  findByIds(_ids: ID[]) {
+    return this.tournamentModel.find({'_id': { $in: _ids } }).exec();
   }
 
 }

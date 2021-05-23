@@ -51,7 +51,7 @@ export class GameController {
     const publishedTime = Date.now();
 
     try {
-      const activeGame = await this.gameSessionService.findOne(params.id);
+      const activeGame = await this.gameSessionService.hashService.findOne(params.id);
 
       if (!activeGame) throw Error(GAME_NOT_FOUND);
       const [statusTitle, description] = GAME_STATUS[activeGame.status];

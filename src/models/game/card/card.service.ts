@@ -91,10 +91,11 @@ export class CardService {
         ids = dbIds.map(objectIdToString);
 
         await this.redisClient.sadd(this.key(type), ...ids);
-        await this.redisClient.expire(this.key(type), 60 * 60);
+        await this.redisClient.expire(this.key(type), 60 * 60 * 24);
       }
 
       await this.redisClient.sadd(deckKey, ...ids);
+      await this.redisClient.expire(deckKey, 60 * 60 * 2);
 
       cardId = await this.redisClient.spop(deckKey);
     }
