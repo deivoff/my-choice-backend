@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
-import { Message } from 'src/models/message/entities/message.entity';
-import { UserName, UserPhoto } from 'src/models/user/entities/user.entity';
 import { Types } from 'mongoose';
+
+import { Message } from './entities/message.entity';
 
 @Injectable()
 export class MessageService {

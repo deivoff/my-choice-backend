@@ -293,6 +293,20 @@ export class GameService {
     return this.gameModel.find({ players: { $in: [userId] } });
   }
 
+  findLimitGames(limit: number = 10, offset: number = 0, tournamentId?: Types.ObjectId) {
+    const games = tournamentId ? this.gameModel.find({
+     tournament: tournamentId,
+    }) : this.gameModel.find({
+      tournament: {
+        $exists: false,
+      }
+    });
+
+    return games.skip(offset).limit(limit).lean();
+
+    return this.gameModel.find({})
+  }
+
   findOne(id: Types.ObjectId) {
     return `This action returns a #${id} game`;
   }

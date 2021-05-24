@@ -7,12 +7,12 @@ import {
   Resolver,
   Subscription,
 } from '@nestjs/graphql';
-import * as DataLoader from 'dataloader';
-
-import { MessageService } from 'src/models/message/message.service';
-import { Author, Message } from 'src/models/message/entities/message.entity';
-import { PubSubEngine } from 'graphql-subscriptions';
 import { Inject, UseGuards } from '@nestjs/common';
+import * as DataLoader from 'dataloader';
+import { PubSubEngine } from 'graphql-subscriptions';
+
+import { MessageService } from './message.service';
+import { Author, Message } from './entities/message.entity';
 import { AuthGuard } from 'src/models/auth/auth.guard';
 import { DecodedUser, User } from 'src/models/user/entities/user.entity';
 import { UserService } from 'src/models/user/user.service';
@@ -21,6 +21,7 @@ import { USER_NOT_FOUND } from 'src/models/user/user.errors';
 import { ChatEvent, ChatPubSubPayload } from 'src/models/message/dto/chat-event.dto';
 import { Loader } from 'src/dataloader';
 import { UserLoader } from 'src/models/user/user.loader';
+import { MESSAGE_NOT_FOUND } from './message.errors';
 
 
 @Resolver(() => Message)
@@ -28,7 +29,6 @@ export class MessageResolver {
   constructor(
     @Inject('PUB_SUB') private readonly pubSub: PubSubEngine,
     private readonly messageService: MessageService,
-    private readonly userService: UserService,
   ) {}
 
   @Query(() => [Message], { name: 'messages'})
@@ -61,15 +61,17 @@ export class MessageResolver {
   @Mutation(() => Boolean)
   async deleteMessage(
     @Args('messageId') messageId: Types.ObjectId,
-    @Args('topic') topic: string,
     @DecodedUser() decodedUser: DecodedUser,
   ) {
-    await this.messageService.ban(messageId);
+    const message = await this.messageService.ban(messageId);
 
+    if (!message) {
+      throw new Error(MESSAGE_NOT_FOUND)
+    }
     await this.pubSub.publish('onMessage', {
       onMessage: {
         _id: messageId,
-        topic,
+        topic: message.topic,
       },
     });
 

@@ -243,14 +243,28 @@ export class GameResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Query(() => [Game], { name: 'games' })
-  findAll(
+  @Query(() => [Game], { name: 'userGames' })
+  findAllUserGames(
     @DecodedUser() { _id }: DecodedUser,
     @Args('userId', { nullable: true }) userId?: Types.ObjectId,
   ) {
     if (userId) return this.gameService.findAllUserGames(userId);
     return this.gameService.findAllUserGames(Types.ObjectId(_id));
   }
+
+
+  @UseGuards(AuthGuard)
+  @Query(() => [Game], { name: 'tournamentGames' })
+  findAllTournamentGames(
+    @DecodedUser() { _id }: DecodedUser,
+    @Args('tournamentId', { nullable: true }) tournamentId?: Types.ObjectId,
+    @Args('limit', { nullable: true, type: () => Int }) limit?: number,
+    @Args('offset', { nullable: true, type: () => Int  }) offset?: number,
+
+  ) {
+    return this.gameService.findLimitGames(limit, offset, tournamentId);
+  }
+
 
   @UseGuards(AuthGuard)
   @Query(() => Game, { name: 'game' })
