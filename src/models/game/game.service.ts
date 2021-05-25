@@ -293,18 +293,34 @@ export class GameService {
     return this.gameModel.find({ players: { $in: [userId] } });
   }
 
-  findLimitGames(limit: number = 10, offset: number = 0, tournamentId?: Types.ObjectId) {
-    const games = tournamentId ? this.gameModel.find({
-     tournament: tournamentId,
-    }) : this.gameModel.find({
-      tournament: {
-        $exists: false,
+  async findLimitGames(limit: number = 10, offset: number = 0, tournamentId?: Types.ObjectId) {
+    const data = await this.gameModel.aggregate([
+      {
+        $match: {
+          'tournament': tournamentId ? tournamentId : { $exists: false },
+        },
+      },
+      {
+        $sort: { '_id' : -1 }
+      },
+      {
+        $facet: {
+          stage1: [{ $group: { _id: null, count: { $sum:1 } } }],
+          stage2: [{ $skip: offset }, { $limit: limit } ]
+        },
+      },
+      {
+        $unwind: "$stage1"
+      },
+      {
+        $project: {
+          totalCount: "$stage1.count",
+          games: "$stage2",
+        }
       }
-    });
+    ])
 
-    return games.skip(offset).limit(limit).lean();
-
-    return this.gameModel.find({})
+    return data[0];
   }
 
   findOne(id: Types.ObjectId) {

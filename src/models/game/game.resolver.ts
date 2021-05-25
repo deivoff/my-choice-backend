@@ -27,6 +27,7 @@ import {
   filterGameSessionSubscription, PlayerChoicePayload,
   UpdateActiveGamePayload,
 } from 'src/models/game/game.utils';
+import { GamesWithCounter } from 'src/models/game/dto/games-with-counter.entity';
 
 @UseInterceptors(SentryInterceptor)
 @Resolver(() => Game)
@@ -254,7 +255,7 @@ export class GameResolver {
 
 
   @UseGuards(AuthGuard)
-  @Query(() => [Game], { name: 'tournamentGames' })
+  @Query(() => GamesWithCounter, { name: 'tournamentGames' })
   findAllTournamentGames(
     @DecodedUser() { _id }: DecodedUser,
     @Args('tournamentId', { nullable: true }) tournamentId?: Types.ObjectId,
