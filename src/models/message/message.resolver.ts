@@ -1,5 +1,5 @@
 import {
-  Args,
+  Args, Int,
   Mutation,
   Parent,
   Query,
@@ -33,9 +33,11 @@ export class MessageResolver {
 
   @Query(() => [Message], { name: 'messages'})
   findMessages(
-    @Args('topic') topic: string
+    @Args('topic') topic: string,
+    @Args('limit', { nullable: true, type: () => Int }) limit?: number,
+    @Args('offset', { nullable: true, type: () => Int  }) offset?: number,
   ) {
-    return this.messageService.findByTopic(topic)
+    return this.messageService.findByTopic(topic, limit, offset)
   }
 
   @UseGuards(AuthGuard)

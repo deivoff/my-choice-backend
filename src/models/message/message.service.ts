@@ -37,13 +37,12 @@ export class MessageService {
     return this.messageModel.findByIdAndDelete(messageId)
   }
 
-  findByTopic(topic: string) {
+  findByTopic(topic: string, limit: number = 20, offset: number = 0) {
     return this.messageModel.find({
       topic,
       banned: { $exists: false },
     }, null, {
-      limit: 20,
       sort: { $natural: -1 }
-    });
+    }).skip(offset).limit(limit).lean();
   }
 }
