@@ -2,7 +2,7 @@ import { ParsedUrlQueryInput } from 'querystring';
 import { isArray } from 'lodash';
 const querystring = require('querystring');
 
-  const enum OAuthMethods {
+const enum OAuthMethods {
   authorize = 'authorize',
   accessToken = 'access_token',
 }
