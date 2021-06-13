@@ -95,6 +95,9 @@ export class User {
   @prop()
   email?: string;
 
+  @prop()
+  refreshToken?: string;
+
   @Field({ nullable: true })
   @prop({ required: false })
   isBot?: boolean;
@@ -143,7 +146,7 @@ export class User {
   @prop({ _id: false })
   social!: UserSocial;
 
-  generateJWT(secret: string) {
+  generateAccessJWT(secret: string) {
     return sign(
       {
         email: this.email,
@@ -153,7 +156,7 @@ export class User {
         _id: this._id,
       },
       secret,
-      { expiresIn: '50d' },
+      { expiresIn: '2h' },
     );
   }
 

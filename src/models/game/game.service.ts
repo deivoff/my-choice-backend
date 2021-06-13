@@ -42,10 +42,9 @@ export class GameService {
   async connect(token?: string) {
     if (!token) return;
 
-    getTimeout('connection')(token).clear();
     const data = decode(token) as DecodedUser;
     if (!data?._id) return;
-
+    getTimeout('connection')(data._id).clear();
     const gameId = await this.gameSessionService.connect(
       Types.ObjectId(data?.['_id'])
     );
@@ -58,10 +57,10 @@ export class GameService {
 
   async disconnect(token?: string) {
     if (!token) return;
+    const data = decode(token) as DecodedUser;
+    if (!data?._id) return;
 
-    getTimeout('connection')(token).set(async () => {
-      const data = decode(token) as DecodedUser;
-      if (!data?._id) return;
+    getTimeout('connection')(data?._id).set(async () => {
       const gameId = await this.gameSessionService.disconnect(
         Types.ObjectId(data?.['_id'])
       );

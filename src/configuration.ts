@@ -3,6 +3,11 @@ enum Enable {
   off = 'off'
 }
 
+export type Secret = {
+  access: string,
+  secret: string,
+}
+
 export default () => {
   const {
     DB_URI,
@@ -13,7 +18,8 @@ export default () => {
     NODE_ENV,
     ORIGIN_URL,
     SSL,
-    SECRET_KEY,
+    SECRET_ACCESS_KEY,
+    SECRET_REFRESH_KEY,
     VK_CLIENT_ID,
     VK_CLIENT_SECRET,
     REDIS_URL,
@@ -25,9 +31,14 @@ export default () => {
     ws: (isSSLEnable ? 'wss://' : 'ws://') + ORIGIN_URL + '/',
     http: (isSSLEnable ? 'https://' : 'http://') + ORIGIN_URL + '/',
   };
+
+  const secret = {
+    refresh: SECRET_REFRESH_KEY,
+    access: SECRET_ACCESS_KEY,
+  }
   return ({
     port: parseInt(PORT, 10),
-    secretKey: SECRET_KEY,
+    secret,
     origin,
     redis: {
       url: REDIS_URL

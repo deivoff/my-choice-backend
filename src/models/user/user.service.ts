@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
+import { sign } from 'jsonwebtoken';
 
 import { User } from 'src/models/user/entities/user.entity';
 import { AuthData } from 'src/models/auth/types/auth.types';
@@ -13,8 +14,22 @@ export class UserService {
     @InjectModel(User) private readonly userModel: ReturnModelType<typeof User>
   ) {}
 
-  findOne(_id: Types.ObjectId | string) {
+  findOne(_id: ID) {
     return this.userModel.findById(_id);
+  }
+
+  async generateRefreshToken(userId: ID, secret: string) {
+    const refreshToken = sign(
+      { _id: userId },
+      secret,
+      { expiresIn: '20d' },
+    );
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      refreshToken
+    });
+
+    return refreshToken;
   }
 
   async upsertVKUser<User extends AuthData & { isBot?: boolean }>(
