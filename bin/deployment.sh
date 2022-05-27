@@ -48,5 +48,5 @@ echo "module.exports = {
   }],
 };" >| ecosystem.config.js
 
-npx pm2 delete $PROJECT_NAME
-npx pm2 start
+pm2 delete $PROJECT_NAME
+pm2 start
