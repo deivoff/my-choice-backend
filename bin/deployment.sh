@@ -22,9 +22,11 @@ SSL=${13}
 
 SENTRY_DSN=${14}
 
+PROJECT_NAME='MyChoice'
+
 echo "module.exports = {
   apps: [{
-    name: 'MyChoiceBackend',
+    name: '$PROJECT_NAME',
     port: '$PORT',
     script: '$PWD/dist/main.js',
     env: {
@@ -45,3 +47,6 @@ echo "module.exports = {
     },
   }],
 };" >| ecosystem.config.js
+
+pm2 delete $PROJECT_NAME
+pm2 start
