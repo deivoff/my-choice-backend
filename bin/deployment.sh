@@ -26,7 +26,7 @@ echo "module.exports = {
   apps: [{
     name: 'MyChoiceBackend',
     port: '$PORT',
-    script: '$PWD/build/index.js',
+    script: '$PWD/dist/main.js',
     env: {
       NODE_ENV: '$NODE_ENV',
       PORT: '$PORT',
