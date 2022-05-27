@@ -27,7 +27,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASS }}
-          source: "build,package.json,yarn.lock,bin"
+          source: "build,package.json,yarn.lock,bin,views"
           target: "~/my-choice/backend"
       - name: Instal dependencies on VPS and restart Node server
         uses: appleboy/ssh-action@master
