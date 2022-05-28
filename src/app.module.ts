@@ -33,17 +33,17 @@ import { DataLoaderInterceptor } from 'src/dataloader';
         return [
           {
             showFriendlyErrorStack: true,
-            name:'publisher',
-            ...configuration
+            name: 'publisher',
+            ...configuration,
           },
           {
             showFriendlyErrorStack: true,
-            name:'subscriber',
-            ...configuration
+            name: 'subscriber',
+            ...configuration,
           },
-        ]
+        ];
       },
-      inject:[ConfigService]
+      inject: [ConfigService],
     }),
     GraphQLModule.forRootAsync({
       imports: [GameModule, ConfigModule],
@@ -56,26 +56,30 @@ import { DataLoaderInterceptor } from 'src/dataloader';
           onConnect: (connectionParams) => {
             const authToken = connectionParams['authToken'];
             if (authToken) {
-              gameService.connect(authToken);
+              void gameService.connect(authToken);
             }
-            return ({ authToken });
-            },
-          onDisconnect: ( _ ,ctx) => ctx?.initPromise?.then(res => {
-            if (typeof res === 'object') {
-              gameService.disconnect(res?.authToken)
-            }
-          }),
-        }
+            return { authToken };
+          },
+          onDisconnect: (_, ctx) =>
+            ctx?.initPromise?.then((res) => {
+              if (typeof res === 'object') {
+                void gameService.disconnect(res?.authToken);
+              }
+            }),
+        },
       }),
     }),
     TypegooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        useUnifiedTopology: true,
-        useNewUrlParser: true,
-        useFindAndModify: false,
-        ...configService.get<ReturnType<typeof configuration>['database']>('database')!
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const configuration = configService.get('database');
+        return {
+          useUnifiedTopology: true,
+          useNewUrlParser: true,
+          useFindAndModify: false,
+          ...configuration,
+        };
+      },
       inject: [ConfigService],
     }),
     CommonModule,

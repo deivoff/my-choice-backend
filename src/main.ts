@@ -14,7 +14,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
-    );
+  );
   const configService = app.get(ConfigService);
 
   Sentry.init({

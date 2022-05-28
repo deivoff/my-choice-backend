@@ -1,14 +1,14 @@
 enum Enable {
   on = 'on',
-  off = 'off'
+  off = 'off',
 }
 
 export type Secret = {
-  access: string,
-  secret: string,
-}
+  access: string;
+  secret: string;
+};
 
-export default () => {
+const configuration = () => {
   const {
     DB_URI,
     DB_NAME,
@@ -35,13 +35,14 @@ export default () => {
   const secret = {
     refresh: SECRET_REFRESH_KEY,
     access: SECRET_ACCESS_KEY,
-  }
-  return ({
+  };
+
+  return {
     port: parseInt(PORT, 10),
     secret,
     origin,
     redis: {
-      url: REDIS_URL
+      url: REDIS_URL,
     },
     database: {
       uri: DB_URI || '',
@@ -57,7 +58,9 @@ export default () => {
     vkConfig: {
       clientID: VK_CLIENT_ID,
       clientSecret: VK_CLIENT_SECRET,
-      callbackURL: origin.http + 'oauth/vk'
-    }
-  });
+      callbackURL: origin.http + 'oauth/vk',
+    },
+  };
 };
+
+export default configuration;
