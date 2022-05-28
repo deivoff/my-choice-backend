@@ -26,7 +26,7 @@ async function bootstrap() {
     tracesSampleRate: 1.0,
   });
 
-  const port = configService.get<number>('PORT');
+  const port = configService.get<number>('port');
   app.setViewEngine({
     engine: {
       pug: require('pug'),
