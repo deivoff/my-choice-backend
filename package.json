@@ -30,7 +30,7 @@
     "@nestjs/platform-fastify": "^7.6.15",
     "@sentry/node": "^6.3.6",
     "@typegoose/typegoose": "^7.4.8",
-    "apollo-server-fastify": "^2.22.2",
+    "apollo-server-fastify": "^3.8.1",
     "dataloader": "^2.0.0",
     "fastify": "^3.14.1",
     "graphql": "^15.5.0",
