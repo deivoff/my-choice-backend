@@ -14,12 +14,6 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
-    {
-      cors: {
-        origin: '*',
-        credentials: true,
-      },
-    },
   );
   const configService = app.get(ConfigService);
   app.useLogger(console);
