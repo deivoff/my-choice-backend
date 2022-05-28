@@ -16,7 +16,7 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
   const configService = app.get(ConfigService);
-  app.enableCors();
+
   Sentry.init({
     dsn: configService.get('sentry.dsn'),
     debug: !configService.get<boolean>('isProd'),
