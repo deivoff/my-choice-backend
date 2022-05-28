@@ -34,6 +34,6 @@ async function bootstrap() {
     templates: join(__dirname, '..', 'views'),
   });
   console.log('Port: ', port);
-  await app.listen(port);
+  await app.listen(port, console.error);
 }
 bootstrap();
