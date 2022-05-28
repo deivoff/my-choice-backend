@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASS }}
           source: "dist,package.json,yarn.lock,bin,views"
-          target: "/var/www/moi-vibor.rf/backend"
+          target: ${{ secrets.BUILD_PATH }}
       - name: Instal dependencies on VPS and restart Node server
         uses: appleboy/ssh-action@master
         with:
@@ -36,5 +36,5 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASS }}
           script: |
-            cd /var/www/moi-vibor.rf/backend
+            cd ${{ secrets.BUILD_PATH }}
             sh ./bin/deployment.sh '${{ secrets.NODE_ENV }}' '${{ secrets.PORT }}' '${{ secrets.ORIGIN_URL }}' '${{ secrets.DB_NAME }}' '${{ secrets.DB_PASS }}' '${{ secrets.DB_USER }}' '${{ secrets.DB_URI }}' '${{ secrets.SECRET_ACCESS_KEY }}' '${{ secrets.SECRET_REFRESH_KEY }}' '${{ secrets.VK_CLIENT_ID }}' '${{ secrets.VK_CLIENT_SECRET }}' '${{ secrets.REDIS_URL }}' '${{ secrets.SSL }}' '${{ secrets.SENTRY_DSN }}'
