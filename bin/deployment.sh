@@ -24,6 +24,7 @@ SENTRY_DSN=${14}
 
 PROJECT_NAME='MyChoice'
 
+node -v
 echo "module.exports = {
   apps: [{
     name: '$PROJECT_NAME',
