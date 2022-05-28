@@ -26,13 +26,14 @@ async function bootstrap() {
     tracesSampleRate: 1.0,
   });
 
-  const port = configService.get<number>('port');
+  const port = configService.get<number>('port') || 3000;
   app.setViewEngine({
     engine: {
       pug: require('pug'),
     },
     templates: join(__dirname, '..', 'views'),
   });
-  await app.listen(port || 3000);
+  console.log('Port: ', port);
+  await app.listen(port);
 }
 bootstrap();
