@@ -33,7 +33,7 @@ async function bootstrap() {
     },
     templates: join(__dirname, '..', 'views'),
   });
-  console.log('Port: ', port);
-  await app.listen(port, console.error);
+
+  await app.listen(port);
 }
 bootstrap();
