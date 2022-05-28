@@ -27,7 +27,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASS }}
-          source: "dist,!dist/**/*.map,package.json,yarn.lock,bin,views"
+          source: "dist,package.json,yarn.lock,bin,views"
           target: ${{ secrets.BUILD_PATH }}
       - name: Instal dependencies on VPS and restart Node server
         uses: appleboy/ssh-action@master
