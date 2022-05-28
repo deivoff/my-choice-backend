@@ -51,7 +51,7 @@ import { DataLoaderInterceptor } from 'src/dataloader';
       useFactory: (gameService: GameService, configService: ConfigService) => ({
         autoSchemaFile: 'schema.gql',
         installSubscriptionHandlers: true,
-        playground: !configService.get('isProd'),
+        playground: true, //!configService.get('isProd'),
         subscriptions: {
           onConnect: (connectionParams) => {
             const authToken = connectionParams['authToken'];
