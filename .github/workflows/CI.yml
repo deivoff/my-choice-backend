@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASS }}
           source: "dist,package.json,yarn.lock,bin,views"
-          target: "/var/www/moi-vibor.rf/backend"
+          target: ${{ secrets.BUILD_PATH }}
       - name: Instal dependencies on VPS and restart Node server
         uses: appleboy/ssh-action@master
         with:
